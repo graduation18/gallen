@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="please type here the 6 digits code we sent to you"
+      android:textSize="20dp"
+      android:textAlignment="center"
+      android:layout_margin="15dp"/>
+
+
+  <android.support.v7.widget.CardView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:cardCornerRadius="15dp"
+      android:background="@color/white"
+      android:layout_margin="20dp"
+      android:layout_gravity="center"
+      >
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sms_code"
+        android:layout_gravity="center">
+      <in.aabhasjindal.otptextview.OtpTextView
+          android:id="@+id/otp_view"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textColor="@color/black"
+          app:bar_enabled="true"
+          app:bar_height="2dp"
+          app:length="6"
+          android:layout_gravity="center"
+          android:textAlignment="center"
+          />
+
+    </LinearLayout>
+
+  </android.support.v7.widget.CardView>
+
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@drawable/rounded_edit_text1"
+      android:layout_margin="20dp"
+      android:text="@string/password"
+      android:textAlignment="center"
+      android:visibility="gone"
+      />
+
+
+
+
+
+</LinearLayout>

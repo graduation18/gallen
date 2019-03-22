@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layoutDirection="ltr"
+
+    >
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="90dp"
+                android:layout_height="100dp"
+                android:layout_gravity="left"
+                android:padding="10dp"
+                />
+
+            <ImageView
+                android:src="@drawable/image_rounded_frame"
+                android:layout_width="90dp"
+                android:layout_height="100dp" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="El Ezaby Pharmacy"
+                android:layout_margin="5dp"/>
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="17 Makram Abaid Nasr City St."
+                android:layout_margin="5dp"
+                android:drawableLeft="@drawable/locations_map"
+                android:drawablePadding="5dp"/>
+            <TextView
+                android:id="@+id/phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="Call number:035"
+                android:layout_margin="5dp"
+                android:drawableLeft="@drawable/watch_available"
+                android:drawablePadding="5dp"/>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center">
+                <Button
+                    android:id="@+id/confirm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/confirm"
+                    android:background="@drawable/round_button_3"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp"
+
+                    />
+                <Button
+                    android:id="@+id/reject"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reject"
+                    android:background="@drawable/round_button_4"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp"
+                    />
+            </TableRow>
+        </LinearLayout>
+
+
+    </android.support.v7.widget.CardView>
+</LinearLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/more"
+        android:checked="true"
+        android:icon="@drawable/nav_more"
+        android:title="@string/more"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/favorites"
+        android:checked="true"
+        android:icon="@drawable/nav_favorits"
+        android:title="@string/favorites"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/myappointments"
+        android:checked="true"
+        android:icon="@drawable/nav_myappointments"
+        android:title="@string/myappointments"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/search"
+        android:checked="true"
+        android:icon="@drawable/nav_search"
+        android:title="@string/search_1"
+        app:showAsAction="ifRoom" />
+
+
+</menu>
