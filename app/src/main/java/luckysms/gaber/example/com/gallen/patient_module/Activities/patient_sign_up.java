@@ -183,9 +183,14 @@ public class patient_sign_up extends AppCompatActivity {
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                        .putString("_id",code_s)
-                                        .putString("email",email_address_s)
-                                        .putString("password", password_s)
+                                        .putString("patient_id",code_s)
+                                        .putString("patient_password", password_s)
+                                        .putString("patient_name",full_name_s)
+                                        .putString("patient_gender",gender)
+                                        .putString("patient_insurance_company",insurance_company_s)
+                                        .putString("patient_date_of_birth",date_of_birth_s)
+                                        .putString("patient_email_address",email_address_s)
+                                        .putString("patient_mobile_number",mobile_number_s)
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .commit();
 
