@@ -14,13 +14,7 @@
         android:background="@drawable/toolbar_color"
         style="@style/ToolBarStyle.Event"
         >
-        <TextView
-            android:id="@+id/back"
-            android:padding="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/back"
-            android:clickable="true"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,7 +63,7 @@
         app:cardCornerRadius="15dp"
         >
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/approvals_recycler"
+            android:id="@+id/appointments_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="5dp"

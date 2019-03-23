@@ -80,6 +80,7 @@
 <string name="search_1">search</string>
 <string name="Accepts_the_discount_code">Accepts the discount code</string>
 <string name="not_Accepts_the_discount_code">Do Not Accepts the discount code</string>
+    <string name="about_us">ABOUT US</string>
 
 
 </resources>
