@@ -5,6 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layoutDirection="ltr"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="56dp"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
     >
     <LinearLayout
         android:layout_width="match_parent"
@@ -95,7 +98,7 @@
 
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/approvals_recycler"
+            android:id="@+id/reviews_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="5dp"

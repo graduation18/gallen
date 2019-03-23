@@ -1,5 +1,6 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,9 +25,11 @@ import java.util.List;
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_appointments_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_doctor_available_appointments_list_adapter;
+import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_doctor_reviews_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.available_appointments_list_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.reviews_list_model;
 
 public class patient_doctor_data_fragment extends Fragment {
     private View view;
@@ -58,6 +61,7 @@ public class patient_doctor_data_fragment extends Fragment {
         graduated_from=(TextView)view.findViewById(R.id.graduated_from);
         image=(ImageView)view.findViewById(R.id.image);
         rating=(RatingBar)view.findViewById(R.id.rating);
+        vistors_reviews=(Button)view.findViewById(R.id.vistors_reviews);
         available_appointments_recycler = view.findViewById(R.id.available_appointments_recycler);
         data_adapter = new patient_doctor_available_appointments_list_adapter(getActivity(), contact_list);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -69,7 +73,7 @@ public class patient_doctor_data_fragment extends Fragment {
         notifications.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                show_dialog();
             }
         });
 
@@ -115,6 +119,32 @@ public class patient_doctor_data_fragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout, fragment)
                 .commit();
+    }
+    private void show_dialog() {
+
+        final Dialog dialog = new Dialog(getActivity());
+        dialog.setContentView(R.layout.patient_doctor_rating_fragment);
+        Button cancel=(Button)dialog.findViewById(R.id.cancel);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        RecyclerView reviews_recycler;
+        List<reviews_list_model> reviews_list = new ArrayList<>();
+        patient_doctor_reviews_list_adapter data_adapter;
+        reviews_recycler = view.findViewById(R.id.reviews_recycler);
+        data_adapter = new patient_doctor_reviews_list_adapter(getActivity(), reviews_list);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        reviews_recycler.setLayoutManager(mLayoutManager);
+        reviews_recycler.setItemAnimator(new DefaultItemAnimator());
+        reviews_recycler.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.HORIZONTAL, 5));
+        reviews_recycler.setAdapter(data_adapter);
+
+
+        dialog.show();
+
     }
 
 }
