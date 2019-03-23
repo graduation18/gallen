@@ -2,6 +2,7 @@ package luckysms.gaber.example.com.gallen.patient_module.Activities;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,12 +12,13 @@ import android.view.WindowManager;
 
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.ViewPagerAdapter_with_titles;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.DataPassListener;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_appointments;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_favorites;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_more;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_search;
 
-public class patient_main_screen extends AppCompatActivity {
+public class patient_main_screen extends AppCompatActivity  {
     private ViewPager viewPager;
     MenuItem prevMenuItem;
     BottomNavigationView bottomNavigationView;
@@ -109,5 +111,6 @@ public class patient_main_screen extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
-    
+
+
 }

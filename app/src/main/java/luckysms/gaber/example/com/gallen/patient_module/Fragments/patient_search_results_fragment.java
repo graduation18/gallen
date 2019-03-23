@@ -1,5 +1,6 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import java.util.List;
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_approval_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_result_list_adapter;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.DataPassListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Model.approval_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
@@ -32,7 +34,15 @@ public class patient_search_results_fragment extends Fragment {
     private RecyclerView search_result_recycler;
     private List<search_result_list_model> contact_list = new ArrayList<>();
     private patient_search_result_list_adapter data_adapter;
+    DataPassListener mCallback;
 
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallback = (DataPassListener) context;
+
+    }
 
 
 
@@ -85,5 +95,11 @@ public class patient_search_results_fragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout, fragment)
                 .commit();
+    }
+
+    public void send_data(int doctor_id){
+        Bundle args = new Bundle();
+        args.putInt("doctor_id",doctor_id);
+        mCallback.passData(new patient_doctor_data_fragment(),args);
     }
 }
