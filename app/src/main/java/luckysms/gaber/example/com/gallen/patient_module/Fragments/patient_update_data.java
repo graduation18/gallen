@@ -205,7 +205,6 @@ public class patient_update_data extends Fragment {
     public void hideProgress(){
         progressWindow.hideProgress();
     }
-
     @Override
     public void onPause() {
         super.onPause();

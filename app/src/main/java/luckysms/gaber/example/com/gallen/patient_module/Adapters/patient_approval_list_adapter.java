@@ -91,5 +91,3 @@ public class patient_approval_list_adapter extends RecyclerView.Adapter<patient_
 
 
 }
-
-

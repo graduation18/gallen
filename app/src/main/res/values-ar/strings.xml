@@ -80,6 +80,13 @@
     <string name="search_1">البحث</string>
     <string name="Accepts_the_discount_code">يقبل اكواد الخصم</string>
     <string name="not_Accepts_the_discount_code">لا يقبل اكواد الخصم</string>
+    <string name="about_us">عنا نحن</string>
+    <string name="detection_number">رقم الكشف</string>
+    <string name="doctor_code">رمز الطبيب</string>
+    <string name="patient_code">رمز المريض</string>
+    <string name="appointments_details">تفاصيل الموعد</string>
+    <string name="date_of_detection">تاريخ الكشف</string>
+    <string name="patient_name">اسم المريض</string>
 
 
 </resources>
