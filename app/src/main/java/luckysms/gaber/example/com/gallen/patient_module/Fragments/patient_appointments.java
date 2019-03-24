@@ -20,6 +20,7 @@ import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_appointments_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_result_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
@@ -44,6 +45,17 @@ public class patient_appointments extends Fragment {
         appointments_recycler.setItemAnimator(new DefaultItemAnimator());
         appointments_recycler.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
         appointments_recycler.setAdapter(data_adapter);
+        appointments_recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), appointments_recycler, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, final int position) {
+
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+            }
+        }));
+
 
         notifications.setOnClickListener(new View.OnClickListener() {
             @Override

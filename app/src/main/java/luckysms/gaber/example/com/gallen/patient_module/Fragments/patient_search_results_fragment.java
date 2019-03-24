@@ -25,6 +25,7 @@ import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_approva
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_result_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.DataPassListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.approval_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
@@ -61,6 +62,17 @@ public class patient_search_results_fragment extends Fragment {
         search_result_recycler.setItemAnimator(new DefaultItemAnimator());
         search_result_recycler.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
         search_result_recycler.setAdapter(data_adapter);
+        search_result_recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), search_result_recycler, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, final int position) {
+
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+            }
+        }));
+
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,9 +109,5 @@ public class patient_search_results_fragment extends Fragment {
                 .commit();
     }
 
-    public void send_data(int doctor_id){
-        Bundle args = new Bundle();
-        args.putInt("doctor_id",doctor_id);
-        mCallback.passData(new patient_doctor_data_fragment(),args);
-    }
+
 }
