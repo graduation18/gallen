@@ -50,6 +50,22 @@ public class patient_search_by_doctor_name_fragment extends Fragment {
                 go_to(fragment);
             }
         });
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name=doctor_name.getText().toString();
+                if (name.length()>0) {
+                    Bundle args = new Bundle();
+                    args.putString("name", name);
+                    Fragment fragment = new patient_search_results_fragment();
+                    fragment.setArguments(args);
+                    go_to(fragment);
+                }
+
+            }
+        });
+
         notifications.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -59,6 +59,7 @@ public class patient_login extends AppCompatActivity {
                 String mobile_number_email_address_s=mobile_number_email_address.getText().toString();
                 String password_s=password.getText().toString();
                 if (mobile_number_email_address_s.length()>0&&password_s.length()>0){
+                    showProgress();
                     login(mobile_number_email_address_s,password_s);
                 }else {
                     Toast.makeText(patient_login.this,getResources().getString(R.string.login_error),Toast.LENGTH_LONG).show();
@@ -126,11 +127,13 @@ public class patient_login extends AppCompatActivity {
                             if (res.getBoolean("done")) {
                                 JSONObject user = res.getJSONObject("user");
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                        .putInt("id",user.getInt("id"))
                                         .putString("_id", user.getString("_id"))
                                         .putString("email", user.getString("email"))
                                         .putString("password", password_s)
                                         .putBoolean("state",true)
                                         .putString("language",Locale.getDefault().getLanguage())
+                                        .putString("accessToken",res.getString("accessToken"))
                                         .commit();
                                 Intent not_now=new Intent(patient_login.this,patient_main_screen.class);
                                 startActivity(not_now);

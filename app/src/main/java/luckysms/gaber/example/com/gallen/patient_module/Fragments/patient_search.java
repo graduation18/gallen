@@ -14,7 +14,7 @@ import android.widget.LinearLayout;
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.DataPassListener;
 
-public class patient_search extends Fragment implements DataPassListener {
+public class patient_search extends Fragment  {
     private View view;
     private Button area_speciality,doctor_name;
     private LinearLayout search_layout;
@@ -52,11 +52,5 @@ public class patient_search extends Fragment implements DataPassListener {
                 .replace(R.id.frameLayout, fragment)
                 .commit();
     }
-    @Override
-    public void passData(Fragment fragment, Bundle data) {
-        fragment.setArguments(data);
-        getChildFragmentManager().beginTransaction()
-                .replace(R.id.frameLayout, fragment)
-                .commit();
-    }
+
 }

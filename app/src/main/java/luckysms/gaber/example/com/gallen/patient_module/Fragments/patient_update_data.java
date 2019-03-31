@@ -1,5 +1,7 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +34,7 @@ import com.bluehomestudio.progresswindow.ProgressWindowConfiguration;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -84,7 +88,26 @@ public class patient_update_data extends Fragment {
             }
         });
 
+        date_of_birth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                show_date();
+            }
 
+        });
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String full_name_s=full_name.getText().toString();
+                String mobile_number_s=mobile_number.getText().toString();
+                String email_address_s=email_address.getText().toString();
+                String date_of_birth_s=date_of_birth.getText().toString();
+                String insurance_company_s=insurance_company.getText().toString();
+
+                update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s,insurance_company_s);
+            }
+        });
 
         view.setFocusableInTouchMode(true);
         view.requestFocus();
@@ -110,8 +133,8 @@ public class patient_update_data extends Fragment {
                 .replace(R.id.frameLayout, fragment)
                 .commit();
     }
-    private void update(final String code_s, final String full_name_s, final String mobile_number_s, final String email_address_s
-            , final String password_s, final String date_of_birth_s, final String insurance_company_s, final String gender)
+    private void update(final String full_name_s, final String mobile_number_s, final String email_address_s
+            , final String date_of_birth_s, final String insurance_company_s)
     {
 
 
@@ -134,21 +157,8 @@ public class patient_update_data extends Fragment {
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
-                                getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                        .putString("patient_id",code_s)
-                                        .putString("patient_password", password_s)
-                                        .putString("patient_name",full_name_s)
-                                        .putString("patient_gender",gender)
-                                        .putString("patient_insurance_company",insurance_company_s)
-                                        .putString("patient_date_of_birth",date_of_birth_s)
-                                        .putString("patient_email_address",email_address_s)
-                                        .putString("patient_mobile_number",mobile_number_s)
-                                        .putString("language",Locale.getDefault().getLanguage())
-                                        .commit();
 
-                                Intent not_now=new Intent(getActivity(),patient_main_screen.class);
-                                startActivity(not_now);
-                                Toast.makeText(getActivity(),getResources().getString(R.string.welcome),Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(),getResources().getString(R.string.data_updated),Toast.LENGTH_LONG).show();
 
                             }
                         }
@@ -166,23 +176,123 @@ public class patient_update_data extends Fragment {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
                     return pars;
                 }
 
                 @Override
-                public Map<String, String> getParams() throws AuthFailureError {
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+                        object.put("name",full_name_s);
+                        object.put("mobile",mobile_number_s);
+                        object.put("email",email_address_s);
+                        object.put("birth_date",date_of_birth_s);
+                        object.put("insurance",insurance_company_s);
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    private void get_data()
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com:30001/api/patients/view";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    hideProgress();
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                               JSONObject doc=res.getJSONObject("doc");
+                               mobile_number.setText(doc.getString("mobile"));
+                               full_name.setText(doc.getString("name"));
+                               email_address.setText(doc.getString("email"));
+                               date_of_birth.setText(doc.getString("birth_date"));
+                               insurance_company.setText(doc.getString("insurance"));
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("patient_name", full_name_s);
-                    pars.put("patient_mobile", mobile_number_s);
-                    pars.put("patient_user_name", email_address_s);
-                    pars.put("patient_password", password_s);
-                    pars.put("patient_date_of_birth", date_of_birth_s);
-                    pars.put("patient_insurance_company", insurance_company_s);
-                    pars.put("patient_gender", gender);
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
 
                     return pars;
                 }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
             };
             queue.add(stringReq);
 
@@ -211,12 +321,25 @@ public class patient_update_data extends Fragment {
         hideProgress();
 
     }
-    public void get_data(){
-        SharedPreferences per=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE);
-        full_name.setText(per.getString("patient_password", ""));
-        mobile_number.setText(per.getString("patient_mobile_number", ""));
-        email_address.setText(per.getString("patient_email_address", ""));
-        date_of_birth.setText(per.getString("patient_date_of_birth", ""));
-        insurance_company.setText(per.getString("patient_insurance_company", ""));
+    private void show_date(){
+        int mYear, mMonth, mDay;
+        final Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(),
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+
+                        date_of_birth.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+
+                    }
+                }, mYear, mMonth, mDay);
+        datePickerDialog.show();
     }
 }

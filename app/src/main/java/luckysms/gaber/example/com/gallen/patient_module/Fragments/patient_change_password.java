@@ -51,7 +51,7 @@ public class patient_change_password extends Fragment {
     private TextView back,number_of_notifications,notifications;
     private EditText old_password,new_password;
     private RequestQueue queue;
-    private String old_pass;
+    private String old_pass,correct_pass;
     private ProgressWindow progressWindow ;
 
 
@@ -90,7 +90,8 @@ public class patient_change_password extends Fragment {
             @Override
             public void onClick(View v) {
                 String new_pass=new_password.getText().toString();
-                if (old_pass.equals(new_pass)){
+                String old_pass=old_password.getText().toString();
+                if (old_pass.equals(correct_pass)){
                     showProgress();
                     update(new_pass);
                 }
@@ -111,7 +112,7 @@ public class patient_change_password extends Fragment {
                 return false;
             }
         });
-
+        get_password();
         return view;
     }
 
@@ -144,7 +145,9 @@ public class patient_change_password extends Fragment {
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
-
+                                new_password.setText("");
+                                old_password.setText("");
+                                Toast.makeText(getActivity(),getResources().getText(R.string.password_reset),Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -161,17 +164,32 @@ public class patient_change_password extends Fragment {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
                     return pars;
                 }
-
                 @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("patient_password", password_s);
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+                        object.put("password",password_s);
 
-                    return pars;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
                 }
+
+
+
             };
             queue.add(stringReq);
 
@@ -198,6 +216,85 @@ public class patient_change_password extends Fragment {
     public void onPause() {
         super.onPause();
         hideProgress();
+
+    }
+    private void get_password()
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com:30001/api/patients/view";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    hideProgress();
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONObject doc=res.getJSONObject("doc");
+                                correct_pass=doc.getString("password");
+                                Log.w("sssss",correct_pass);
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
 
     }
 }

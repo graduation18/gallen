@@ -97,7 +97,8 @@
                 android:layout_margin="15dp"/>
 
         </RadioGroup>
-        <android.support.v7.widget.AppCompatAutoCompleteTextView
+
+        <AutoCompleteTextView
             android:id="@+id/city"
             android:layout_width="230dp"
             android:layout_height="wrap_content"
@@ -105,10 +106,12 @@
             android:layout_margin="5dp"
             android:background="@drawable/rounded_edit_text1"
             android:hint="@string/enter_city_name"
-            android:textAlignment="center"
             android:padding="5dp"
-            android:textSize="15dp" />
-        <android.support.v7.widget.AppCompatAutoCompleteTextView
+            android:textAlignment="center"
+            android:textSize="15dp"
+            android:completionThreshold="1"/>
+
+        <AutoCompleteTextView
             android:id="@+id/governorates"
             android:layout_width="230dp"
             android:layout_height="wrap_content"
@@ -116,21 +119,22 @@
             android:layout_margin="5dp"
             android:background="@drawable/rounded_edit_text1"
             android:hint="@string/all_governorates"
-            android:textAlignment="center"
             android:padding="5dp"
-            android:textSize="15dp" />
+            android:textAlignment="center"
+            android:textSize="15dp"
+            android:completionThreshold="1"/>
         <Spinner
             android:id="@+id/speciality"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="230dp"
+            android:layout_height="30dp"
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:background="@drawable/rounded_edit_text1"
             android:textSize="15dp" />
         <Spinner
             android:id="@+id/insurance_company"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="230dp"
+            android:layout_height="30dp"
             android:layout_gravity="center"
             android:layout_margin="15dp"
             android:background="@drawable/rounded_edit_text1"

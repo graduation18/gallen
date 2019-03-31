@@ -7,6 +7,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/round_button_7"
     android:layoutDirection="ltr"
+    android:padding="10dp"
     >
 
 
@@ -36,6 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:background="@drawable/round_button_6"
+            android:text="@string/book_now"
+            android:textColor="@color/white"
             />
     </LinearLayout>
 

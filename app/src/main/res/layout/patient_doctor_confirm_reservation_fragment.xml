@@ -156,6 +156,8 @@
                 android:layout_toRightOf="@+id/rating_ratio"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="15dp"
+                style="?android:attr/ratingBarStyleSmall"
+
 
                 />
         </RelativeLayout>

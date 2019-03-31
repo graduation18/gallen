@@ -1,5 +1,7 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,14 +17,32 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bluehomestudio.progresswindow.ProgressWindow;
+import com.bluehomestudio.progresswindow.ProgressWindowConfiguration;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_appointments_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class patient_complete_booking_fragment extends Fragment {
     private View view;
@@ -29,11 +50,13 @@ public class patient_complete_booking_fragment extends Fragment {
     private Button confirm;
 
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         view = inflater.inflate(R.layout.patient_complete_the_booking_fragment, container, false);
+
         back=(TextView)view.findViewById(R.id.back);
         number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
         notifications=(TextView)view.findViewById(R.id.notifications);
@@ -49,7 +72,6 @@ public class patient_complete_booking_fragment extends Fragment {
         notifications.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
             }
         });
 
@@ -74,6 +96,7 @@ public class patient_complete_booking_fragment extends Fragment {
             }
         });
 
+
         return view;
     }
     public void go_to(Fragment fragment) {
@@ -81,4 +104,7 @@ public class patient_complete_booking_fragment extends Fragment {
                 .replace(R.id.frameLayout, fragment)
                 .commit();
     }
+
+
+
 }

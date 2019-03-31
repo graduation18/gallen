@@ -61,8 +61,9 @@ public class patient_doctor_available_appointments_list_adapter extends Recycler
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         available_appointments_list_model data = contact_list.get(position);
-        holder.date.setText(data.date);
-        holder.time.setText(data.time);
+        holder.date.setText(data.day+"\n"+data.from);
+
+        holder.time.setText(data.to);
 
 
 

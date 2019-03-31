@@ -17,7 +17,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
-import luckysms.gaber.example.com.gallen.patient_module.Model.approval_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
 public class patient_search_result_list_adapter extends RecyclerView.Adapter<patient_search_result_list_adapter.MyViewHolder>  {
@@ -79,7 +78,7 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
             holder.discount_code.setText(context.getResources().getText(R.string.not_Accepts_the_discount_code));
         }
         holder.graduated_from.setText(data.doctor_graduated);
-        holder.doctor_fee.setText(String .valueOf(data.doctor_fee));
+        holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_fee));
         holder.rating.setRating(data.doctor_rating);
         Picasso.with(context)
                 .load(data.doctor_image)

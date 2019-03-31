@@ -77,7 +77,6 @@
     <string name="all_governorates">All Governorates</string>
     <string name="enter_city_name">Enter City Name</string>
     <string name="location_permission_denied">Location Permission is Denied we Can\'t get o your Location</string>
-    <string name="lotcation_permission_denied">Location Permission Is Denied We Can\'t Get Your Location</string>
     <string name="search_1">search</string>
     <string name="Accepts_the_discount_code">Accepts the discount code</string>
     <string name="not_Accepts_the_discount_code">Do Not Accepts the discount code</string>
@@ -88,6 +87,11 @@
     <string name="appointments_details">Appointments Details</string>
     <string name="date_of_detection">Date of Detection</string>
     <string name="patient_name">Patient Name</string>
+    <string name="medical_report">Medical Report</string>
+    <string name="list_of_drugs">List Of Drugs</string>
+    <string name="rumors">Rumors</string>
+    <string name="drug">Drug</string>
+    <string name="the_dose">The dose</string>
 
 
 </resources>
