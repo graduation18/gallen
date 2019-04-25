@@ -92,6 +92,14 @@
     <string name="rumors">Rumors</string>
     <string name="drug">Drug</string>
     <string name="the_dose">The dose</string>
+    <string name="password_reset">password has been reset</string>
+    <string name="data_updated">data has been updated</string>
+    <string name="please_turn_on_gps">please turn on gps</string>
+    <string name="Detection_Price">Detection Price :</string>
+    <string name="book_now">BOOK NOW</string>
+    <string name="please_sign_in_first">please sign in first</string>
+    <string name="no_appointments_yet">No Appointments Yet</string>
+    <string name="no_favourites_yet">No Favourites Yet</string>
 
 
 </resources>

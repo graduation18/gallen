@@ -2,70 +2,88 @@ package luckysms.gaber.example.com.gallen.patient_module.Adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
-public class speciality_SpinAdapter extends ArrayAdapter<patient_speciality_model> {
+public class speciality_SpinAdapter  extends RecyclerView.Adapter<speciality_SpinAdapter.MyViewHolder>  {
 
-    // Your sent context
     private Context context;
-    // Your custom values for the spinner (User)
-    private ArrayList<patient_speciality_model> values;
+    private List<patient_speciality_model> contact_list;
 
-    public speciality_SpinAdapter(Context context, int textViewResourceId,
-                                  ArrayList<patient_speciality_model>  values) {
-        super(context, textViewResourceId, values);
+    public void filterList(ArrayList<patient_speciality_model> filteredList) {
+        contact_list = filteredList;
+        notifyDataSetChanged();
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        public TextView name;
+
+        public MyViewHolder(View view) {
+            super(view);
+            name=(TextView) view.findViewById(R.id.name);
+
+        }
+    }
+
+
+
+    public speciality_SpinAdapter(Context context, List<patient_speciality_model> contact_list) {
         this.context = context;
-        this.values = values;
+        this.contact_list = contact_list;
     }
 
     @Override
-    public int getCount(){
-        return values.size();
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.dialog_list_row, parent, false);
+        return new MyViewHolder(itemView);
+
+
     }
+
+
+
 
     @Override
-    public patient_speciality_model getItem(int position){
-        return values.get(position);
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
+        patient_speciality_model data = contact_list.get(position);
+        holder.name.setText(data.name);
+
+
+
+
     }
+
 
     @Override
-    public long getItemId(int position){
-        return position;
+    public int getItemCount() {
+        return contact_list.size();
     }
 
 
-    // And the "magic" goes here
-    // This is for the "passive" state of the spinner
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        // I created a dynamic TextView here, but you can reference your own  custom layout for each spinner item
-        TextView label = (TextView) super.getView(position, convertView, parent);
-        label.setTextColor(Color.BLACK);
-        // Then you can get the current item using the values array (Users array) and the current position
-        // You can NOW reference each method you has created in your bean object (User class)
-        label.setText(values.get(position).name);
 
-        // And finally return your dynamic (or custom) view for each spinner item
-        return label;
-    }
 
-    // And here is when the "chooser" is popped up
-    // Normally is the same view, but you can customize it if you want
-    @Override
-    public View getDropDownView(int position, View convertView,
-                                ViewGroup parent) {
-        TextView label = (TextView) super.getDropDownView(position, convertView, parent);
-        label.setTextColor(Color.BLACK);
-        label.setText(values.get(position).name);
 
-        return label;
-    }
 }
+
+

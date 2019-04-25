@@ -92,6 +92,14 @@
     <string name="rumors">الاشاعات</string>
     <string name="drug">أدوية</string>
     <string name="the_dose">الجرعة</string>
+    <string name="password_reset">تم تغير رقمك السري</string>
+    <string name="data_updated">تم تحديث بيناتك</string>
+    <string name="please_turn_on_gps">من فضلكفم بفتح خدمة تحديد المواقع</string>
+    <string name="Detection_Price">سعر الكشف:</string>
+    <string name="book_now">أحجز الأن</string>
+    <string name="please_sign_in_first">من فضلك فم بتسجيل الدخول اولا</string>
+    <string name="no_appointments_yet">لا يوجد مواعيد حتى الان</string>
+    <string name="no_favourites_yet">لا يوجد مفضلات حتى الان</string>
 
 
 </resources>

@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -30,8 +31,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.bluehomestudio.progresswindow.ProgressWindow;
-import com.bluehomestudio.progresswindow.ProgressWindowConfiguration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +51,7 @@ public class patient_change_password extends Fragment {
     private EditText old_password,new_password;
     private RequestQueue queue;
     private String old_pass,correct_pass;
-    private ProgressWindow progressWindow ;
+    private ProgressBar mprogressBar;
 
 
 
@@ -69,8 +68,7 @@ public class patient_change_password extends Fragment {
         number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
         notifications=(TextView)view.findViewById(R.id.notifications);
         old_pass=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("patient_password", "");
-
-        progressConfigurations();
+        mprogressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +90,7 @@ public class patient_change_password extends Fragment {
                 String new_pass=new_password.getText().toString();
                 String old_pass=old_password.getText().toString();
                 if (old_pass.equals(correct_pass)){
-                    showProgress();
+                    mprogressBar.setVisibility(View.VISIBLE);
                     update(new_pass);
                 }
             }
@@ -112,6 +110,7 @@ public class patient_change_password extends Fragment {
                 return false;
             }
         });
+        mprogressBar.setVisibility(View.VISIBLE);
         get_password();
         return view;
     }
@@ -136,7 +135,7 @@ public class patient_change_password extends Fragment {
                 @Override
                 public void onResponse(String response) {
                     //do other things with the received JSONObject
-                    hideProgress();
+                    mprogressBar.setVisibility(View.INVISIBLE);
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
@@ -159,6 +158,7 @@ public class patient_change_password extends Fragment {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
                 }
             }) {
                 @Override
@@ -199,25 +199,7 @@ public class patient_change_password extends Fragment {
 
 
     }
-    private void progressConfigurations(){
-        progressWindow = ProgressWindow.getInstance(getActivity());
-        ProgressWindowConfiguration progressWindowConfiguration = new ProgressWindowConfiguration();
-        progressWindowConfiguration.backgroundColor = Color.parseColor("#32000000") ;
-        progressWindowConfiguration.progressColor = Color.WHITE ;
-        progressWindow.setConfiguration(progressWindowConfiguration);
-    }
-    public void showProgress(){
-        progressWindow.showProgress();
-    }
-    public void hideProgress(){
-        progressWindow.hideProgress();
-    }
-    @Override
-    public void onPause() {
-        super.onPause();
-        hideProgress();
 
-    }
     private void get_password()
     {
 
@@ -232,7 +214,8 @@ public class patient_change_password extends Fragment {
                 @Override
                 public void onResponse(String response) {
                     //do other things with the received JSONObject
-                    hideProgress();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
@@ -257,6 +240,7 @@ public class patient_change_password extends Fragment {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
                 }
             }) {
                 @Override

@@ -1,5 +1,6 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,6 +22,17 @@ public class patient_search_by_doctor_name_fragment extends Fragment {
     private Button confirm;
     private EditText doctor_name;
     private TextView back,number_of_notifications,notifications;
+    private boolean visitor;
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (getArguments()!=null){
+            visitor=getArguments().getBoolean("visitor");
+        }
+    }
+
 
 
 
@@ -47,6 +59,11 @@ public class patient_search_by_doctor_name_fragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Fragment fragment=new patient_search();
+                Bundle args=new Bundle();
+                if (visitor){
+                    args.putBoolean("visitor",true);
+                }
+                fragment.setArguments(args);
                 go_to(fragment);
             }
         });
@@ -58,6 +75,9 @@ public class patient_search_by_doctor_name_fragment extends Fragment {
                 if (name.length()>0) {
                     Bundle args = new Bundle();
                     args.putString("name", name);
+                    if (visitor){
+                        args.putBoolean("visitor",true);
+                    }
                     Fragment fragment = new patient_search_results_fragment();
                     fragment.setArguments(args);
                     go_to(fragment);
@@ -80,6 +100,11 @@ public class patient_search_by_doctor_name_fragment extends Fragment {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if( keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
                     Fragment fragment=new patient_search();
+                    Bundle args=new Bundle();
+                    if (visitor){
+                        args.putBoolean("visitor",true);
+                    }
+                    fragment.setArguments(args);
                     go_to(fragment);
                     return true;
                 }
@@ -93,7 +118,7 @@ public class patient_search_by_doctor_name_fragment extends Fragment {
     }
     public void go_to(Fragment fragment) {
         getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frameLayout, fragment)
+                .replace(R.id.search_frameLayout, fragment)
                 .commit();
     }
 }

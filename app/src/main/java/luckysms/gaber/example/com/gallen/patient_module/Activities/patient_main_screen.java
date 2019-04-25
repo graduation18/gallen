@@ -13,10 +13,10 @@ import android.view.WindowManager;
 
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.ViewPagerAdapter_with_titles;
-import luckysms.gaber.example.com.gallen.patient_module.Custom.DataPassListener;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_appointments;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_favorites;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_more;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_more_visitor;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_search;
 
 public class patient_main_screen extends AppCompatActivity  {
@@ -101,15 +101,26 @@ public class patient_main_screen extends AppCompatActivity  {
     private void setupViewPager(ViewPager viewPager)
     {
         ViewPagerAdapter_with_titles adapter = new ViewPagerAdapter_with_titles(getSupportFragmentManager());
-        patient_more patient_more_fragment =new patient_more();
+        patient_more_visitor patient_more_visitor_fragment = new patient_more_visitor();
+        patient_more patient_more_fragment = new patient_more();
         patient_favorites patient_favorites_fragment =new patient_favorites();
         patient_appointments patient_appointments_fragment =new patient_appointments();
         patient_search patient_search_fragment =new patient_search();
-        adapter.addFragment(patient_more_fragment);
+        Bundle bundle=new Bundle();
+        bundle.putBoolean("visitor",getIntent().getBooleanExtra("visitor",false));
+        patient_search_fragment.setArguments(bundle);
+        if (getIntent().getBooleanExtra("visitor",false)) {
+            adapter.addFragment(patient_more_visitor_fragment);
+
+        }else {
+            adapter.addFragment(patient_more_fragment);
+
+        }
         adapter.addFragment(patient_favorites_fragment);
         adapter.addFragment(patient_appointments_fragment);
         adapter.addFragment(patient_search_fragment);
         viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(3);
     }
 
 

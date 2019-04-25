@@ -1,73 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layoutDirection="ltr"
-    >
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_home"
-        android:layout_height="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/view_background"
         android:layout_width="match_parent"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@drawable/toolbar_color"
-        style="@style/ToolBarStyle.Event"
+        android:layout_height="match_parent"
         >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/myappointments"
-            android:textColor="@color/white"
-            android:layout_gravity="center"
-            android:gravity="center"
-            />
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="right"
-            >
-            <TextView
-                android:id="@+id/notifications"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:drawableLeft="@drawable/notifications"
-                android:layout_marginRight="20dp"
-
-                />
-
-            <TextView
-                android:id="@+id/number_of_notifications"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="9dp"
-                android:layout_marginLeft="9dp"
-                android:layout_marginTop="7dp"
-                android:background="@drawable/circle"
-                android:text="15"
-                android:textSize="6dp"
-                android:textAlignment="center"/>
-        </RelativeLayout>
-
-    </android.support.v7.widget.Toolbar>
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:layout_margin="5dp"
-        app:cardCornerRadius="15dp"
-        >
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/appointments_recycler"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="5dp"
-            />
-    </android.support.v7.widget.CardView>
+            android:id="@+id/frameLayout">
 
-</LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layoutDirection="ltr"
+                android:id="@+id/appointments_layout"
+
+                >
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar_home"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:minHeight="?attr/actionBarSize"
+                    android:background="@drawable/toolbar_color"
+                    style="@style/ToolBarStyle.Event"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/myappointments"
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        />
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:gravity="right"
+                        >
+                        <TextView
+                            android:id="@+id/notifications"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:drawableLeft="@drawable/notifications"
+                            android:layout_marginRight="20dp"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/number_of_notifications"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginStart="9dp"
+                            android:layout_marginLeft="9dp"
+                            android:layout_marginTop="7dp"
+                            android:background="@drawable/circle"
+                            android:text="15"
+                            android:textSize="6dp"
+                            android:textAlignment="center"/>
+                    </RelativeLayout>
+
+                </android.support.v7.widget.Toolbar>
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:layout_margin="5dp"
+                    app:cardCornerRadius="15dp"
+                    >
+                    <TextView
+                        android:id="@+id/text"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="@string/no_appointments_yet"
+                        android:textSize="25dp"
+                        android:textColor="@color/green_light"
+                        android:drawableLeft="@drawable/doctor_info"
+                        android:textAlignment="center"/>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/appointments_recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:visibility="invisible"
+                        />
+                </android.support.v7.widget.CardView>
+
+            </LinearLayout>
+        </FrameLayout>
+
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/view_foreground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:visibility="invisible"/>
+
+
+    </RelativeLayout>
+
+</FrameLayout>

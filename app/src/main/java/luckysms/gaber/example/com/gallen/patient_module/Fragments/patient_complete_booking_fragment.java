@@ -1,6 +1,7 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,8 +27,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.bluehomestudio.progresswindow.ProgressWindow;
-import com.bluehomestudio.progresswindow.ProgressWindowConfiguration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_main_screen;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_appointments_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
@@ -78,6 +78,9 @@ public class patient_complete_booking_fragment extends Fragment {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent go_main=new Intent(getActivity(),patient_main_screen.class);
+                startActivity(go_main);
+                getActivity().finish();
 
             }
         });
@@ -101,7 +104,7 @@ public class patient_complete_booking_fragment extends Fragment {
     }
     public void go_to(Fragment fragment) {
         getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frameLayout, fragment)
+                .replace(R.id.search_frameLayout, fragment)
                 .commit();
     }
 

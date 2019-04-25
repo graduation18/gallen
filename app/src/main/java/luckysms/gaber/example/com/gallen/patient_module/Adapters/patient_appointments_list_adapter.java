@@ -13,17 +13,21 @@ import android.widget.Toast;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
-import luckysms.gaber.example.com.gallen.patient_module.Model.approval_list_model;
 
-public class patient_appointments_list_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
+public class patient_appointments_list_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private List<appointments_list_model> contact_list;
+    private RecyclerTouchListener touchListener;
+    private appointment_Listener mListener;
 
 
 
@@ -40,8 +44,22 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
             image=(ImageView)view.findViewById(R.id.image);
             detect=(Button)view.findViewById(R.id.detect);
             details=(Button)view.findViewById(R.id.details);
-
+            details.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.details(getAdapterPosition());
+                }
+            });
+            detect.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.detect(getAdapterPosition());
+                }
+            });
         }
+
+
+
     }
     public class MyViewHolder_not_finshed extends RecyclerView.ViewHolder {
         public TextView name,speciality,date,time;
@@ -57,7 +75,20 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
             map_location=(Button)view.findViewById(R.id.map_location);
             cancel=(Button)view.findViewById(R.id.cancel);
 
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.cancel(getAdapterPosition());
+                }
+            });
+            map_location.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.map_location(getAdapterPosition());
+                }
+            });
         }
+
     }
     public class MyViewHolder_cancelled extends RecyclerView.ViewHolder {
         public TextView name,speciality,date,time;
@@ -72,23 +103,25 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
 
 
         }
+
     }
 
 
 
-    public patient_appointments_list_adapter(Context context, List<appointments_list_model> contact_list) {
+    public patient_appointments_list_adapter(Context context, List<appointments_list_model> contact_list,appointment_Listener mListener) {
         this.context = context;
         this.contact_list = contact_list;
+        this.mListener =mListener;
     }
 
     @Override
     public int getItemViewType(int position) {
 
-        if (contact_list.get(position).type.equals("finshed")){
+        if (contact_list.get(position).status_id==2){
             return 0;
-        }else if (contact_list.get(position).type.equals("not finshed")){
+        }else if (contact_list.get(position).status_id==1){
             return 1;
-        }else if (contact_list.get(position).type.equals("cancelled")){
+        }else if (contact_list.get(position).status_id==3){
             return 2;
         }
             return super.getItemViewType(position);
@@ -121,12 +154,17 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
         appointments_list_model data = contact_list.get(position);
         if (holder.getItemViewType()==0){
             MyViewHolder_finshed finshed=(MyViewHolder_finshed)holder;
-            finshed.name.setText(data.name);
-            finshed.date.setText(data.date);
-            finshed.time.setText(new Date(data.time).toString());
-            finshed.speciality.setText(data.speciality);
+            finshed.name.setText(data.selected_doctor_name);
+            Date date=new Date(data.date);
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            String date_s = df2.format(date);
+            SimpleDateFormat df1 = new SimpleDateFormat("hh:mm a");
+            String time_s = df1.format(date);
+            finshed.date.setText(date_s);
+            finshed.time.setText(time_s);
+            finshed.speciality.setText(data.selected_specialty_name);
             Picasso.with(context)
-                    .load(data.image)
+                    .load(data.image_url)
                     .placeholder(R.drawable.pharmcy)
                     .into(finshed.image, new Callback() {
                         @Override
@@ -141,12 +179,17 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
 
         }else if (holder.getItemViewType()==1){
             MyViewHolder_not_finshed not_finshed=(MyViewHolder_not_finshed)holder;
-            not_finshed.name.setText(data.name);
-            not_finshed.date.setText(data.date);
-            not_finshed.time.setText(new Date(data.time).toString());
-            not_finshed.speciality.setText(data.speciality);
+            not_finshed.name.setText(data.selected_doctor_name);
+            Date date=new Date(data.date);
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            String date_s = df2.format(date);
+            SimpleDateFormat df1 = new SimpleDateFormat("hh:mm a");
+            String time_s = df1.format(date);
+            not_finshed.date.setText(date_s);
+            not_finshed.time.setText(time_s);
+            not_finshed.speciality.setText(data.selected_specialty_name);
             Picasso.with(context)
-                    .load(data.image)
+                    .load(data.image_url)
                     .placeholder(R.drawable.pharmcy)
                     .into(not_finshed.image, new Callback() {
                         @Override
@@ -155,14 +198,21 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
                             Toast.makeText(context,"error loading image",Toast.LENGTH_LONG).show();
                         }
                     });
+
+
         }else if (holder.getItemViewType()==2){
             MyViewHolder_cancelled cancelled=(MyViewHolder_cancelled)holder;
-            cancelled.name.setText(data.name);
-            cancelled.date.setText(data.date);
-            cancelled.time.setText(new Date(data.time).toString());
-            cancelled.speciality.setText(data.speciality);
+            cancelled.name.setText(data.selected_doctor_name);
+            Date date=new Date(data.date);
+            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+            String date_s = df2.format(date);
+            SimpleDateFormat df1 = new SimpleDateFormat("hh:mm a");
+            String time_s = df1.format(date);
+            cancelled.date.setText(date_s);
+            cancelled.time.setText(time_s);
+            cancelled.speciality.setText(data.selected_specialty_name);
             Picasso.with(context)
-                    .load(data.image)
+                    .load(data.image_url)
                     .placeholder(R.drawable.pharmcy)
                     .into(cancelled.image, new Callback() {
                         @Override

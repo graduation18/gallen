@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -21,8 +22,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.bluehomestudio.progresswindow.ProgressWindow;
-import com.bluehomestudio.progresswindow.ProgressWindowConfiguration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,8 +36,7 @@ public class patient_more extends Fragment  {
     private Button settings,approval_list,contact_us,about_us,sign_out;
     public LinearLayout more_layout;
     private RequestQueue queue;
-    private ProgressWindow progressWindow ;
-
+    private ProgressBar mprogressBar;
 
 
 
@@ -47,7 +45,7 @@ public class patient_more extends Fragment  {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         view = inflater.inflate(R.layout.patient_more_fragment, container, false);
-        progressConfigurations();
+        mprogressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         settings=(Button)view.findViewById(R.id.settings);
         approval_list=(Button)view.findViewById(R.id.approval_list);
         contact_us=(Button)view.findViewById(R.id.contact_us);
@@ -55,14 +53,12 @@ public class patient_more extends Fragment  {
         sign_out=(Button)view.findViewById(R.id.sign_out);
         more_layout=(LinearLayout)view.findViewById(R.id.more_layout);
 
+
         patient_settings inst = patient_settings.instance();
 
         if (inst==null){
             more_layout.setVisibility(View.VISIBLE);
         }
-
-
-
 
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +94,7 @@ public class patient_more extends Fragment  {
         sign_out.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mprogressBar.setVisibility(View.VISIBLE);
                 logout();
             }
         });
@@ -127,6 +124,8 @@ public class patient_more extends Fragment  {
                 @Override
                 public void onResponse(String response) {
                     //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
@@ -151,6 +150,8 @@ public class patient_more extends Fragment  {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
                 }
             });
             queue.add(stringReq);
@@ -161,24 +162,5 @@ public class patient_more extends Fragment  {
 
 
     }
-    private void progressConfigurations(){
-        progressWindow = ProgressWindow.getInstance(getActivity());
-        ProgressWindowConfiguration progressWindowConfiguration = new ProgressWindowConfiguration();
-        progressWindowConfiguration.backgroundColor = Color.parseColor("#32000000") ;
-        progressWindowConfiguration.progressColor = Color.WHITE ;
-        progressWindow.setConfiguration(progressWindowConfiguration);
-    }
-    public void showProgress(){
-        progressWindow.showProgress();
-    }
-    public void hideProgress(){
-        progressWindow.hideProgress();
-    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        hideProgress();
-
-    }
 }

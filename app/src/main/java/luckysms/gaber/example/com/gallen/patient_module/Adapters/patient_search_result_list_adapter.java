@@ -24,12 +24,15 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
     private Context context;
     private List<search_result_list_model> contact_list;
 
-
+    public void filterList(List<search_result_list_model> filteredList) {
+        contact_list = filteredList;
+        notifyDataSetChanged();
+    }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name,speciality,schedules,discount_code,graduated_from,doctor_fee;
+        public TextView name,speciality,schedules,discount_code,graduated_from,doctor_fee,hospital_name;
         public Button book_now;
-        public ImageView image;
+        public ImageView image,hospital_image;
         public RatingBar rating;
         public MyViewHolder(View view) {
             super(view);
@@ -39,9 +42,11 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
             discount_code=(TextView) view.findViewById(R.id.discount_code);
             graduated_from=(TextView) view.findViewById(R.id.graduated_from);
             doctor_fee=(TextView) view.findViewById(R.id.doctor_fee);
+            hospital_name=(TextView) view.findViewById(R.id.hospital_name);
             book_now=(Button)view.findViewById(R.id.book_now);
             rating=(RatingBar)view.findViewById(R.id.rating);
             image=(ImageView)view.findViewById(R.id.image);
+            hospital_image=(ImageView)view.findViewById(R.id.hospital_image);
 
         }
     }
@@ -69,25 +74,34 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         search_result_list_model data = contact_list.get(position);
-        holder.name.setText(data.doctor_name);
-        holder.speciality.setText(data.doctor_speciality);
-        holder.schedules.setText(data.doctor_availabilty);
-        if (data.doctor_accept_discount) {
+        holder.name.setText(data.doctor_model.doctor_name);
+        holder.speciality.setText(data.patient_speciality_model.name);
+        holder.schedules.setText(data.doctor_model.doctor_availabilty);
+        if (data.doctor_model.doctor_accept_discount) {
             holder.discount_code.setText(context.getResources().getText(R.string.Accepts_the_discount_code));
         }else {
             holder.discount_code.setText(context.getResources().getText(R.string.not_Accepts_the_discount_code));
         }
-        holder.graduated_from.setText(data.doctor_graduated);
-        holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_fee));
-        holder.rating.setRating(data.doctor_rating);
-        Picasso.with(context)
-                .load(data.doctor_image)
+        holder.graduated_from.setText(data.doctor_model.doctor_graduated);
+        holder.hospital_name.setText(data.hospital_model.hospital_name);
+        holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_model.doctor_fee));
+        holder.rating.setRating(data.doctor_model.doctor_rating);
+        /*Picasso.with(context)
+                .load(data.doctor_model.doctor_image)
                 .placeholder(R.drawable.pharmcy)
                 .into(holder.image, new Callback() {
                     @Override
                     public void onSuccess() {}
                     @Override public void onError() {
-                        Toast.makeText(context,"error loading image",Toast.LENGTH_LONG).show();
+                    }
+                });*/
+        Picasso.with(context)
+                .load(data.hospital_model.hospital_image_url)
+                .placeholder(R.drawable.pharmcy)
+                .into(holder.hospital_image, new Callback() {
+                    @Override
+                    public void onSuccess() {}
+                    @Override public void onError() {
                     }
                 });
 

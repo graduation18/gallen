@@ -1,5 +1,6 @@
 package luckysms.gaber.example.com.gallen.patient_module.Activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,9 +23,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.bluehomestudio.progresswindow.ProgressWindow;
-import com.bluehomestudio.progresswindow.ProgressWindowConfiguration;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,15 +39,16 @@ public class patient_login extends AppCompatActivity {
     private Button sign_in,see_password;
     private boolean seen;
     private RequestQueue queue;
-    private ProgressWindow progressWindow ;
     private TextView back;
+    private ProgressBar mprogressBar;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_login);
-        progressConfigurations();
+        mprogressBar = (ProgressBar) findViewById(R.id.progressBar);
         mobile_number_email_address=(EditText)findViewById(R.id.mobile_number_email_address);
         password=(EditText)findViewById(R.id.password);
         see_password=(Button)findViewById(R.id.see_password);
@@ -59,7 +61,7 @@ public class patient_login extends AppCompatActivity {
                 String mobile_number_email_address_s=mobile_number_email_address.getText().toString();
                 String password_s=password.getText().toString();
                 if (mobile_number_email_address_s.length()>0&&password_s.length()>0){
-                    showProgress();
+                    mprogressBar.setVisibility(View.VISIBLE);
                     login(mobile_number_email_address_s,password_s);
                 }else {
                     Toast.makeText(patient_login.this,getResources().getString(R.string.login_error),Toast.LENGTH_LONG).show();
@@ -110,6 +112,7 @@ public class patient_login extends AppCompatActivity {
             final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
+                    mprogressBar.setVisibility(View.INVISIBLE);
                     //do other things with the received JSONObject
                     Log.w("dsakjbsdahk", response);
                     try {
@@ -128,17 +131,12 @@ public class patient_login extends AppCompatActivity {
                                 JSONObject user = res.getJSONObject("user");
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                                         .putInt("id",user.getInt("id"))
-                                        .putString("_id", user.getString("_id"))
-                                        .putString("email", user.getString("email"))
                                         .putString("password", password_s)
-                                        .putBoolean("state",true)
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .putString("accessToken",res.getString("accessToken"))
                                         .commit();
-                                Intent not_now=new Intent(patient_login.this,patient_main_screen.class);
-                                startActivity(not_now);
-                                finish();
-                                Toast.makeText(patient_login.this,getResources().getString(R.string.welcome),Toast.LENGTH_LONG).show();
+                                mprogressBar.setVisibility(View.VISIBLE);
+                               get_data(user.getInt("id"));
 
                             }
                         }
@@ -151,6 +149,7 @@ public class patient_login extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
                 }
             }) {
                 @Override
@@ -176,24 +175,93 @@ public class patient_login extends AppCompatActivity {
 
 
     }
-    private void progressConfigurations(){
-        progressWindow = ProgressWindow.getInstance(this);
-        ProgressWindowConfiguration progressWindowConfiguration = new ProgressWindowConfiguration();
-        progressWindowConfiguration.backgroundColor = Color.parseColor("#32000000") ;
-        progressWindowConfiguration.progressColor = Color.WHITE ;
-        progressWindow.setConfiguration(progressWindowConfiguration);
-    }
-    public void showProgress(){
-        progressWindow.showProgress();
-    }
-    public void hideProgress(){
-        progressWindow.hideProgress();
+    private void get_data(final int id)
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com:30001/api/patients/all";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(this);
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    //do other things with the received JSONObject
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(patient_login.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONArray list=res.getJSONArray("list");
+                                for (int i=0;i<list.length();i++) {
+                                    JSONObject doc = list.getJSONObject(i);
+                                    Intent got_confirm_code = new Intent(patient_login.this, patient_confirm_code.class);
+                                    Log.w("dsaldj", doc.getString("mobile"));
+                                    got_confirm_code.putExtra("phone_number", doc.getString("mobile"));
+                                    startActivity(got_confirm_code);
+                                    finish();
+                                }
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(patient_login.this, "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        JSONObject _id=new JSONObject();
+                        _id.put("id",id);
+                        object.put("where",_id);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        hideProgress();
-
-    }
 }

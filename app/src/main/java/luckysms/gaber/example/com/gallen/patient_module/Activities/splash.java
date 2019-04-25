@@ -93,6 +93,7 @@ public class splash extends AppCompatActivity {
     }
     @SuppressLint("NewApi")
     private void change_language(){
+        Log.w("sa;ksdakas",getSharedPreferences("personal_data",Context.MODE_PRIVATE).getString("language",""));
         if (getSharedPreferences("personal_data",Context.MODE_PRIVATE).getString("language","").equals("")) {
             Resources res = getResources();
 // Change locale settings in the app.
@@ -105,6 +106,22 @@ public class splash extends AppCompatActivity {
             getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                     .putString("language",Locale.getDefault().getLanguage())
                     .commit();
+        }else if (getSharedPreferences("personal_data",Context.MODE_PRIVATE).getString("language","").equals("ar")){
+            Resources res = getResources();
+// Change locale settings in the app.
+            DisplayMetrics dm = res.getDisplayMetrics();
+            android.content.res.Configuration conf = res.getConfiguration();
+            conf.setLocale(new Locale("ar")); // API 17+ only.
+// Use conf.locale = new Locale(...) if targeting lower versions
+            res.updateConfiguration(conf, dm);
+        }else{
+            Resources res = getResources();
+// Change locale settings in the app.
+            DisplayMetrics dm = res.getDisplayMetrics();
+            android.content.res.Configuration conf = res.getConfiguration();
+            conf.setLocale(new Locale("en")); // API 17+ only.
+// Use conf.locale = new Locale(...) if targeting lower versions
+            res.updateConfiguration(conf, dm);
         }
     }
 }
