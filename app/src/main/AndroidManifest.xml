@@ -20,8 +20,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".patient_module.Activities.patient_sign_up"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -51,10 +51,13 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".patient_module.Activities.complete_booking"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" ></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".hospital_module.Activities.hospital_start_activity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" ></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".hospital_module.Activities.hospital_search_by_doctor_name" />
+        <activity android:name=".hospital_module.Activities.hospital_admin_page" />
+        <activity android:name=".hospital_module.Activities.hospital_defintions"></activity>
     </application>
 
 </manifest>
