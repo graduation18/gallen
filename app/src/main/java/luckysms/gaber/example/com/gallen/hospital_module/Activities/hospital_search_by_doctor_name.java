@@ -189,6 +189,25 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
                     pars.put("Cookie", "access_token="+ getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
                     return pars;
                 }
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",1);
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
 
 
             };

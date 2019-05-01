@@ -1,14 +1,25 @@
 package luckysms.gaber.example.com.gallen.hospital_module.Fragments;
 
+import android.app.Dialog;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -33,26 +44,56 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.hospital_module.Activities.hospital_search_by_doctor_name;
+import luckysms.gaber.example.com.gallen.hospital_module.Adapters.hospital_search_result_list_adapter;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.clinic_model;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.doctor_model;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.search_doctor_name_model;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.speciality_model;
+import luckysms.gaber.example.com.gallen.patient_module.Activities.complete_booking;
+import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_settings;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
 
 import static android.content.Context.MODE_PRIVATE;
 
+
 public class hospital_doctor_working_times extends Fragment {
     private View view;
-    private ImageView doctor_image;
-    private EditText doctor_code,full_name,doctor_phone,email_address,doctor_fee,doctor_info;
     private CheckBox saturaday,sunday,monday,tuesday,wednsday,thursday,friday;
     private Spinner start_appointment_saturaday,end_appointment_saturaday,start_appointment_sunday,end_appointment_sunday,start_appointment_monday
             ,end_appointment_monday,start_appointment_tuesday,end_appointment_tuesday,start_appointment_wednsday,end_appointment_wednsday
             ,start_appointment_thursday,end_appointment_thursday,start_appointment_friday,end_appointment_friday;
-    private Button save,cancel;
+    private Button save,cancel,doctor_name,appointment_period,speciality;
     private TextView back,number_of_notifications,notifications;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
+    private RecyclerView dialog_list;
+    private speciality_SpinAdapter speciality_adapter;
+    private ArrayList<patient_speciality_model> specialities=new ArrayList<>();
+    private ArrayList<patient_speciality_model> filteredList = new ArrayList<>();
+    private patient_speciality_model selected_speciality;
+    private clinic_model selected_clinic;
+
+    private ArrayList<search_doctor_name_model>doctor_name_list=new ArrayList<>();
+    private ArrayList<search_doctor_name_model>doctor_name_filteredList=new ArrayList<>();
+    private search_doctor_name_model selected_doctor;
+    private hospital_search_result_list_adapter doctor_adapter;
+
+
 
     @Nullable
     @Override
@@ -64,6 +105,9 @@ public class hospital_doctor_working_times extends Fragment {
         notifications=(TextView)view.findViewById(R.id.notifications);
         save=(Button)view.findViewById(R.id.save);
         cancel=(Button)view.findViewById(R.id.cancel);
+        doctor_name=(Button)view.findViewById(R.id.doctor_name);
+        appointment_period=(Button)view.findViewById(R.id.appointment_period);
+        speciality=(Button)view.findViewById(R.id.speciality);
         saturaday=(CheckBox)view.findViewById(R.id.saturaday);
         sunday=(CheckBox)view.findViewById(R.id.sunday);
         monday=(CheckBox)view.findViewById(R.id.monday);
@@ -100,6 +144,137 @@ public class hospital_doctor_working_times extends Fragment {
         end_appointment_thursday.setEnabled(false);
         start_appointment_friday.setEnabled(false);
         end_appointment_friday.setEnabled(false);
+        doctor_name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog dialog=new Dialog(getActivity());
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                dialog.setContentView(R.layout.dialog_list);
+                dialog_list= dialog.findViewById(R.id.dialog_list);
+                final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
+                doctor_adapter=new hospital_search_result_list_adapter(getActivity(),doctor_name_list);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+                dialog_list.setLayoutManager(mLayoutManager);
+                dialog_list.setItemAnimator(new DefaultItemAnimator());
+                dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
+                dialog_list.setAdapter(doctor_adapter);
+                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
+                    @Override
+                    public void onClick(View v, final int position) {
+                        if (searchh.getText().length()>0){
+                            selected_doctor=doctor_name_filteredList.get(position);
+                            doctor_name.setText(selected_doctor.doctor_model.doctor_name);
+                            dialog.dismiss();
+                        }else {
+                            selected_doctor=doctor_name_list.get(position);
+                            doctor_name.setText(selected_doctor.doctor_model.doctor_name);
+                            dialog.dismiss();
+                        }
+
+                    }
+
+                    @Override
+                    public void onLongClick(View view, int position) {
+                    }
+                }));
+
+
+                searchh.addTextChangedListener(new TextWatcher() {
+
+                    @Override
+                    public void afterTextChanged(Editable s) {}
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start,
+                                                  int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start,
+                                              int before, int count) {
+
+                        doctor_filter(s.toString());
+
+
+                    }
+                });
+
+
+
+                mprogressBar.setVisibility(View.VISIBLE);
+
+                get_doctor_data();
+                dialog.show();
+
+            }
+        });
+        speciality.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog dialog=new Dialog(getActivity());
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                dialog.setContentView(R.layout.dialog_list);
+                dialog_list= dialog.findViewById(R.id.dialog_list);
+                final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
+                speciality_adapter=new speciality_SpinAdapter(getActivity(),specialities);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+                dialog_list.setLayoutManager(mLayoutManager);
+                dialog_list.setItemAnimator(new DefaultItemAnimator());
+                dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
+                dialog_list.setAdapter(speciality_adapter);
+                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
+                    @Override
+                    public void onClick(View v, final int position) {
+                        if (searchh.getText().length()>0){
+                            selected_speciality=filteredList.get(position);
+                            speciality.setText(selected_speciality.name);
+                            dialog.dismiss();
+                        }else {
+                            selected_speciality=specialities.get(position);
+                            speciality.setText(selected_speciality.name);
+                            dialog.dismiss();
+                        }
+
+                    }
+
+                    @Override
+                    public void onLongClick(View view, int position) {
+                    }
+                }));
+
+
+                searchh.addTextChangedListener(new TextWatcher() {
+
+                    @Override
+                    public void afterTextChanged(Editable s) {}
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start,
+                                                  int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start,
+                                              int before, int count) {
+
+                        speciality_filter(s.toString());
+
+
+                    }
+                });
+
+
+
+                mprogressBar.setVisibility(View.VISIBLE);
+
+                get_specialties_data();
+                dialog.show();
+
+            }
+        });
+
         saturaday.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -421,14 +596,18 @@ public class hospital_doctor_working_times extends Fragment {
                 try {
                     shift.put("times_list",times_list);
                     doctor_list.put(shift);
-                    update_clinic(5,doctor_list);
+                    if (selected_doctor!=null) {
+                        get_clinic_by_doctor(selected_doctor.doctor_model.id);
+                    }else {
+                        Toast.makeText(getActivity(),getResources().getText(R.string.please_select_doctor_first),Toast.LENGTH_LONG).show();
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-        
 
+        fill_hours();
         return view;
     }
     public void go_to(Fragment fragment) {
@@ -457,6 +636,7 @@ public class hospital_doctor_working_times extends Fragment {
                         JSONObject res = new JSONObject(response);
                         if (res.has("done")) {
                             if (res.getBoolean("done")) {
+
                             }
                         }
 
@@ -514,7 +694,7 @@ public class hospital_doctor_working_times extends Fragment {
 
 
     }
-    private void get_clinics(final int hospital_id)
+    private void get_clinic_by_doctor(final int doctor_id)
     {
 
 
@@ -538,22 +718,25 @@ public class hospital_doctor_working_times extends Fragment {
                                 JSONArray list=res.getJSONArray("list");
                                 for (int i=0;i<list.length();i++) {
                                     JSONObject clinic=list.getJSONObject(i);
-                                    clinic.getInt("id");
-                                    clinic.getString("name");
-                                    clinic.getBoolean("active");
-                                    clinic.getJSONObject("hospital");
-                                    clinic.getJSONObject("gov");
-                                    clinic.getJSONObject("city");
-                                    clinic.getString("address");
-                                    clinic.getString("phone");
-                                    clinic.getString("website");
-                                    clinic.getString("email");
-                                    clinic.getString("image_url");
-                                    clinic.getJSONArray("insurance_company_list");
-                                    clinic.getJSONArray("doctor_list");
-                                    clinic.getJSONArray("nurse_list");
-                                    clinic.getDouble("latitude");
-                                    clinic.getDouble("longitude");
+                                    int id=clinic.getInt("id");
+                                    String name=clinic.getString("name");
+                                    boolean active=clinic.getBoolean("active");
+                                    JSONObject hospital=clinic.getJSONObject("hospital");
+                                    JSONObject gov=clinic.getJSONObject("gov");
+                                    JSONObject city=clinic.getJSONObject("city");
+                                    String address=clinic.getString("address");
+                                    String phone=clinic.getString("phone");
+                                    String website=clinic.getString("website");
+                                    String email=clinic.getString("email");
+                                    String image_url=clinic.getString("image_url");
+                                    JSONArray insurance_company_list=clinic.getJSONArray("insurance_company_list");
+                                    JSONArray doctor_list=clinic.getJSONArray("doctor_list");
+                                    JSONArray nurse_list=clinic.getJSONArray("nurse_list");
+                                    double latitude=clinic.getDouble("latitude");
+                                    double longitude=clinic.getDouble("longitude");
+                                    update_clinic(id,doctor_list);
+                                    selected_clinic=new clinic_model(name,address,phone,website,email,image_url
+                                            ,id,active,hospital,gov,city,insurance_company_list,doctor_list,nurse_list,latitude,longitude);
                                 }
                             }
                         }
@@ -583,7 +766,7 @@ public class hospital_doctor_working_times extends Fragment {
                     JSONObject object=new JSONObject();
                     try {
                         JSONObject where=new JSONObject();
-                        where.put("hospital.id",hospital_id);
+                        where.put("doctor_list.doctor.id",doctor_id);
                         object.put("where",where);
 
 
@@ -612,5 +795,439 @@ public class hospital_doctor_working_times extends Fragment {
         }
 
 
+    }
+    private void get_specialties_data()
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com:30001/api/medical_specialties/all";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+
+
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                specialities.clear();
+                                JSONArray list=res.getJSONArray("list");
+
+                                for (int i=0;i<list.length();i++){
+                                    JSONObject object=list.getJSONObject(i);
+                                    String _id=object.getString("_id");
+                                    String image_url=object.getString("image_url");
+                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    int id=object.getInt("id");
+                                    patient_speciality_model speciality=  new patient_speciality_model(_id,image_url,name,id);
+                                    specialities.add(speciality);
+
+
+                                }
+                                speciality_adapter.notifyDataSetChanged();
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    private void speciality_filter(String text) {
+        filteredList.clear();
+        for (patient_speciality_model item : specialities) {
+            if (!item.name.isEmpty()){
+                if (item.name.toLowerCase().contains(text.toLowerCase())) {
+                    filteredList.add(item);
+                }
+            }else {
+                if (item.name.toLowerCase().contains(text.toLowerCase())) {
+                    filteredList.add(item);
+                }
+            }
+
+        }
+
+        speciality_adapter.filterList(filteredList);
+    }
+    private void doctor_filter(String text) {
+        doctor_name_filteredList.clear();
+        for (search_doctor_name_model item : doctor_name_list) {
+            if (!item.doctor_model.doctor_name.isEmpty()){
+                if (item.doctor_model.doctor_name.toLowerCase().contains(text.toLowerCase())) {
+                    doctor_name_filteredList.add(item);
+                }
+            }else {
+                if (item.doctor_model.doctor_name.toLowerCase().contains(text.toLowerCase())) {
+                    doctor_name_filteredList.add(item);
+                }
+            }
+
+        }
+
+        doctor_adapter.filterList(doctor_name_filteredList);
+    }
+    private void add_ticket(final JSONObject selected_doctor, final JSONObject selected_time
+            , final JSONObject selected_specialty, final JSONObject selected_hospital, final JSONObject status
+            , final JSONArray drugs_list, final JSONArray scans_list, final JSONArray analyses_list
+            , final JSONArray operation_list, final JSONObject selected_shift, final JSONObject image_url
+            , final JSONObject selected_clinic,final JSONObject ticket_date) {
+
+
+        try {
+            String url = "http://microtec1.egytag.com:30001/api/tickets/add";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+
+                                Toast.makeText(getActivity(),getResources().getString(R.string.booking_successful),Toast.LENGTH_LONG).show();
+                                Intent c=new Intent(getActivity(),complete_booking.class);
+                                startActivity(c);
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+
+
+                    try {
+                        object.put("selected_doctor",selected_doctor);
+                        object.put("selected_time",selected_time);
+                        object.put("selected_specialty",selected_specialty);
+                        object.put("selected_hospital",selected_hospital);
+                        object.put("drugs_list",drugs_list);
+                        object.put("operation_list",operation_list);
+                        object.put("scans_list",scans_list);
+                        object.put("analyses_list",analyses_list);
+                        object.put("selected_shift",selected_shift);
+                        object.put("status",status);
+                        object.put("image_url",image_url);
+                        object.put("date",new Date().getTime());
+                        object.put("selected_clinic",selected_clinic);
+                        object.put("ticket_date",ticket_date);
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    private void fill_hours(){
+        List<String> spinnerArray =  new ArrayList<String>();
+        spinnerArray.add("7:00 am");
+        spinnerArray.add("7:30 am");
+        spinnerArray.add("8:00 am");
+        spinnerArray.add("8:30 am");
+        spinnerArray.add("9:00 am");
+        spinnerArray.add("9:30 am");
+        spinnerArray.add("10:00 am");
+        spinnerArray.add("10:30 am");
+        spinnerArray.add("11:00 am");
+        spinnerArray.add("11:30 am");
+        spinnerArray.add("12:00 pm");
+        spinnerArray.add("12:30 pm");
+        spinnerArray.add("1:00 pm");
+        spinnerArray.add("1:30 pm");
+        spinnerArray.add("2:00 pm");
+        spinnerArray.add("2:30 pm");
+        spinnerArray.add("3:00 pm");
+        spinnerArray.add("3:30 pm");
+        spinnerArray.add("4:00 pm");
+        spinnerArray.add("4:30 pm");
+        spinnerArray.add("5:00 pm");
+        spinnerArray.add("5:30 pm");
+        spinnerArray.add("6:00 pm");
+        spinnerArray.add("6:30 pm");
+        spinnerArray.add("7:00 pm");
+        spinnerArray.add("7:30 pm");
+        spinnerArray.add("8:00 pm");
+        spinnerArray.add("8:30 pm");
+        spinnerArray.add("9:00 pm");
+        spinnerArray.add("9:30 pm");
+        spinnerArray.add("10:00 pm");
+        spinnerArray.add("10:30 pm");
+        spinnerArray.add("11:00 pm");
+        spinnerArray.add("11:30 pm");
+        spinnerArray.add("12:00 am");
+        spinnerArray.add("12:30 am");
+        spinnerArray.add("1:00 am");
+        spinnerArray.add("1:30 am");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        start_appointment_saturaday.setAdapter(adapter);
+        end_appointment_saturaday.setAdapter(adapter);
+        start_appointment_sunday.setAdapter(adapter);
+        end_appointment_sunday.setAdapter(adapter);
+        start_appointment_monday.setAdapter(adapter);
+        end_appointment_monday.setAdapter(adapter);
+        start_appointment_tuesday.setAdapter(adapter);
+        end_appointment_tuesday.setAdapter(adapter);
+        start_appointment_wednsday.setAdapter(adapter);
+        end_appointment_wednsday.setAdapter(adapter);
+        start_appointment_thursday.setAdapter(adapter);
+        end_appointment_thursday.setAdapter(adapter);
+        start_appointment_friday.setAdapter(adapter);
+        end_appointment_friday.setAdapter(adapter);
+
+
+    }
+    private void get_doctor_data()
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com/api/hospitals/view";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+
+
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                doctor_name_list.clear();
+                                JSONObject doc=res.getJSONObject("doc");
+                                JSONArray doctor_list=doc.getJSONArray("doctor_list");
+
+                                for (int d=0;d<doctor_list.length();d++){
+                                    JSONObject doctor_obj=doctor_list.getJSONObject(d);
+                                    JSONObject doctor=doctor_obj.getJSONObject("doctor");
+                                    String doctor__id=doctor.getString("_id");
+                                    int doctor_id=doctor.getInt("id");
+                                    String  doctor_email=doctor.getString("email");
+                                    String  doctor_code=doctor.getString("code");
+                                    String  doctor_phone=doctor.getString("phone");
+                                    String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
+                                    JSONObject specialty=doctor.getJSONObject("specialty");
+                                    String specialty__id=specialty.getString("_id");
+                                    int specialty_id=specialty.getInt("id");
+                                    JSONArray review_list=new JSONArray();
+                                    if (doctor_obj.has("review_list")){
+                                        review_list=doctor_obj.getJSONArray("review_list");
+                                    }
+                                    String specialty_name=new String (specialty.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    doctor_model doctor_model=new doctor_model(doctor_name,"","","",false,4.5f,200
+                                            ,doctor_id,"","Male",review_list.toString(),doctor_code,doctor_email,doctor_phone);
+                                    speciality_model speciality_model=new speciality_model(specialty__id,"ss",specialty_name,specialty_id);
+                                    doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model));
+                                }
+
+                                doctor_adapter.notifyDataSetChanged();
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",1);
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void ticket_data(String date, final JSONObject selected_time,JSONObject selected_shift){
+        JSONObject selected_doctor_obj=new JSONObject();
+        JSONObject selected_specialty_obj=new JSONObject();
+        JSONObject selected_hospital_obj=new JSONObject();
+        JSONObject status_obj=new JSONObject();
+        JSONObject ticket_date =new JSONObject();
+        JSONObject selected_clinic_obj =new JSONObject();
+        try {
+            selected_doctor_obj.put("id",selected_doctor.doctor_model.id);
+            selected_doctor_obj.put("name",selected_doctor.doctor_model.doctor_name);
+            selected_doctor_obj.put("image",selected_doctor.doctor_model.doctor_image);
+            selected_doctor_obj.put("fee",selected_doctor.doctor_model.doctor_fee);
+            selected_doctor_obj.put("rating",new JSONArray(selected_doctor.doctor_model.doctor_rating));
+            selected_doctor_obj.put("discount_code",selected_doctor.doctor_model.doctor_accept_discount);
+            selected_doctor_obj.put("review_list",new JSONArray(selected_doctor.doctor_model.review_list));
+            selected_doctor_obj.put("gender",selected_doctor.doctor_model.doctor_gender);
+            selected_doctor_obj.put("info",selected_doctor.doctor_model.doctor_notes);
+            selected_specialty_obj.put("id",selected_speciality.id);
+            selected_specialty_obj.put("name",selected_speciality.name);
+            selected_hospital_obj.put("id",1);
+            selected_hospital_obj.put("name","مستشفى الامل");
+            status_obj.put("name_en","available");
+            status_obj.put("name_ar","متاح");
+            status_obj.put("id",0);
+            ticket_date.put("date",date);
+            selected_clinic_obj.put("id",selected_clinic.id);
+            selected_clinic_obj.put("name",selected_clinic.name);
+
+            add_ticket(selected_doctor_obj,selected_time,selected_specialty_obj,selected_hospital_obj,status_obj,
+                    new JSONArray(),new JSONArray(),new JSONArray(),new JSONArray(),selected_shift,new JSONObject(),selected_clinic_obj,ticket_date);
+
+
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

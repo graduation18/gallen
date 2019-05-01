@@ -145,6 +145,7 @@
     <string name="none">none</string>
     <string name="active">active</string>
     <string name="not_active">not active</string>
+    <string name="please_select_doctor_first">please select doctor first</string>
 
 
 </resources>
