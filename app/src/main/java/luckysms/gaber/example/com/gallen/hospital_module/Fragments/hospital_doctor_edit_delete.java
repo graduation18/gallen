@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.clinic_model;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.speciality_model;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
@@ -66,19 +68,17 @@ public class hospital_doctor_edit_delete extends Fragment {
     private Button edit_doctor,delete_doctor;
     private TextView back,number_of_notifications,notifications;
     int PICK_IMAGE_MULTIPLE = 1;
-    private RecyclerView dialog_list;
-    private speciality_SpinAdapter speciality_adapter;
-    private ArrayList<patient_speciality_model> specialities=new ArrayList<>();
-    private ArrayList<patient_speciality_model> filteredList = new ArrayList<>();
-    private patient_speciality_model selected_speciality;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
-    private String selected_image,doctor_name_s,doctor_availabilty_s,doctor_gender_s
+    private String _id,selected_image,doctor_name_s,doctor_availabilty_s,doctor_gender_s
             ,doctor_graduated_s,doctor_image_s,doctor_notes_s,dotor_code_s,review_list_s,speciality_name_s,doctor_email_s,doctor_phone_s;
     private boolean doctor_accept_discount_b;
     private double doctor_fee_d;
     private Float doctor_rating_f;
     private int id_i;
+    private clinic_model clinic_model;
+    private patient_speciality_model speciality_model;
+
 
 
 
@@ -96,11 +96,14 @@ public class hospital_doctor_edit_delete extends Fragment {
             doctor_phone_s=getArguments().getString("doctor_phone");
             doctor_email_s=getArguments().getString("doctor_email");
             review_list_s= getArguments().getString("review_list");
-            speciality_name_s= getArguments().getString("speciality_name");
+            speciality_model= (patient_speciality_model) getArguments().getSerializable("speciality");
             doctor_accept_discount_b= getArguments().getBoolean("doctor_accept_discount");
             doctor_fee_d= getArguments().getDouble("doctor_fee");
             doctor_rating_f=getArguments().getFloat("doctor_rating");
             id_i=getArguments().getInt("id");
+            _id=getArguments().getString("_id");
+            clinic_model=(clinic_model)getArguments().getSerializable("clinic");
+
         }
     }
 
@@ -127,7 +130,7 @@ public class hospital_doctor_edit_delete extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment fragment=new patient_settings();
+                Fragment fragment=new hospital_search_edit_doctor();
                 go_to(fragment);
             }
         });
@@ -147,22 +150,25 @@ public class hospital_doctor_edit_delete extends Fragment {
             @Override
             public void onClick(View v) {
                 Bundle bundle=new Bundle();
-                bundle.putString("doctor_name",speciality_name_s);
+                bundle.putString("doctor_name",doctor_name_s);
                 bundle.putString("doctor_availabilty",doctor_availabilty_s);
                 bundle.putString("doctor_gender",doctor_gender_s);
                 bundle.putString("doctor_graduated",doctor_graduated_s);
                 bundle.putString("doctor_image",doctor_image_s);
+                bundle.putString("_id",_id);
                 bundle.putString("doctor_notes",doctor_notes_s);
                 bundle.putString("dotor_code",dotor_code_s);
                 bundle.putString("doctor_phone",doctor_phone_s);
                 bundle.putString("review_list",review_list_s);
                 bundle.putString("doctor_email",doctor_email_s);
-                bundle.putString("speciality_name",speciality_name_s);
+                bundle.putSerializable("speciality",speciality_model);
+                bundle.putSerializable("clinic",clinic_model);
                 bundle.putBoolean("doctor_accept_discount",doctor_accept_discount_b);
                 bundle.putDouble("doctor_fee",doctor_fee_d);
                 bundle.putFloat("doctor_rating",doctor_rating_f);
                 bundle.putInt("id",id_i);
-                Fragment hospital_doctor_edit_delete=new hospital_doctor_edit_delete();
+                bundle.putString("_id",_id);
+                Fragment hospital_doctor_edit_delete=new hospital_doctor_edit();
                 hospital_doctor_edit_delete.setArguments(bundle);
                 go_to(hospital_doctor_edit_delete);
 
@@ -191,14 +197,15 @@ public class hospital_doctor_edit_delete extends Fragment {
             doctor_accept_code.setText(getResources().getText(R.string.not_Accepts_the_discount_code));
 
         }
-        speciality.setText(speciality_name_s);
+        speciality.setText(speciality_model.name);
+
     }
     private void delete_doctor(final int id)
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/doctors/delete";
+            String url = "http://microtec1.egytag.com/api/doctors/delete";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -214,6 +221,7 @@ public class hospital_doctor_edit_delete extends Fragment {
                         JSONObject res = new JSONObject(response);
                         if (res.has("done")) {
                             if (res.getBoolean("done")) {
+                                getActivity().finish();
                             }
                         }
 

@@ -130,13 +130,18 @@ public class patient_login extends AppCompatActivity {
                             if (res.getBoolean("done")) {
                                 JSONObject user = res.getJSONObject("user");
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                        .putInt("id",user.getInt("id"))
+                                        .putInt("id",user.getJSONObject("ref_info").getInt("id"))
                                         .putString("password", password_s)
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .putString("accessToken",res.getString("accessToken"))
+                                        .putString("type",user.getString("type"))
                                         .commit();
                                 mprogressBar.setVisibility(View.VISIBLE);
-                               get_data(user.getInt("id"));
+                                Intent got_confirm_code = new Intent(patient_login.this, patient_confirm_code.class);
+                                Log.w("dsaldj", user.getString("mobile"));
+                                got_confirm_code.putExtra("phone_number", user.getString("mobile"));
+                                startActivity(got_confirm_code);
+                                finish();
 
                             }
                         }
@@ -175,93 +180,6 @@ public class patient_login extends AppCompatActivity {
 
 
     }
-    private void get_data(final int id)
-    {
 
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/patients/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    //do other things with the received JSONObject
-
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-                        if (res.has("error")) {
-                            Toast.makeText(patient_login.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                for (int i=0;i<list.length();i++) {
-                                    JSONObject doc = list.getJSONObject(i);
-                                    Intent got_confirm_code = new Intent(patient_login.this, patient_confirm_code.class);
-                                    Log.w("dsaldj", doc.getString("mobile"));
-                                    got_confirm_code.putExtra("phone_number", doc.getString("mobile"));
-                                    startActivity(got_confirm_code);
-                                    finish();
-                                }
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(patient_login.this, "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+ getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-
-                    return pars;
-                }
-
-                @Override
-                public byte[] getBody() throws com.android.volley.AuthFailureError {
-                    JSONObject object=new JSONObject();
-                    try {
-                        JSONObject _id=new JSONObject();
-                        _id.put("id",id);
-                        object.put("where",_id);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.w("sadkjsdkjlljksda",object.toString());
-                    return object.toString().getBytes();
-
-                };
-
-                public String getBodyContentType()
-                {
-                    return "application/json; charset=utf-8";
-                }
-
-
-            };
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
 
 }

@@ -1,7 +1,9 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -82,15 +84,6 @@ public class patient_appointments extends Fragment implements appointment_Listen
         appointments_recycler.setItemAnimator(new DefaultItemAnimator());
         appointments_recycler.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
         appointments_recycler.setAdapter(data_adapter);
-        appointments_recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), appointments_recycler, new RecyclerTouchListener.ClickListener() {
-            @Override
-            public void onClick(View v, final int position) {
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-            }
-        }));
 
 
         notifications.setOnClickListener(new View.OnClickListener() {
@@ -109,7 +102,7 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/tickets/all";
+            String url = "http://microtec1.egytag.com/api/tickets/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -296,106 +289,7 @@ public class patient_appointments extends Fragment implements appointment_Listen
                 .replace(R.id.frameLayout, fragment)
                 .commit();
     }
-    private void detected(final int ticket_id)
-    {
 
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/tickets/update";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-                        Log.w("dsakjbsdahk", res.toString());
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(), getResources().getString(R.string.error), Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                get_appointments(getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    if (error instanceof NetworkError) {
-                    } else if (error instanceof ServerError) {
-                    } else if (error instanceof AuthFailureError) {
-                    } else if (error instanceof ParseError) {
-                    } else if (error instanceof NoConnectionError) {
-                    } else if (error instanceof TimeoutError) {
-                        Toast.makeText(getContext(),
-                                "Oops. Timeout error!",
-                                Toast.LENGTH_LONG).show();
-                    }
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-                @Override
-                public byte[] getBody() throws com.android.volley.AuthFailureError {
-                    JSONObject object=new JSONObject();
-                    try {
-                        JSONObject status=new JSONObject();
-                        status.put("id",2);
-                        status.put("ar","تم الكشف");
-                        status.put("en","finshed");
-                        status.put("name","finshed");
-                        object.put("id",ticket_id);
-                        object.put("status",status);
-
-
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.w("sadkjsdkjlljksda",object.toString());
-                    return object.toString().getBytes();
-
-                };
-
-                public String getBodyContentType()
-                {
-                    return "application/json; charset=utf-8";
-                }
-
-            };
-
-
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    5000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
     private void cancelled(final int ticket_id)
     {
 
@@ -511,6 +405,12 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
     }
 
+    private void open_map(int position){
+        String url = "http://maps.google.com/maps?daddr=" + contact_list.get(position).latitude + "," + contact_list.get(position).longitude;
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
+    }
+
 
     @Override
     public void detect(int pos) {
@@ -530,6 +430,6 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
     @Override
     public void map_location(int pos) {
-
+        open_map(pos);
     }
 }

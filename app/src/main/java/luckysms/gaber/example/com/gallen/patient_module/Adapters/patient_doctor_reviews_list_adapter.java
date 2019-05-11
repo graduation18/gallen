@@ -49,7 +49,7 @@ public class patient_doctor_reviews_list_adapter extends RecyclerView.Adapter<pa
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.patient_approval_list_item, parent, false);
+                .inflate(R.layout.patient_review_list_item, parent, false);
         return new MyViewHolder(itemView);
 
 

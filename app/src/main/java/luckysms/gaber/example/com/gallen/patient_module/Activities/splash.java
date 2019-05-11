@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.doctor_module.Activities.basic_activity;
+import luckysms.gaber.example.com.gallen.hospital_module.Activities.hospital_start_activity;
 
 public class splash extends AppCompatActivity {
 
@@ -76,10 +78,23 @@ public class splash extends AppCompatActivity {
             @Override
             public void run() {
                 if(getSharedPreferences("personal_data",MODE_PRIVATE).getBoolean("state",false)){
-                    Intent main=new Intent(splash.this,patient_main_screen.class);
-                    startActivity(main);
-                    finish();
-                    overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
+                    if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("hospital")){
+                        Intent main=new Intent(splash.this,hospital_start_activity.class);
+                        startActivity(main);
+                        finish();
+                        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
+                    }else if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("patient")){
+                        Intent main=new Intent(splash.this,patient_main_screen.class);
+                        startActivity(main);
+                        finish();
+                        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
+                    }else if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("doctor")){
+                        Intent main=new Intent(splash.this,basic_activity.class);
+                        startActivity(main);
+                        finish();
+                        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
+                    }
+
 
                 }else {
                     Intent mobile_authentication=new Intent(splash.this,patient_start_screen.class);

@@ -1,74 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layoutDirection="ltr"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
 
-    >
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_home"
-        android:layout_height="wrap_content"
+    <RelativeLayout
+        android:id="@+id/view_background"
         android:layout_width="match_parent"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@drawable/toolbar_color"
-        style="@style/ToolBarStyle.Event"
+        android:layout_height="match_parent"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/favorite_doctors"
-            android:textColor="@color/white"
-            android:layout_gravity="center"
-            android:gravity="center"
-            />
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="right"
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layoutDirection="ltr"
+            android:id="@+id/favourite_layout"
+
             >
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_home"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:minHeight="?attr/actionBarSize"
+                android:background="@drawable/toolbar_color"
+                style="@style/ToolBarStyle.Event"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/favorite_doctors"
+                    android:textColor="@color/white"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    />
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    >
+                    <TextView
+                        android:id="@+id/notifications"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:drawableLeft="@drawable/notifications"
+                        android:layout_marginRight="20dp"
+
+                        />
+
+                    <TextView
+                        android:id="@+id/number_of_notifications"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginStart="9dp"
+                        android:layout_marginLeft="9dp"
+                        android:layout_marginTop="7dp"
+                        android:background="@drawable/circle"
+                        android:text="15"
+                        android:textSize="6dp"
+                        android:textAlignment="center"/>
+                </RelativeLayout>
+
+            </android.support.v7.widget.Toolbar>
             <TextView
-                android:id="@+id/notifications"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:drawableLeft="@drawable/notifications"
-                android:layout_marginRight="20dp"
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:text="@string/no_favourites_yet"
+                android:textSize="20dp"
+                android:textColor="@color/green_light"
+                android:drawableLeft="@drawable/doctor_info"
+                android:textAlignment="center"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/favorite_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible"
 
                 />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/number_of_notifications"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="9dp"
-                android:layout_marginLeft="9dp"
-                android:layout_marginTop="7dp"
-                android:background="@drawable/circle"
-                android:text="15"
-                android:textSize="6dp"
-                android:textAlignment="center"/>
-        </RelativeLayout>
+    </RelativeLayout>
 
-    </android.support.v7.widget.Toolbar>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="5dp"
-        android:text="@string/no_favourites_yet"
-        android:textSize="25dp"
-        android:textColor="@color/green_light"
-        android:drawableLeft="@drawable/doctor_info"
-        android:textAlignment="center"/>
+    <RelativeLayout
+        android:id="@+id/view_foreground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        >
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/favorite_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:visibility="invisible"/>
 
-        />
-</LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>
+
+

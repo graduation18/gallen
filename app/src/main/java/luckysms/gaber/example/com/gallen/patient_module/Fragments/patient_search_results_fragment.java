@@ -60,6 +60,8 @@ import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_filter_data;
 import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.hospital_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.nurse_model;
@@ -71,7 +73,7 @@ import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class patient_search_results_fragment extends Fragment {
+public class patient_search_results_fragment extends Fragment implements pass_filter_data {
     private View view;
     private TextView back,number_of_notifications,notifications,location,speciality;
     private RecyclerView search_result_recycler;
@@ -82,13 +84,9 @@ public class patient_search_results_fragment extends Fragment {
     private int city_i,governorate_i,speciality_i,insurance_company_i;
     private String name, city_s,governorate_s,speciality_s,insurance_company_s;
     private boolean visitor;
-    private Button filter, insurance_company,degree;
-    private RadioButton selected_gender;
-    private RecyclerView dialog_list;
-    private insurance_SpinAdapter adapter;
-    private List<patient_insurance_model> insurance_model_list = new ArrayList<>();
-    private List<patient_insurance_model> filtered_insurance_model_list = new ArrayList<>();
+    private Button filter;
     private ProgressBar mprogressBar;
+    private pass_filter_data mListener;
 
 
 
@@ -212,199 +210,15 @@ public class patient_search_results_fragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                View view = getLayoutInflater().inflate(R.layout.bottom_sheet, null);
+                Bundle s=new Bundle();
+                filters_BottomSheetFragment bottomSheetFragment = new filters_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                mListener=bottomSheetFragment;
+                mListener.pass_data(contact_list,patient_search_results_fragment.this);
 
-                final BottomSheetDialog dialog=new BottomSheetDialog(getActivity());
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(view);
-                insurance_company=(Button)dialog.findViewById(R.id.insurance_company);
-                degree=(Button)dialog.findViewById(R.id.degree);
-                final Button filter_it=(Button)dialog.findViewById(R.id.filters);
-                RadioGroup group=(RadioGroup)dialog.findViewById(R.id.radioGroup);
-                final EditText fee_from=(EditText)dialog.findViewById(R.id.fee_from);
-                final EditText fee_to=(EditText)dialog.findViewById(R.id.fee_to);
-                group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        if(checkedId == R.id.male) {
-                            selected_gender=(RadioButton)dialog.findViewById(R.id.male);
-
-                        } else if(checkedId == R.id.female) {
-
-                            selected_gender=(RadioButton)dialog.findViewById(R.id.female);
-
-                        }
                     }
                 });
-                insurance_company.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        final Dialog dialog=new Dialog(getActivity());
-                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                        dialog.setContentView(R.layout.dialog_list);
-                        dialog_list= dialog.findViewById(R.id.dialog_list);
-                        final EditText search=(EditText)dialog.findViewById(R.id.search_edt);
-                        adapter=new insurance_SpinAdapter(getActivity(),insurance_model_list);
-                        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-                        dialog_list.setLayoutManager(mLayoutManager);
-                        dialog_list.setItemAnimator(new DefaultItemAnimator());
-                        dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
-                        dialog_list.setAdapter(adapter);
-                        dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
-                            @Override
-                            public void onClick(View v, final int position) {
-                                if (search.getText().length()>0) {
-                                    insurance_company_i = filtered_insurance_model_list.get(position).id;
-                                    speciality_s = filtered_insurance_model_list.get(position).name;
-                                    speciality.setText(speciality_s);
-                                    dialog.dismiss();
-                                }else {
-                                    insurance_company_i = insurance_model_list.get(position).id;
-                                    speciality_s = insurance_model_list.get(position).name;
-                                    speciality.setText(speciality_s);
-                                    dialog.dismiss();
-                                }
-                            }
-
-                            @Override
-                            public void onLongClick(View view, int position) {
-                            }
-                        }));
-
-
-                        search.addTextChangedListener(new TextWatcher() {
-
-                            @Override
-                            public void afterTextChanged(Editable s) {}
-
-                            @Override
-                            public void beforeTextChanged(CharSequence s, int start,
-                                                          int count, int after) {
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence s, int start,
-                                                      int before, int count) {
-
-                                filter(s.toString());
-
-
-                            }
-                        });
-                        dialog.show();
-                        mprogressBar.setVisibility(View.VISIBLE);
-                        get_insurance_data();
-                    }
-                });
-
-                filter_it.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        filtered_contact_list.clear();
-                        if (fee_from.getText().toString().length()>0&&fee_to.getText().toString().length()>0) {
-
-                            filtered_contact_list.clear();
-                                for (search_result_list_model model:contact_list){
-                                    if (model.doctor_model.doctor_fee <= Integer.parseInt(fee_to.getText().toString())&&model.doctor_model.doctor_fee >= Integer.parseInt(fee_from.getText().toString())) {
-                                        filtered_contact_list.add(model);
-                                    }
-                                }
-                                data_adapter.filterList(filtered_contact_list);
-
-
-                        } else if (fee_from.getText().toString().length()>0&&fee_to.getText().toString().length()==0){
-
-
-                                    filtered_contact_list.clear();
-                                for (search_result_list_model model : contact_list) {
-                                    if (model.doctor_model.doctor_fee >= Integer.parseInt(fee_from.getText().toString())) {
-                                        filtered_contact_list.add(model);
-
-                                    }
-                                }
-
-                                Log.w("dssdasda", fee_from.getText().toString()+filtered_contact_list.size());
-                                data_adapter.filterList(filtered_contact_list);
-                        }else if (fee_to.getText().toString().length()>0&&fee_from.getText().toString().length()==0){
-
-                                        filtered_contact_list.clear();
-                                        for (search_result_list_model model:contact_list){
-                                            if (model.doctor_model.doctor_fee <= Integer.parseInt(fee_to.getText().toString())) {
-                                                filtered_contact_list.add(model);
-                                            }
-                                        }
-                                        data_adapter.filterList(filtered_contact_list);
-
-                            }else{
-                            data_adapter.filterList(contact_list);
-                        }
-                        if (insurance_company_i>0){
-                            if (filtered_contact_list.size()>0) {
-                                for (search_result_list_model model : filtered_contact_list) {
-                                    if (model.patient_insurance_model.id != insurance_company_i) {
-                                        filtered_contact_list.remove(model);
-                                    }
-                                }
-                                data_adapter.filterList(filtered_contact_list);
-                            }else {
-                                for (search_result_list_model model : contact_list) {
-
-                                        if (model.patient_insurance_model.id == insurance_company_i) {
-                                            filtered_contact_list.add(model);
-                                        }
-
-                                }
-                                data_adapter.filterList(filtered_contact_list);
-                            }
-                        }
-                        if (selected_gender!=null){
-                            Log.w("sdljhdsakjd",selected_gender.getText().toString());
-                            if (filtered_contact_list.size()>0) {
-                                for (search_result_list_model model : filtered_contact_list) {
-                                    if (!model.doctor_model.doctor_gender.equals(selected_gender.getText().toString())) {
-                                        Log.w("sdljhdsakjd",model.doctor_model.doctor_gender+"  "+selected_gender.getText().toString());
-                                        filtered_contact_list.remove(model);
-                                    }
-                                }
-                                data_adapter.filterList(filtered_contact_list);
-                            }else {
-                                for (search_result_list_model model : contact_list) {
-
-                                    if (model.doctor_model.doctor_gender.equals(selected_gender.getText().toString())) {
-                                        filtered_contact_list.add(model);
-                                    }
-
-                                }
-                                data_adapter.filterList(filtered_contact_list);
-                            }
-                        }
-
-
-
-
-
-
-
-
-
-                        dialog.dismiss();
-                    }
-                });
-
-
-
-
-                dialog.show();
-
-
-
-
-
-
-            }
-        });
-
 
         view.setFocusableInTouchMode(true);
         view.requestFocus();
@@ -446,7 +260,7 @@ public class patient_search_results_fragment extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/hospitals/all";
+            String url = "http://microtec1.egytag.com/api/hospitals/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -485,7 +299,7 @@ public class patient_search_results_fragment extends Fragment {
                                     //hospital
                                     String  hospital__id=hospital.getString("_id");
                                     int  hospital_id=hospital.getInt("id");
-                                    String hospital_image_url="http://microtec1.egytag.com:30001"+hospital.getString("image_url");
+                                    String hospital_image_url="http://microtec1.egytag.com"+hospital.getString("image_url");
                                     String hospital_name=new String(hospital.getString("name").getBytes("ISO-8859-1"), "UTF-8");
                                     String hospital_address=hospital.getString("address");
                                     String hospital_phone = null;
@@ -619,7 +433,7 @@ public class patient_search_results_fragment extends Fragment {
                     try {
                         if(name != null && !name.isEmpty()) {
                             JSONObject name_object=new JSONObject();
-                            name_object.put("doctor_list.doctor.name", name);
+                            name_object.put("doctor_list.name", name);
                             object.put("where", name_object);
                         }
 
@@ -680,106 +494,17 @@ public class patient_search_results_fragment extends Fragment {
 
 
     }
-    private void filter(String text)
-    {
-        filtered_insurance_model_list.clear();
-        for (patient_insurance_model item : insurance_model_list) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_insurance_model_list.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_insurance_model_list.add(item);
-                }
-            }
 
-        }
 
-        adapter.filterList(filtered_insurance_model_list);
+    @Override
+    public void pass_data(List<search_result_list_model> contact_list,pass_filter_data listner) {
+        this.mListener=listner;
     }
-    private void get_insurance_data()
-    {
 
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_insurance_companies/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                insurance_model_list.clear();
-                                insurance_model_list.add(new patient_insurance_model("","","none",0));
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_insurance_model city=  new patient_insurance_model(_id,image_url,name,id);
-                                    insurance_model_list.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                               adapter.notifyDataSetChanged();
-
-
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
+    @Override
+    public void notify_adapter(pass_filter_data listner,List<search_result_list_model> contact_list ) {
+        data_adapter.filterList(contact_list);
+        data_adapter.notifyDataSetChanged();
     }
 
 

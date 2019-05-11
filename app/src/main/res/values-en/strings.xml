@@ -100,6 +100,56 @@
     <string name="please_sign_in_first">please sign in first</string>
     <string name="no_appointments_yet">No Appointments Yet</string>
     <string name="no_favourites_yet">No Favourites Yet</string>
+    <string name="filters">Filters</string>
+    <string name="degree">Degree</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="insurance_company_3">Choose Insurance Company</string>
+    <string name="degree_2">choose Degree</string>
+    <string name="country">choose country</string>
+    <string name="choose_image">choose Image</string>
+    <string name="complete_booking">Complete Booking</string>
+    <string name="added_to_favourite">Added To Favourite</string>
+    <string name="my_appointments">My Appointments</string>
+    <string name="history">History</string>
+    <string name="view">View</string>
+    <string name="add_review">Add Review</string>
+    <string name="definition_and_addition"><![CDATA[Definitions & Additions]]></string>
+    <string name="create_doctor_account">Create Doctor Account</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="list">list</string>
+    <string name="hospital_clinic_definition">Hospital/Clinic Definition</string>
+    <string name="doctor_registration">Doctor Registration</string>
+    <string name="edit_delete_doctor">Edit/Delete Doctor</string>
+    <string name="define_working_time">Define Working Time</string>
+    <string name="view_edit_working_time">View/Edit Working Time</string>
+    <string name="block_patinet">Block Patient</string>
+    <string name="hospital_code">Hospital/Clinc Code</string>
+    <string name="hospital_address">Hospital Address</string>
+    <string name="area">Area</string>
+    <string name="save">Save</string>
+    <string name="hospital_clinic">Hospital/Clinic</string>
+    <string name="delete_doctor">Delete Doctor</string>
+    <string name="edit_doctor">Edit Doctor</string>
+    <string name="times_of_work">Times Of Work</string>
+    <string name="saturaday">saturaday</string>
+    <string name="sunday">Sunday</string>
+    <string name="thursday">thursday</string>
+    <string name="friday">friday</string>
+    <string name="wednsday">wednsday</string>
+    <string name="tuesday">tuesday</string>
+    <string name="monday">monday</string>
+    <string name="appointment_period">Appointment Period</string>
+    <string name="block_patient">Block Patient</string>
+    <string name="evaluation">Evaluation</string>
+    <string name="none">none</string>
+    <string name="active">active</string>
+    <string name="not_active">not active</string>
+    <string name="please_select_doctor_first">please select doctor first</string>
+    <string name="website">Website</string>
+    <string name="status">status</string>
+    <string name="please_select_speciality_first">please select speciality first</string>
+
 
 
 </resources>

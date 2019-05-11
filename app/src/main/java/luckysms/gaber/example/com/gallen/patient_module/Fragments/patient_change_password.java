@@ -205,7 +205,7 @@ public class patient_change_password extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/patients/view";
+            String url = "http://microtec1.egytag.com/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

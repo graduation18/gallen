@@ -75,6 +75,9 @@ import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_Spin
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_city_data;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_gov_data;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_speciality_data;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_city_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_gov_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
@@ -83,32 +86,23 @@ import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality
 import static android.content.Context.LOCATION_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
-public class patient_search_by_area_fragment extends Fragment  {
+public class patient_search_by_area_fragment extends Fragment implements pass_gov_data,pass_city_data  {
     private View view;
     private Button search;
     private TextView back,number_of_notifications,notifications;
     private RadioGroup radioGroup;
     private RadioButton auto_location,select_governate;
     private Button city,governorates;
-    //private Spinner insurance_company;
     private FusedLocationProviderClient mFusedLocationClient;
     private String state;
-    appointment_Listener mCallback;
-    private RequestQueue queue;
-    private ArrayList<patient_city_model>cities=new ArrayList<>();
-    private ArrayList<patient_gov_model>govs=new ArrayList<>();
-    //private ArrayList<patient_insurance_model>insurance_companies=new ArrayList<>();
-    private gov_SpinAdapter adapter;
-    private city_SpinAdapter adapter2;
-    private cities_list_adapter cities_list_adapter;
-    private governorates_list_adapter governorates_list_adapter;
-    private int city_id,gov_id,insurance_id,speciality_id;
-    private boolean visitor;
+    private int speciality_id;
     private String speciality_s;
-    RecyclerView dialog_list;
-    private ArrayList<patient_gov_model> filtered_govs_List = new ArrayList<>();
-    private ArrayList<patient_city_model> filtered_cities_List = new ArrayList<>();
-    private ProgressBar mprogressBar;
+    private boolean visitor;
+    private pass_city_data mListener_city;
+    private pass_gov_data mListener_gov;
+    private patient_city_model city_model;
+    private patient_gov_model gov_model;
+
 
     @Override
     public void onAttach(Context context) {
@@ -126,7 +120,6 @@ public class patient_search_by_area_fragment extends Fragment  {
     {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         view = inflater.inflate(R.layout.patient_search_by_area_fragment, container, false);
-        mprogressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         city=(Button)view.findViewById(R.id.city);
         governorates=(Button)view.findViewById(R.id.governorates);
         //insurance_company=(Spinner)view.findViewById(R.id.insurance_company);
@@ -159,141 +152,34 @@ public class patient_search_by_area_fragment extends Fragment  {
         city.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-
-                                        final Dialog dialog=new Dialog(getActivity());
-                                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                                        dialog.setContentView(R.layout.dialog_list);
-                                        dialog_list= dialog.findViewById(R.id.dialog_list);
-                                        final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
-                                        adapter2=new city_SpinAdapter(getActivity(),cities);
-                                        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-                                        dialog_list.setLayoutManager(mLayoutManager);
-                                        dialog_list.setItemAnimator(new DefaultItemAnimator());
-                                        dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
-                                        dialog_list.setAdapter(adapter2);
-                                        dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
-                                            @Override
-                                            public void onClick(View v, final int position) {
-                                                if (searchh.getText().length()>0){
-                                                    city_id=filtered_cities_List.get(position).id;
-                                                    city.setText(filtered_cities_List.get(position).name);
-                                                    dialog.dismiss();
-                                                }else {
-                                                    city_id=cities.get(position).id;
-                                                    city.setText(cities.get(position).name);
-                                                    dialog.dismiss();
-                                                }
-
-
-                                            }
-
-                                            @Override
-                                            public void onLongClick(View view, int position) {
-                                            }
-                                        }));
-                                        searchh.addTextChangedListener(new TextWatcher() {
-
-                                            @Override
-                                            public void afterTextChanged(Editable s) {}
-
-                                            @Override
-                                            public void beforeTextChanged(CharSequence s, int start,
-                                                                          int count, int after) {
-                                            }
-
-                                            @Override
-                                            public void onTextChanged(CharSequence s, int start,
-                                                                      int before, int count) {
-
-                                                filter_city(s.toString());
-
-
-                                            }
-                                        });
-
-                                        mprogressBar.setVisibility(View.VISIBLE);
-                                        get_cities_data();
-                                        dialog.show();
-
-
+                                        Bundle s=new Bundle();
+                                        if (gov_model!=null&&city_model==null){
+                                            s.putInt("gov_id",gov_model.id);
+                                        }
+                                        search_city_BottomSheetFragment bottomSheetFragment = new search_city_BottomSheetFragment();
+                                        bottomSheetFragment.setArguments(s);
+                                        bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                                        mListener_city=bottomSheetFragment;
+                                        mListener_city.pass_data(null,patient_search_by_area_fragment.this);
 
                                     }
                                 });
         governorates.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
+                                                Bundle s=new Bundle();
+                                                if (city_model!=null&&gov_model==null){
+                                                    s.putInt("city_id",city_model.govid);
+                                                }
+                                                search_gov_BottomSheetFragment bottomSheetFragment = new search_gov_BottomSheetFragment();
+                                                bottomSheetFragment.setArguments(s);
+                                                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                                                mListener_gov=bottomSheetFragment;
+                                                mListener_gov.pass_data(null,patient_search_by_area_fragment.this);
 
-                                                final Dialog dialog=new Dialog(getActivity());
-                                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                                                dialog.setContentView(R.layout.dialog_list);
-                                                dialog_list= dialog.findViewById(R.id.dialog_list);
-                                                final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
-                                                adapter=new gov_SpinAdapter(getActivity(),govs);
-                                                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-                                                dialog_list.setLayoutManager(mLayoutManager);
-                                                dialog_list.setItemAnimator(new DefaultItemAnimator());
-                                                dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
-                                                dialog_list.setAdapter(adapter);
-                                                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
-                                                    @Override
-                                                    public void onClick(View v, final int position) {
-                                                        if (searchh.getText().length()>0){
-                                                            gov_id=filtered_govs_List.get(position).id;
-                                                            governorates.setText(filtered_govs_List.get(position).name);
-                                                            dialog.dismiss();
-
-                                                        }else {
-                                                            gov_id=govs.get(position).id;
-                                                            governorates.setText(govs.get(position).name);
-                                                            dialog.dismiss();
-
-                                                        }
-
-                                                    }
-
-                                                    @Override
-                                                    public void onLongClick(View view, int position) {
-                                                    }
-                                                }));
-
-                                                searchh.addTextChangedListener(new TextWatcher() {
-
-                                                    @Override
-                                                    public void afterTextChanged(Editable s) {}
-
-                                                    @Override
-                                                    public void beforeTextChanged(CharSequence s, int start,
-                                                                                  int count, int after) {
-                                                    }
-
-                                                    @Override
-                                                    public void onTextChanged(CharSequence s, int start,
-                                                                              int before, int count) {
-
-                                                        filter_govs(s.toString());
-
-
-                                                    }
-                                                });
-
-                                                mprogressBar.setVisibility(View.VISIBLE);
-                                                get_goves_data();
-                                                dialog.show();
                                             }
                                         });
-        /*insurance_company.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                insurance_id=insurance_companies.get(position).id;
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                insurance_id=0;
-            }
-        });*/
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
@@ -340,10 +226,19 @@ public class patient_search_by_area_fragment extends Fragment  {
             public void onClick(View v) {
                 Fragment fragment=new patient_search_results_fragment();
                 Bundle args = new Bundle();
-                args.putInt("city",city_id);
-                args.putInt("governorate",gov_id);
+                if (city_model!=null){
+                    args.putInt("city",city_model.id);
+                }else {
+                    args.putInt("city",0);
+                }
+
+                if (gov_model!=null){
+                    args.putInt("governorate",gov_model.id);
+                    }else {
+                    args.putInt("governorate",0);
+
+                }
                 args.putInt("speciality",0);
-                args.putInt("insurance_company",insurance_id);
                 args.putInt("speciality",speciality_id);
                 args.putString("city_s",city.getText().toString());
                 args.putString("governorate_s",governorates.getText().toString());
@@ -434,294 +329,15 @@ public class patient_search_by_area_fragment extends Fragment  {
     }
 
 
-
-    private void get_cities_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com/api/cities/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                cities.clear();
-                                JSONArray list=res.getJSONArray("list");
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                     String _id=object.getString("_id");
-                                     String image_url=object.getString("image_url");
-                                     String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                     String gov_id=object.getJSONObject("gov").getString("_id");
-                                     String gov_name=new String( object.getJSONObject("gov").getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                     int id=object.getInt("id");
-                                     int govid=object.getJSONObject("gov").getInt("id");
-                                     patient_city_model  city=  new patient_city_model(_id,image_url,name,gov_id,gov_name,id,govid);
-                                     cities.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                                adapter2.notifyDataSetChanged();
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
-
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-
-                    return pars;
-                }
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-    private void get_goves_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/goves/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                govs.clear();
-                                JSONArray list=res.getJSONArray("list");
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_gov_model city=  new patient_gov_model(_id,image_url,name,id);
-                                    govs.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                               adapter.notifyDataSetChanged();
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
-
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-
-                    return pars;
-                }
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-   /* private void get_insurance_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_insurance_companies/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    hideProgress();
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                insurance_companies.add(new patient_insurance_model("","","none",0));
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_insurance_model city=  new patient_insurance_model(_id,image_url,name,id);
-                                    insurance_companies.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                                adapter = new insurance_SpinAdapter(getActivity(), android.R.layout.simple_spinner_item, insurance_companies);
-                                insurance_company.setAdapter(adapter);
-
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
+    @Override
+    public void pass_data(patient_city_model city_model, pass_city_data listner) {
+        this.city_model=city_model;
+        city.setText(city_model.name);
     }
 
-    */
-
-    private void filter_govs(String text) {
-        filtered_govs_List.clear();
-        for (patient_gov_model item : govs) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_govs_List.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_govs_List.add(item);
-                }
-            }
-
-        }
-
-        adapter.filterList(filtered_govs_List);
-    }
-    private void filter_city(String text) {
-        filtered_cities_List.clear();
-        for (patient_city_model item : cities) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_cities_List.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_cities_List.add(item);
-                }
-            }
-
-        }
-
-        adapter2.filterList(filtered_cities_List);
+    @Override
+    public void pass_data(patient_gov_model gov_model, pass_gov_data listner) {
+        this.gov_model=gov_model;
+        governorates.setText(gov_model.name);
     }
 }

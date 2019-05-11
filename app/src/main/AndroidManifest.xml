@@ -54,10 +54,17 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".hospital_module.Activities.hospital_start_activity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+
+        </activity>
+        <activity android:name=".hospital_module.Activities.hospital_search_by_doctor_name"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".hospital_module.Activities.hospital_search_by_doctor_name" />
-        <activity android:name=".hospital_module.Activities.hospital_admin_page" />
-        <activity android:name=".hospital_module.Activities.hospital_defintions"></activity>
+        <activity android:name=".hospital_module.Activities.hospital_admin_page"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".hospital_module.Activities.hospital_defintions"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".hospital_module.Activities.basic_activity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" ></activity>
     </application>
 
 </manifest>

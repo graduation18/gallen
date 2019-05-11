@@ -85,15 +85,15 @@ public class hospital_search_result_list_adapter extends RecyclerView.Adapter<ho
         holder.graduated_from.setText(data.doctor_model.doctor_graduated);
         holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_model.doctor_fee));
         holder.rating.setRating(data.doctor_model.doctor_rating);
-        /*Picasso.with(context)
-                .load(data.doctor_model.doctor_image)
-                .placeholder(R.drawable.pharmcy)
+        Picasso.with(context)
+                .load("http://microtec1.egytag.com"+data.doctor_model.doctor_image)
+                .placeholder(R.drawable.user)
                 .into(holder.image, new Callback() {
                     @Override
                     public void onSuccess() {}
                     @Override public void onError() {
                     }
-                });*/
+                });
 
 
 

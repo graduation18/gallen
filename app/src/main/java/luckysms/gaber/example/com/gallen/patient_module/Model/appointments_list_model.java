@@ -11,6 +11,7 @@ public class appointments_list_model {
 
     public JSONArray drugs_list,scans_list,analyses_list,operation_list;
    public long date;
+   public double latitude,longitude;
     public appointments_list_model(
             String selected_time_name, String selected_shift_name, String selected_doctor_name, String selected_specialty_name
             , String selected_hospital_name, String selected_clinic_name, String patient__id, String patient_image_url, String patient_name

@@ -57,24 +57,22 @@ import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_sign_
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.insurance_SpinAdapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_insurance_data;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class patient_update_data extends Fragment {
+public class patient_update_data extends Fragment implements pass_insurance_data {
     private View view;
     private Button confirm;
     private TextView back,number_of_notifications,notifications;
     private EditText full_name,mobile_number,email_address,date_of_birth;
     private Button insurance_company;
     private RequestQueue queue;
-    private List<patient_insurance_model> insurance_model_list = new ArrayList<>();
-    private List<patient_insurance_model> filtered_insurance_model_list = new ArrayList<>();
-    private insurance_SpinAdapter adapter;
-    private RecyclerView dialog_list;
     private int insurance_company_i;
-    private String insurance_company__i;
     private ProgressBar mprogressBar;
+    private patient_insurance_model insurance_model;
+    private pass_insurance_data mListener_insurance;
 
 
 
@@ -128,68 +126,19 @@ public class patient_update_data extends Fragment {
                 String date_of_birth_s=date_of_birth.getText().toString();
                 String insurance_company_s=insurance_company.getText().toString();
 
-                update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s,insurance_company_s,insurance_company_i,insurance_company__i);
+                update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s,insurance_company_s,insurance_model.id,insurance_model.name);
             }
         });
 
         insurance_company.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog=new Dialog(getActivity());
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.dialog_list);
-                dialog_list= dialog.findViewById(R.id.dialog_list);
-                final EditText search=(EditText)dialog.findViewById(R.id.search_edt);
-                adapter=new insurance_SpinAdapter(getActivity(),insurance_model_list);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-                dialog_list.setLayoutManager(mLayoutManager);
-                dialog_list.setItemAnimator(new DefaultItemAnimator());
-                dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
-                dialog_list.setAdapter(adapter);
-                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
-                    @Override
-                    public void onClick(View v, final int position) {
-                        if (search.getText().length()>0) {
-                            insurance_company_i = filtered_insurance_model_list.get(position).id;
-                            insurance_company__i = filtered_insurance_model_list.get(position)._id;
-                            insurance_company.setText(filtered_insurance_model_list.get(position).name);
-                            dialog.dismiss();
-                        }else {
-                            insurance_company_i = insurance_model_list.get(position).id;
-                            insurance_company__i = insurance_model_list.get(position)._id;
-                            insurance_company.setText(insurance_model_list.get(position).name);
-                            dialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-
-
-                search.addTextChangedListener(new TextWatcher() {
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start,
-                                                  int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start,
-                                              int before, int count) {
-
-                        filter(s.toString());
-
-
-                    }
-                });
-                dialog.show();
-                mprogressBar.setVisibility(View.VISIBLE);
-                get_insurance_data();
+                Bundle s=new Bundle();
+                search_insurance_BottomSheetFragment bottomSheetFragment = new search_insurance_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                mListener_insurance=bottomSheetFragment;
+                mListener_insurance.pass_data(null,patient_update_data.this);
             }
         });
 
@@ -313,7 +262,7 @@ public class patient_update_data extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/patients/view";
+            String url = "http://microtec1.egytag.com/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -337,10 +286,13 @@ public class patient_update_data extends Fragment {
                                 full_name.setText(new String (doc.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
                                 email_address.setText(doc.getString("username"));
                                 date_of_birth.setText(doc.getString("birth_date"));
-                                JSONObject insurance=doc.getJSONObject("insurance_company");
+                                JSONObject insurance=doc.getJSONObject("insurance");
                                 insurance_company.setText(new String(insurance.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
-                                insurance_company_i=insurance.getInt("id");
-                                insurance_company__i=insurance.getString("_id");
+                                insurance_model=new patient_insurance_model("","",insurance.getString("name"),insurance.getInt("id"));
+
+
+
+
                             }
                         }
 
@@ -420,106 +372,11 @@ public class patient_update_data extends Fragment {
                 }, mYear, mMonth, mDay);
         datePickerDialog.show();
     }
-    private void filter(String text) {
-        filtered_insurance_model_list.clear();
-        for (patient_insurance_model item : insurance_model_list) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_insurance_model_list.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_insurance_model_list.add(item);
-                }
-            }
 
-        }
 
-        adapter.filterList(filtered_insurance_model_list);
+    @Override
+    public void pass_data(patient_insurance_model insurance_model, pass_insurance_data listner) {
+        this.insurance_model=insurance_model;
+        insurance_company.setText(insurance_model.name);
     }
-    private void get_insurance_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_insurance_companies/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                insurance_model_list.clear();
-                                insurance_model_list.add(new patient_insurance_model("","","none",0));
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_insurance_model city=  new patient_insurance_model(_id,image_url,name,id);
-                                    insurance_model_list.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                                adapter.notifyDataSetChanged();
-
-
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-
 }

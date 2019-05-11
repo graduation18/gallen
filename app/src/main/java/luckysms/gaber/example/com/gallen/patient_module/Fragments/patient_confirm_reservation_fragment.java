@@ -277,7 +277,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/tickets/add";
+            String url = "http://microtec1.egytag.com/api/tickets/add";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -379,7 +379,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/patients/view";
+            String url = "http://microtec1.egytag.com/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

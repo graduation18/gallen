@@ -37,10 +37,18 @@
             </FrameLayout>
             <RatingBar
                 android:id="@+id/rating"
+                style="?android:attr/ratingBarStyleSmall"
                 android:layout_width="80dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="10dp"
-                />
+                android:layout_alignParentRight="true"
+                android:layout_gravity="right"
+                android:layout_marginStart="14dp"
+                android:layout_marginLeft="14dp"
+                android:layout_toEndOf="@+id/rating_ratio"
+                android:layout_toRightOf="@+id/rating_ratio"
+
+                android:gravity="right"
+                android:numStars="5" />
             <TextView
                 android:id="@+id/doctor_fee"
                 android:layout_width="wrap_content"

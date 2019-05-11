@@ -42,6 +42,8 @@ import java.util.concurrent.TimeUnit;
 import in.aabhasjindal.otptextview.OTPListener;
 import in.aabhasjindal.otptextview.OtpTextView;
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.doctor_module.Activities.basic_activity;
+import luckysms.gaber.example.com.gallen.hospital_module.Activities.hospital_start_activity;
 
 
 /**
@@ -128,14 +130,25 @@ public class patient_confirm_code extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()){
-                            getSharedPreferences("logged_in",MODE_PRIVATE).edit()
+                            getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                                     .putBoolean("state",true)
                                     .putString("phone",phone)
                                     .commit();
+                            if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("hospital")){
+                                Intent intent=new Intent(patient_confirm_code.this,hospital_start_activity.class);
+                                startActivity(intent);
+                                finish();
+                            }else if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("patient")){
+                                Intent intent=new Intent(patient_confirm_code.this,patient_main_screen.class);
+                                startActivity(intent);
+                                finish();
+                            }else if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("doctor")){
+                                Intent intent=new Intent(patient_confirm_code.this,basic_activity.class);
+                                startActivity(intent);
+                                finish();
+                            }
 
-                            Intent intent=new Intent(patient_confirm_code.this,patient_main_screen.class);
-                            startActivity(intent);
-                            finish();
+
 
                         }else {
                             Log.w("khgj",task.getException());
@@ -146,83 +159,7 @@ public class patient_confirm_code extends AppCompatActivity {
                     }
                 });
     }
-    private void login(final String mobile_number_email_address_s, final String password_s)
-    {
 
-
-        try {
-            String url = "http://microtec1.egytag.com/api/user/login";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-                        if (res.has("error")) {
-                            if (res.getString("error").equals("email not set")){
-                                Toast.makeText(patient_confirm_code.this,getResources().getString(R.string.email_not_set),Toast.LENGTH_LONG).show();
-
-                            }else if (res.getString("error").equals("email or password error")){
-                                Toast.makeText(patient_confirm_code.this,getResources().getString(R.string.email_or_password_error),Toast.LENGTH_LONG).show();
-
-                            }
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONObject user = res.getJSONObject("user");
-                                getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                        .putString("_id", user.getString("_id"))
-                                        .putString("email", user.getString("email"))
-                                        .putString("password", password_s)
-                                        .putBoolean("state",true)
-                                        .putString("language",Locale.getDefault().getLanguage())
-                                        .commit();
-                                Intent not_now=new Intent(patient_confirm_code.this,patient_main_screen.class);
-                                startActivity(not_now);
-                                finish();
-                                Toast.makeText(patient_confirm_code.this,getResources().getString(R.string.welcome),Toast.LENGTH_LONG).show();
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_LONG).show();
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
-
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("email", mobile_number_email_address_s);
-                    pars.put("password", password_s);
-                    return pars;
-                }
-            };
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
 
 
 

@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.hospital_module.Activities.hospital_defintions;
 import luckysms.gaber.example.com.gallen.hospital_module.Activities.hospital_search_by_doctor_name;
 import luckysms.gaber.example.com.gallen.hospital_module.Adapters.hospital_search_result_list_adapter;
 import luckysms.gaber.example.com.gallen.hospital_module.Model.clinic_model;
@@ -77,7 +78,8 @@ public class hospital_doctor_working_times extends Fragment {
     private Spinner start_appointment_saturaday,end_appointment_saturaday,start_appointment_sunday,end_appointment_sunday,start_appointment_monday
             ,end_appointment_monday,start_appointment_tuesday,end_appointment_tuesday,start_appointment_wednsday,end_appointment_wednsday
             ,start_appointment_thursday,end_appointment_thursday,start_appointment_friday,end_appointment_friday;
-    private Button save,cancel,doctor_name,appointment_period,speciality;
+    private Button save,cancel,doctor_name,speciality;
+    private EditText appointment_period;
     private TextView back,number_of_notifications,notifications;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
@@ -106,7 +108,7 @@ public class hospital_doctor_working_times extends Fragment {
         save=(Button)view.findViewById(R.id.save);
         cancel=(Button)view.findViewById(R.id.cancel);
         doctor_name=(Button)view.findViewById(R.id.doctor_name);
-        appointment_period=(Button)view.findViewById(R.id.appointment_period);
+        appointment_period=(EditText)view.findViewById(R.id.appointment_period);
         speciality=(Button)view.findViewById(R.id.speciality);
         saturaday=(CheckBox)view.findViewById(R.id.saturaday);
         sunday=(CheckBox)view.findViewById(R.id.sunday);
@@ -117,18 +119,18 @@ public class hospital_doctor_working_times extends Fragment {
         friday=(CheckBox)view.findViewById(R.id.friday);
         start_appointment_saturaday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
         end_appointment_saturaday=(Spinner)view.findViewById(R.id.end_appointment_saturaday);
-        start_appointment_sunday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        end_appointment_sunday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        start_appointment_monday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        end_appointment_monday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        start_appointment_tuesday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        end_appointment_tuesday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        start_appointment_wednsday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        end_appointment_wednsday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        start_appointment_thursday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        end_appointment_thursday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        start_appointment_friday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
-        end_appointment_friday=(Spinner)view.findViewById(R.id.start_appointment_saturaday);
+        start_appointment_sunday=(Spinner)view.findViewById(R.id.start_appointment_sunday);
+        end_appointment_sunday=(Spinner)view.findViewById(R.id.end_appointment_sunday);
+        start_appointment_monday=(Spinner)view.findViewById(R.id.start_appointment_monday);
+        end_appointment_monday=(Spinner)view.findViewById(R.id.end_appointment_monday);
+        start_appointment_tuesday=(Spinner)view.findViewById(R.id.start_appointment_tuesday);
+        end_appointment_tuesday=(Spinner)view.findViewById(R.id.end_appointment_tuesday);
+        start_appointment_wednsday=(Spinner)view.findViewById(R.id.start_appointment_wednsday);
+        end_appointment_wednsday=(Spinner)view.findViewById(R.id.end_appointment_wednsday);
+        start_appointment_thursday=(Spinner)view.findViewById(R.id.start_appointment_thursday);
+        end_appointment_thursday=(Spinner)view.findViewById(R.id.end_appointment_thursday);
+        start_appointment_friday=(Spinner)view.findViewById(R.id.start_appointment_friday);
+        end_appointment_friday=(Spinner)view.findViewById(R.id.end_appointment_friday);
         mprogressBar = (ProgressBar)view.findViewById(R.id.progressBar);
         start_appointment_saturaday.setEnabled(false);
         end_appointment_saturaday.setEnabled(false);
@@ -204,7 +206,7 @@ public class hospital_doctor_working_times extends Fragment {
 
                 mprogressBar.setVisibility(View.VISIBLE);
 
-                get_doctor_data();
+                get_doctor_data(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
                 dialog.show();
 
             }
@@ -373,8 +375,8 @@ public class hospital_doctor_working_times extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment fragment=new patient_settings();
-                go_to(fragment);
+                Intent intent=new Intent(getActivity(),hospital_defintions.class);
+                startActivity(intent);
             }
         });
         notifications.setOnClickListener(new View.OnClickListener() {
@@ -385,8 +387,17 @@ public class hospital_doctor_working_times extends Fragment {
         });
 
         save.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
+                int time_period = 0;
+                if (appointment_period.getText().toString().length()>0){
+
+                    time_period= Integer.parseInt(appointment_period.getText().toString());
+                }
+                if(time_period==0){
+                    time_period=20;
+                }
                 JSONArray doctor_list=new JSONArray();
                 JSONObject shift=new JSONObject();
                 JSONArray times_list=new JSONArray();
@@ -413,6 +424,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -442,6 +468,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -471,6 +512,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -500,6 +556,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.TUESDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -529,6 +600,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.WEDNESDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -558,6 +644,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.THURSDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -587,6 +688,21 @@ public class hospital_doctor_working_times extends Fragment {
                         obj.put("day",day);
                         obj.put("from",from_obj);
                         obj.put("to",to_obj);
+                        String date;
+                        Calendar c=Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY);
+                        c.set(Calendar.HOUR_OF_DAY,0);
+                        c.set(Calendar.MINUTE,0);
+                        c.set(Calendar.SECOND,0);
+                        DateFormat df=new SimpleDateFormat("dd/MM/yyyy");
+                        if (df.format(c.getTime()).equals(df.format(new Date().getTime()))){
+                            date=df.format(c.getTime());
+                        }else {
+                            c.add(Calendar.DATE,7);
+                            date=df.format(c.getTime());
+                        }
+
+                        sched_tickets(from,to,time_period,date,obj);
                         times_list.put(obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -614,6 +730,158 @@ public class hospital_doctor_working_times extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout, fragment)
                 .commit();
+    }
+    private void get_doctor_data(final int id)
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com/api/hospitals/view";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+
+
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                doctor_name_list.clear();
+                                JSONObject doc=res.getJSONObject("doc");
+                                JSONArray doctor_list=doc.getJSONArray("doctor_list");
+
+                                for (int d=0;d<doctor_list.length();d++){
+                                    JSONObject doctor=doctor_list.getJSONObject(d);
+
+                                    String doctor__id="";
+                                    if (doctor.has("_id")){doctor__id=doctor.getString("_id");}
+                                    int doctor_id=doctor.getInt("id");
+                                    String  doctor_email=doctor.getString("email");
+                                    String  doctor_info=doctor.getString("info");
+                                    boolean  doctor_active=doctor.getBoolean("active");
+                                    boolean  doctor_accept_code=doctor.getBoolean("accept_code");
+
+                                    String doctor_availabilty=getResources().getString(R.string.not_active);
+                                    if (doctor_active){
+                                        doctor_availabilty=getResources().getString(R.string.active);
+                                    }
+                                    String  doctor_code="";
+                                    if (doctor.has("code")){doctor.getString("code");}
+                                    String  doctor_phone=doctor.getString("phone");
+                                    String  doctor_gender=doctor.getString("gender");
+                                    double  doctor_fee=doctor.getDouble("fee");
+                                    String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
+                                    JSONObject specialty=doctor.getJSONObject("specialty");
+                                    String specialty__id="";
+                                    if (specialty.has("_id")){specialty.getString("_id");}
+                                    int specialty_id=specialty.getInt("id");
+                                    JSONArray review_list=new JSONArray();
+                                    if (doctor.has("review_list")){
+                                        review_list=doctor.getJSONArray("review_list");
+                                    }
+                                    JSONObject clinic=new JSONObject();
+                                    if (doctor.has("clinic")){
+                                        clinic=doctor.getJSONObject("clinic");
+                                    }
+                                    double rating=0;
+                                    JSONArray rating_list=new JSONArray();
+                                    if (doctor.has("rating_list")){
+                                        rating_list=doctor.getJSONArray("rating_list");
+                                        for (int a=0;a<rating_list.length();a++){
+                                            JSONObject rate=rating_list.getJSONObject(a);
+                                            rating=rating+rate.getInt("rate");
+                                        }
+                                        rating=rating/rating_list.length();
+                                    }
+                                    String specialty_name=new String (specialty.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    doctor_model doctor_model=new doctor_model(doctor_name,doctor_availabilty,
+                                            "",doctor_image,doctor_accept_code
+                                            ,Float.parseFloat(String.valueOf(rating)),doctor_fee
+                                            ,doctor_id,doctor_info,doctor_gender,
+                                            review_list.toString(),doctor_code,doctor_email,doctor_phone,doctor__id);
+                                    patient_speciality_model speciality_model=new patient_speciality_model(specialty__id,"ss",specialty_name,specialty_id);
+                                    clinic_model clinic_model=new clinic_model(
+                                            clinic.getString("name"), clinic.getString("address"), clinic.getString("phone")
+                                            , clinic.getString("website"),clinic.getString("email"),clinic.getString("image_url"),
+                                            clinic.getInt("id"),clinic.getBoolean("active"),clinic.getJSONObject("hospital").toString(),
+                                            clinic.getJSONObject("gov").toString(),clinic.getJSONObject("city").toString(),
+                                            clinic.getJSONArray("insurance_company_list").toString(),
+                                            clinic.getJSONArray("doctor_list").toString(), clinic.getJSONArray("nurse_list").toString()
+                                            ,clinic.getDouble("latitude"),
+                                            clinic.getDouble("longitude")
+                                    );
+                                    doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model,clinic_model));
+                                }
+
+                                doctor_adapter.notifyDataSetChanged();
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",id);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
     }
     private void update_clinic(final int clinic_id, final JSONArray doctor_list)
     {
@@ -736,7 +1004,9 @@ public class hospital_doctor_working_times extends Fragment {
                                     double longitude=clinic.getDouble("longitude");
                                     update_clinic(id,doctor_list);
                                     selected_clinic=new clinic_model(name,address,phone,website,email,image_url
-                                            ,id,active,hospital,gov,city,insurance_company_list,doctor_list,nurse_list,latitude,longitude);
+                                            ,id,active,hospital.toString(),gov.toString(),
+                                            city.toString(),insurance_company_list.toString()
+                                            ,doctor_list.toString(),nurse_list.toString(),latitude,longitude);
                                 }
                             }
                         }
@@ -1076,120 +1346,7 @@ public class hospital_doctor_working_times extends Fragment {
 
 
     }
-    private void get_doctor_data()
-    {
 
-
-        try {
-            String url = "http://microtec1.egytag.com/api/hospitals/view";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                doctor_name_list.clear();
-                                JSONObject doc=res.getJSONObject("doc");
-                                JSONArray doctor_list=doc.getJSONArray("doctor_list");
-
-                                for (int d=0;d<doctor_list.length();d++){
-                                    JSONObject doctor_obj=doctor_list.getJSONObject(d);
-                                    JSONObject doctor=doctor_obj.getJSONObject("doctor");
-                                    String doctor__id=doctor.getString("_id");
-                                    int doctor_id=doctor.getInt("id");
-                                    String  doctor_email=doctor.getString("email");
-                                    String  doctor_code=doctor.getString("code");
-                                    String  doctor_phone=doctor.getString("phone");
-                                    String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
-                                    JSONObject specialty=doctor.getJSONObject("specialty");
-                                    String specialty__id=specialty.getString("_id");
-                                    int specialty_id=specialty.getInt("id");
-                                    JSONArray review_list=new JSONArray();
-                                    if (doctor_obj.has("review_list")){
-                                        review_list=doctor_obj.getJSONArray("review_list");
-                                    }
-                                    String specialty_name=new String (specialty.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    doctor_model doctor_model=new doctor_model(doctor_name,"","","",false,4.5f,200
-                                            ,doctor_id,"","Male",review_list.toString(),doctor_code,doctor_email,doctor_phone);
-                                    speciality_model speciality_model=new speciality_model(specialty__id,"ss",specialty_name,specialty_id);
-                                    doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model));
-                                }
-
-                                doctor_adapter.notifyDataSetChanged();
-
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-                @Override
-                public byte[] getBody() throws AuthFailureError {
-                    JSONObject object=new JSONObject();
-                    try {
-                        object.put("id",1);
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.w("sadkjsdkjlljksda",object.toString());
-                    return object.toString().getBytes();
-
-                };
-
-                public String getBodyContentType()
-                {
-                    return "application/json; charset=utf-8";
-                }
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void ticket_data(String date, final JSONObject selected_time,JSONObject selected_shift){
         JSONObject selected_doctor_obj=new JSONObject();
@@ -1219,6 +1376,7 @@ public class hospital_doctor_working_times extends Fragment {
             selected_clinic_obj.put("id",selected_clinic.id);
             selected_clinic_obj.put("name",selected_clinic.name);
 
+
             add_ticket(selected_doctor_obj,selected_time,selected_specialty_obj,selected_hospital_obj,status_obj,
                     new JSONArray(),new JSONArray(),new JSONArray(),new JSONArray(),selected_shift,new JSONObject(),selected_clinic_obj,ticket_date);
 
@@ -1228,6 +1386,191 @@ public class hospital_doctor_working_times extends Fragment {
 
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void sched_tickets(String from, String to, int time_period, String date, JSONObject selected_shift){
+        int from_h= Integer.parseInt(from.split(":")[0]);
+        int to_h= Integer.parseInt(to.split(":")[0]);
+        int from_m= Integer.parseInt(from.split(":")[1].split(" ")[0]);
+        int to_m= Integer.parseInt(to.split(":")[1].split(" ")[0]);
+        String to_aa=to.split(" ")[1];
+        String from_aa=from.split(" ")[1];
+        if (from_aa.contains("pm")){
+            from_h=from_h+12;
+        }
+        if (to_aa.contains("pm")){
+            to_h=to_h+12;
+        }
+        if (from_h>=to_h){
+            to_h=to_h+24;
+        }
+        while (from_h<to_h){
+            if (from_m+time_period>=60){
+                if(from_h*60+from_m+time_period<to_h*60+to_m){
+                    from_m+=time_period-60;
+                    from_h++;
+                    String time;
+                    if (from_h>=12){
+                        if (from_m==0){
+                            if (from_h - 12>=12){
+                                if (from_h - 12==12){
+                                    time = from_h - 12 + ":" + from_m + "0 am";
+                                }else {
+                                    time = from_h - 24 + ":" + from_m + "0 am";
+                                }
+                            }else {
+                                if (from_h==12){
+                                    time = from_h  + ":" + from_m + "0 pm";
+                                }else {
+                                    time = from_h - 12 + ":" + from_m + "0 pm";
+                                }
+                            }
+                        }else {
+                            if (from_h==12){
+                                time=from_h+":"+from_m+" pm";
+                            }else {
+                                time=from_h-12+":"+from_m+" pm";
+                            }
+
+
+                        }
+                    }else {
+                        if (from_m==0){
+                            time=from_h+":"+from_m+"0 am";
+                        }else {
+                            time=from_h+":"+from_m+" am";
+
+                        }
+                    }
+                    try {
+                        Log.w("sdasddsadsa",time);
+                        ticket_data(date,new JSONObject(time),selected_shift);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+
+            }else{
+
+                from_m+=time_period;
+                String time;
+                if (from_h>=12){
+                    if (from_m==0){
+                        if (from_h - 12>=12){
+                            if (from_h - 12==12){
+                                time = from_h - 12 + ":" + from_m + "0 am";
+                            }else {
+                                time = from_h - 24 + ":" + from_m + "0 am";
+                            }
+                        }else {
+                            if (from_h==12){
+                                time = from_h  + ":" + from_m + "0 pm";
+                            }else {
+                                time = from_h - 12 + ":" + from_m + "0 pm";
+                            }
+                        }
+                    }else {
+                        if (from_h - 12>=12){
+                            if (from_h - 12==12){
+                                time = from_h - 12 + ":" + from_m + " am";
+                            }else {
+                                time = from_h - 24 + ":" + from_m + " am";
+                            }
+                        }else {
+                            if (from_h==12){
+                                time = from_h  + ":" + from_m + " pm";
+                            }else {
+                                time = from_h - 12 + ":" + from_m + " pm";
+                            }
+
+                        }
+
+                    }
+                }else {
+                    if (from_m==0){
+                        time=from_h+":"+from_m+"0 am";
+                    }else {
+                        time=from_h+":"+from_m+" am";
+
+                    }
+                }
+                try {
+                    Log.w("sdasddsadsa",time);
+                    ticket_data(date,new JSONObject(time),selected_shift);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+            if(from_h==to_h&&from_m<to_m&&from_m+time_period<to_m){
+
+                        from_m+=time_period;
+                        String time;
+                        if (from_h>=12){
+                            if (from_m==0){
+                                if (from_h==12){
+                                    time = from_h+ ":" + from_m + "0 pm";
+                                }else {
+                                    if (from_h - 12>=12){
+                                        if (from_h - 12==12){
+                                            time = from_h - 12 + ":" + from_m + "0 am";
+                                        }else {
+                                            time = from_h - 24 + ":" + from_m + "0 am";
+                                        }
+                                    }else {
+                                        if (from_h==12){
+                                            time = from_h  + ":" + from_m + "0 pm";
+                                        }else {
+                                            time = from_h - 12 + ":" + from_m + "0 pm";
+                                        }
+
+                                    }
+                                }
+                            }else {
+                                if (from_h==12){
+                                    time = from_h  + ":" + from_m + " pm";
+                                }else {
+
+                                    if (from_h - 12>=12){
+                                        if (from_h - 12==12){
+                                            time = from_h - 12 + ":" + from_m + " am";
+                                        }else {
+                                            time = from_h - 24 + ":" + from_m + " am";
+                                        }
+                                    }else {
+                                        if (from_h==12){
+                                            time = from_h  + ":" + from_m + " pm";
+                                        }else {
+                                            time = from_h - 12 + ":" + from_m + " pm";
+                                        }
+                                    }
+                                }
+
+
+                            }
+
+                        }else {
+                            if (from_m==0){
+                                time=from_h+":"+from_m+"0 am";
+                            }else {
+                                time=from_h+":"+from_m+" am";
+
+                            }
+
+                        }
+                        try {
+                            Log.w("sdasddsadsa",time);
+                            ticket_data(date,new JSONObject(time),selected_shift);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+            }
         }
     }
 }

@@ -50,28 +50,29 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_speciality_data;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
+
 import static android.content.Context.MODE_PRIVATE;
 
-public class patient_search_by_area_speciality_fragment extends Fragment  {
+public class patient_search_by_area_speciality_fragment extends Fragment implements pass_speciality_data {
     private View view;
     private Button search;
     private TextView back,number_of_notifications,notifications;
     private Button speciality;
-    private String state,speciality_s;
-    private RequestQueue queue;
-    private ArrayList<patient_speciality_model>specialities=new ArrayList<>();
-    private ArrayList<patient_speciality_model> filteredList = new ArrayList<>();
-    private speciality_SpinAdapter adapter;
-    private int speciality_id;
     private boolean visitor;
-    RecyclerView dialog_list;
-    private ProgressBar mprogressBar;
+    private patient_speciality_model speciality_model;
+    private pass_speciality_data mListener;
+
+
+
 
     @Override
     public void onAttach(Context context) {
@@ -87,7 +88,7 @@ public class patient_search_by_area_speciality_fragment extends Fragment  {
     {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         view = inflater.inflate(R.layout.patient_search_by_area_and_speciality_fragment, container, false);
-        mprogressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+
         speciality=(Button) view.findViewById(R.id.speciality);
         search=(Button)view.findViewById(R.id.search);
         back=(TextView)view.findViewById(R.id.back);
@@ -116,67 +117,12 @@ public class patient_search_by_area_speciality_fragment extends Fragment  {
         speciality.setOnClickListener(new View.OnClickListener() {
                                           @Override
                                           public void onClick(View v) {
-                                              final Dialog dialog=new Dialog(getActivity());
-                                              dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                              dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                                              dialog.setContentView(R.layout.dialog_list);
-                                              dialog_list= dialog.findViewById(R.id.dialog_list);
-                                              final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
-                                              adapter=new speciality_SpinAdapter(getActivity(),specialities);
-                                              RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-                                              dialog_list.setLayoutManager(mLayoutManager);
-                                              dialog_list.setItemAnimator(new DefaultItemAnimator());
-                                              dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
-                                              dialog_list.setAdapter(adapter);
-                                              dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
-                                                  @Override
-                                                  public void onClick(View v, final int position) {
-                                                      if (searchh.getText().length()>0){
-                                                          speciality_id=filteredList.get(position).id;
-                                                          speciality_s=filteredList.get(position).name;
-                                                          speciality.setText(speciality_s);
-                                                          dialog.dismiss();
-                                                      }else {
-                                                          speciality_id=specialities.get(position).id;
-                                                          speciality_s=specialities.get(position).name;
-                                                          speciality.setText(speciality_s);
-                                                          dialog.dismiss();
-                                                      }
-
-                                                  }
-
-                                                  @Override
-                                                  public void onLongClick(View view, int position) {
-                                                  }
-                                              }));
-
-
-                                              searchh.addTextChangedListener(new TextWatcher() {
-
-                                                  @Override
-                                                  public void afterTextChanged(Editable s) {}
-
-                                                  @Override
-                                                  public void beforeTextChanged(CharSequence s, int start,
-                                                                                int count, int after) {
-                                                  }
-
-                                                  @Override
-                                                  public void onTextChanged(CharSequence s, int start,
-                                                                            int before, int count) {
-
-                                                      filter(s.toString());
-
-
-                                                  }
-                                              });
-
-
-
-                                              mprogressBar.setVisibility(View.VISIBLE);
-
-                                              get_specialties_data();
-                                              dialog.show();
+                                              Bundle s=new Bundle();
+                                              search_specilty_BottomSheetFragment bottomSheetFragment = new search_specilty_BottomSheetFragment();
+                                              bottomSheetFragment.setArguments(s);
+                                              bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                                              mListener=bottomSheetFragment;
+                                              mListener.pass_data(null,patient_search_by_area_speciality_fragment.this);
 
                                           }
                                       });
@@ -205,15 +151,19 @@ public class patient_search_by_area_speciality_fragment extends Fragment  {
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment fragment=new patient_search_by_area_fragment();
-                Bundle args = new Bundle();
-                args.putInt("speciality",speciality_id);
-                args.putString("speciality_s",speciality_s);
-                              if (visitor){
-                    args.putBoolean("visitor",true);
+                if (speciality_model!=null) {
+                    Fragment fragment = new patient_search_by_area_fragment();
+                    Bundle args = new Bundle();
+                    args.putInt("speciality", speciality_model.id);
+                    args.putString("speciality_s", speciality_model.name);
+                    if (visitor) {
+                        args.putBoolean("visitor", true);
+                    }
+                    fragment.setArguments(args);
+                    go_to(fragment);
+                }else {
+                    Toast.makeText(getActivity(),getResources().getText(R.string.please_select_speciality_first),Toast.LENGTH_LONG).show();
                 }
-                fragment.setArguments(args);
-                go_to(fragment);
             }
 
         });
@@ -229,105 +179,9 @@ public class patient_search_by_area_speciality_fragment extends Fragment  {
     }
 
 
-
-    private void get_specialties_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_specialties/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                specialities.clear();
-                                JSONArray list=res.getJSONArray("list");
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_speciality_model speciality=  new patient_speciality_model(_id,image_url,name,id);
-                                    specialities.add(speciality);
-
-
-                                }
-                                adapter.notifyDataSetChanged();
-
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
+    @Override
+    public void pass_data(patient_speciality_model speciality_model, pass_speciality_data listner) {
+        this.speciality_model=speciality_model;
+        speciality.setText(speciality_model.name);
     }
-
-    private void filter(String text) {
-        filteredList.clear();
-        for (patient_speciality_model item : specialities) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filteredList.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filteredList.add(item);
-                }
-            }
-
-        }
-
-        adapter.filterList(filteredList);
-    }
-
 }

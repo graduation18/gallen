@@ -2,15 +2,8 @@ package luckysms.gaber.example.com.gallen.patient_module.Activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -19,13 +12,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Base64;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -33,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,82 +30,78 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.fxn.pix.Pix;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mukesh.countrypicker.CountryPicker;
 import com.mukesh.countrypicker.CountryPickerListener;
 import com.rilixtech.CountryCodePicker;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 import luckysms.gaber.example.com.gallen.R;
-import luckysms.gaber.example.com.gallen.patient_module.Adapters.cities_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.city_SpinAdapter;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.gov_SpinAdapter;
-import luckysms.gaber.example.com.gallen.patient_module.Adapters.governorates_list_adapter;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.insurance_SpinAdapter;
-import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.ApiConfig;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_city_data;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_filter_data;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_gov_data;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_insurance_data;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_search_by_area_fragment;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.search_city_BottomSheetFragment;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.search_gov_BottomSheetFragment;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.search_insurance_BottomSheetFragment;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_city_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_gov_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-public class patient_sign_up extends AppCompatActivity {
+public class patient_sign_up extends AppCompatActivity implements pass_gov_data,pass_city_data,pass_insurance_data {
     private RequestQueue queue;
     private EditText full_name,mobile_number,email_address,password,confirm_password,date_of_birth;
     private Button insurance_company;
-    private Button register,see_password,see_confirm_password,select_image,country;
+    private Button register,see_password,see_confirm_password,country;
     private RadioGroup group;
     private RadioButton selected_gender;
-    private ImageView photo;
+    private ImageView doctor_image;
     private boolean seen_pass,seen_confirm_pass;
     private TextView back;
-    private ArrayList<patient_city_model> cities=new ArrayList<>();
-    private ArrayList<patient_gov_model>govs=new ArrayList<>();
     private Button city,governorates;
-    int city_id,gov_id;
     int PICK_IMAGE_MULTIPLE = 1;
-    private RecyclerView dialog_list;
-    private insurance_SpinAdapter insurance_adapter;
-    private List<patient_insurance_model> insurance_model_list = new ArrayList<>();
-    private List<patient_insurance_model> filtered_insurance_model_list = new ArrayList<>();
-    private int insurace_i;
     private CountryCodePicker  cpp;
-    private ArrayList<patient_gov_model> filtered_govs_List = new ArrayList<>();
-    private ArrayList<patient_city_model> filtered_cities_List = new ArrayList<>();
-    private gov_SpinAdapter adapter;
-    private city_SpinAdapter adapter2;
     private ProgressBar mprogressBar;
     private String selected_image_url;
+    private pass_insurance_data mListener_insurance;
+    private pass_city_data mListener_city;
+    private pass_gov_data mListener_gov;
+    private patient_city_model city_model;
+    private patient_gov_model gov_model;
+    private patient_insurance_model insurance_model;
 
 
 
@@ -136,7 +120,6 @@ public class patient_sign_up extends AppCompatActivity {
         insurance_company=(Button)findViewById(R.id.insurance_company);
         see_password=(Button)findViewById(R.id.see_password);
         see_confirm_password=(Button)findViewById(R.id.see_confirm_password);
-        select_image=(Button)findViewById(R.id.select_image);
         register=(Button)findViewById(R.id.register);
         country=(Button)findViewById(R.id.country);
         back=(TextView)findViewById(R.id.back);
@@ -144,7 +127,7 @@ public class patient_sign_up extends AppCompatActivity {
         selected_gender=(RadioButton)findViewById(R.id.male);
         city=(Button)findViewById(R.id.city);
         governorates=(Button)findViewById(R.id.governorates);
-        photo=(ImageView)findViewById(R.id.photo);
+        doctor_image=(ImageView)findViewById(R.id.doctor_image);
 
 
         date_of_birth.setOnClickListener(new View.OnClickListener() {
@@ -221,184 +204,41 @@ public class patient_sign_up extends AppCompatActivity {
         insurance_company.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog=new Dialog(patient_sign_up.this);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                dialog.setContentView(R.layout.dialog_list);
-                dialog_list= dialog.findViewById(R.id.dialog_list);
-                final EditText search=(EditText)dialog.findViewById(R.id.search_edt);
-                insurance_adapter=new insurance_SpinAdapter(patient_sign_up.this,insurance_model_list);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(patient_sign_up.this);
-                dialog_list.setLayoutManager(mLayoutManager);
-                dialog_list.setItemAnimator(new DefaultItemAnimator());
-                dialog_list.addItemDecoration(new MyDividerItemDecoration(patient_sign_up.this, LinearLayoutManager.VERTICAL, 5));
-                dialog_list.setAdapter(insurance_adapter);
-                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(patient_sign_up.this, dialog_list, new RecyclerTouchListener.ClickListener() {
-                    @Override
-                    public void onClick(View v, final int position) {
-                        if (search.getText().length()>0) {
-                            insurace_i = filtered_insurance_model_list.get(position).id;
-                            insurance_company.setText(filtered_insurance_model_list.get(position).name);
-
-                            dialog.dismiss();
-                        }else {
-                            insurace_i = insurance_model_list.get(position).id;
-                            insurance_company.setText(insurance_model_list.get(position).name);
-                            dialog.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-
-
-                search.addTextChangedListener(new TextWatcher() {
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start,
-                                                  int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start,
-                                              int before, int count) {
-
-                        filter(s.toString());
-
-
-                    }
-                });
-                dialog.show();
-                mprogressBar.setVisibility(View.VISIBLE);
-                get_insurance_data();
-
+                Bundle s=new Bundle();
+                search_insurance_BottomSheetFragment bottomSheetFragment = new search_insurance_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+                mListener_insurance=bottomSheetFragment;
+                mListener_insurance.pass_data(null,patient_sign_up.this);
             }
         });
         governorates.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog=new Dialog(patient_sign_up.this);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                dialog.setContentView(R.layout.dialog_list);
-                dialog_list= dialog.findViewById(R.id.dialog_list);
-                final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
-                adapter=new gov_SpinAdapter(patient_sign_up.this,govs);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(patient_sign_up.this);
-                dialog_list.setLayoutManager(mLayoutManager);
-                dialog_list.setItemAnimator(new DefaultItemAnimator());
-                dialog_list.addItemDecoration(new MyDividerItemDecoration(patient_sign_up.this, LinearLayoutManager.VERTICAL, 5));
-                dialog_list.setAdapter(adapter);
-                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(patient_sign_up.this, dialog_list, new RecyclerTouchListener.ClickListener() {
-                    @Override
-                    public void onClick(View v, final int position) {
-                        if (searchh.getText().length()>0){
-                            gov_id=filtered_govs_List.get(position).id;
-                            governorates.setText(filtered_govs_List.get(position).name);
-                            dialog.dismiss();
+                Bundle s=new Bundle();
+                if (city_model!=null&&gov_model==null){
+                    s.putInt("city_id",city_model.govid);
+                }
+                search_gov_BottomSheetFragment bottomSheetFragment = new search_gov_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+                mListener_gov=bottomSheetFragment;
+                mListener_gov.pass_data(null,patient_sign_up.this);
 
-                        }else {
-                            gov_id=govs.get(position).id;
-                            governorates.setText(govs.get(position).name);
-                            dialog.dismiss();
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-
-                searchh.addTextChangedListener(new TextWatcher() {
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start,
-                                                  int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start,
-                                              int before, int count) {
-
-                        filter_govs(s.toString());
-
-
-                    }
-                });
-
-                mprogressBar.setVisibility(View.VISIBLE);
-                get_goves_data();
-                dialog.show();
             }
         });
         city.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog=new Dialog(patient_sign_up.this);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                dialog.setContentView(R.layout.dialog_list);
-                dialog_list= dialog.findViewById(R.id.dialog_list);
-                final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
-                adapter2=new city_SpinAdapter(patient_sign_up.this,cities);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(patient_sign_up.this);
-                dialog_list.setLayoutManager(mLayoutManager);
-                dialog_list.setItemAnimator(new DefaultItemAnimator());
-                dialog_list.addItemDecoration(new MyDividerItemDecoration(patient_sign_up.this, LinearLayoutManager.VERTICAL, 5));
-                dialog_list.setAdapter(adapter2);
-                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(patient_sign_up.this, dialog_list, new RecyclerTouchListener.ClickListener() {
-                    @Override
-                    public void onClick(View v, final int position) {
-                        if (searchh.getText().length()>0){
-                            city_id=filtered_cities_List.get(position).id;
-                            city.setText(filtered_cities_List.get(position).name);
-                            dialog.dismiss();
-                        }else {
-                            city_id=cities.get(position).id;
-                            city.setText(cities.get(position).name);
-                            dialog.dismiss();
-                        }
-
-
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-                searchh.addTextChangedListener(new TextWatcher() {
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start,
-                                                  int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start,
-                                              int before, int count) {
-
-                        filter_city(s.toString());
-
-
-                    }
-                });
-
-                mprogressBar.setVisibility(View.VISIBLE);
-                get_cities_data();
-                dialog.show();
+                Bundle s=new Bundle();
+                if (gov_model!=null&&city_model==null){
+                    s.putInt("gov_id",gov_model.id);
+                }
+                search_city_BottomSheetFragment bottomSheetFragment = new search_city_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+                mListener_city=bottomSheetFragment;
+                mListener_city.pass_data(null,patient_sign_up.this);
             }
         });
         register.setOnClickListener(new View.OnClickListener() {
@@ -411,7 +251,7 @@ public class patient_sign_up extends AppCompatActivity {
                 String confirm_password_s=confirm_password.getText().toString();
                 String date_of_birth_s=date_of_birth.getText().toString();
                 String insurance_company_s=insurance_company.getText().toString();
-                int insurance_company_i=insurace_i;
+                int insurance_company_i=insurance_model.id;
 
 
                 String gender=selected_gender.getText().toString();
@@ -431,7 +271,7 @@ public class patient_sign_up extends AppCompatActivity {
                    if (confirm_password_s.equals(password_s)) {
                        mprogressBar.setVisibility(View.VISIBLE);
                        sign_up(full_name_s, mobile_number_s, email_address_s, password_s, date_of_birth_s
-                               , insurance_company_s, gender,gender_id,insurance_company_i,gov_id,city_id,city_s,gov_s,country_s);
+                               , insurance_company_s, gender,gender_id,insurance_company_i,gov_model.id,city_model.id,city_model.name,gov_model.name,country_s);
                    }else {
                        Toast.makeText(patient_sign_up.this,getResources().getText(R.string.password_not_matched),Toast.LENGTH_LONG).show();
                    }
@@ -450,14 +290,7 @@ public class patient_sign_up extends AppCompatActivity {
             }
         });
 
-        select_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                select_images();
-                select_image.setVisibility(View.INVISIBLE);
-            }
-        });
-        photo.setOnClickListener(new View.OnClickListener() {
+        doctor_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 select_images();
@@ -473,7 +306,7 @@ public class patient_sign_up extends AppCompatActivity {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/register/add";
+            String url = "http://microtec1.egytag.com/api/register/add";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
             }
@@ -491,8 +324,15 @@ public class patient_sign_up extends AppCompatActivity {
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
+                                JSONObject user = res.getJSONObject("user");
+                                getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                        .putInt("id",user.getJSONObject("ref_info").getInt("id"))
+                                        .putBoolean("state",true)
+                                        .putString("language",Locale.getDefault().getLanguage())
+                                        .commit();
                                 login(full_name_s,mobile_number_s,email_address_s,password_s,date_of_birth_s,insurance_company_s
-                                        ,gender,gender_id,insurance_company_i,gov_id,city_id,city_name,gov_name,country);
+                                        ,gender,gender_id,insurance_company_i,gov_id,city_id,city_name,gov_name,country,selected_image_url);
+
                             }
                         }
 
@@ -525,26 +365,6 @@ public class patient_sign_up extends AppCompatActivity {
                         object.put("patient_mobile", mobile_number_s);
                         object.put("patient_user_name", email_address_s);
                         object.put("patient_password", password_s);
-                        object.put("birth_date", date_of_birth_s);
-                        JSONObject gen=new JSONObject();
-                        gen.put("name", gender);
-                        gen.put("id", gender_id);
-                        object.put("gender",gen);
-                        JSONObject insurance=new JSONObject();
-                        insurance.put("id",insurance_company_i);
-                        insurance.put("name",insurance_company_s);
-                        object.put("insurance",insurance);
-                        JSONObject gov=new JSONObject();
-                        gov.put("id",gov_id);
-                        gov.put("name",gov_name);
-                        object.put("gov",gov);
-                        JSONObject city=new JSONObject();
-                        city.put("id",city_id);
-                        city.put("name",city_name);
-                        object.put("city",city);
-                        JSONObject countr=new JSONObject();
-                        countr.put("name",country);
-                        object.put("country",countr);
 
 
 
@@ -580,12 +400,12 @@ public class patient_sign_up extends AppCompatActivity {
     private void update(final String full_name_s, final String mobile_number_s, final String email_address_s
             , final String password_s, final String date_of_birth_s, final String insurance_company_s, final String gender, final int gender_id
             , final int insurance_company_i, final int gov_id, final int city_id, final String city_name, final String gov_name
-            ,final String country,final int id)
+            , final String country, final int id, final String selected_image_url)
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/patients/update";
+            String url = "http://microtec1.egytag.com/api/patients/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
             }
@@ -626,6 +446,8 @@ public class patient_sign_up extends AppCompatActivity {
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> pars = new HashMap<String, String>();
                     pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
                     return pars;
                 }
 
@@ -648,7 +470,7 @@ public class patient_sign_up extends AppCompatActivity {
                         JSONObject insurance=new JSONObject();
                         insurance.put("id",insurance_company_i);
                         insurance.put("name",insurance_company_s);
-                        object.put("insurance",insurance);
+                        object.put("insurance_company",insurance);
                         JSONObject gov=new JSONObject();
                         gov.put("id",gov_id);
                         gov.put("name",gov_name);
@@ -660,6 +482,7 @@ public class patient_sign_up extends AppCompatActivity {
                         JSONObject countr=new JSONObject();
                         countr.put("name",country);
                         object.put("country",countr);
+                        object.put("image_url",selected_image_url);
 
 
 
@@ -691,11 +514,10 @@ public class patient_sign_up extends AppCompatActivity {
 
 
     }
-
     private void login(final String full_name_s, final String mobile_number_s, final String email_address_s
             , final String password_s, final String date_of_birth_s, final String insurance_company_s, final String gender, final int gender_id
             , final int insurance_company_i, final int gov_id, final int city_id, final String city_name, final String gov_name
-            ,final String country)
+            , final String country, final String selected_image_url)
     {
 
 
@@ -725,13 +547,13 @@ public class patient_sign_up extends AppCompatActivity {
                             if (res.getBoolean("done")) {
                                 JSONObject user = res.getJSONObject("user");
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                        .putInt("id",user.getInt("id"))
+                                        .putInt("id",user.getJSONObject("ref_info").getInt("id"))
                                         .putBoolean("state",true)
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .putString("accessToken",res.getString("accessToken"))
                                         .commit();
                                 update(full_name_s,mobile_number_s,email_address_s,password_s,date_of_birth_s,insurance_company_s
-                                        ,gender,gender_id,insurance_company_i,gov_id,city_id,city_name,gov_name,country,user.getInt("id"));
+                                        ,gender,gender_id,insurance_company_i,gov_id,city_id,city_name,gov_name,country,user.getJSONObject("ref_info").getInt("id"),selected_image_url);
 
                             }
                         }
@@ -770,256 +592,9 @@ public class patient_sign_up extends AppCompatActivity {
 
     }
 
-    private void get_cities_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com/api/cities/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(patient_sign_up.this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(patient_sign_up.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                cities.clear();
-                                JSONArray list=res.getJSONArray("list");
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    String gov_id=object.getJSONObject("gov").getString("_id");
-                                    String gov_name=new String( object.getJSONObject("gov").getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    int govid=object.getJSONObject("gov").getInt("id");
-                                    patient_city_model  city=  new patient_city_model(_id,image_url,name,gov_id,gov_name,id,govid);
-                                    cities.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                                adapter2.notifyDataSetChanged();
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
-
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-
-                    return pars;
-                }
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-    private void get_goves_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/goves/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(patient_sign_up.this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(patient_sign_up.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                govs.clear();
-                                JSONArray list=res.getJSONArray("list");
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_gov_model city=  new patient_gov_model(_id,image_url,name,id);
-                                    govs.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                                adapter.notifyDataSetChanged();
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
-
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-
-                    return pars;
-                }
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-    private void get_insurance_data()
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_insurance_companies/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(patient_sign_up.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                insurance_model_list.clear();
-                                insurance_model_list.add(new patient_insurance_model("","","none",0));
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_insurance_model city=  new patient_insurance_model(_id,image_url,name,id);
-                                    insurance_model_list.add(city);
-                                    Log.w("dsakjbsdahk",name);
-
-
-                                }
-                                insurance_adapter.notifyDataSetChanged();
 
 
 
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
     private void show_date(){
         int mYear, mMonth, mDay;
         final Calendar c = Calendar.getInstance();
@@ -1053,9 +628,10 @@ public class patient_sign_up extends AppCompatActivity {
             ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
             for (String uri:returnValue){
                 try {
-
+                    Log.w("kdasjasdjls",uri);
                     mprogressBar.setVisibility(View.VISIBLE);
-                    SendImage(uri);
+                    uploadImage(uri);
+
 
                 } catch (Exception e) {
                     Log.w("errrrrrrror",e.getMessage());
@@ -1065,89 +641,76 @@ public class patient_sign_up extends AppCompatActivity {
 
 
     }
-    private void filter(String text) {
-        filtered_insurance_model_list.clear();
-        for (patient_insurance_model item : insurance_model_list) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_insurance_model_list.add(item);
+    private void uploadImage(String imagePath) {
+        //creating a file
+        File file = new File(imagePath);
+        //creating request body for file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("fileToUpload", file.getName(), requestFile);
+//        RequestBody descBody = RequestBody.create(MediaType.parse("text/plain"), desc);
+        Log.e("requestFile",requestFile.toString());
+        //The gson builder
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        //creating retrofit object
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(ApiConfig.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        //creating our api
+        ApiConfig api = retrofit.create(ApiConfig.class);
+        //creating a call and calling the upload image method
+        Call call = api.uploadImage("upload/image/default",body);
+        //finally performing the call
+        call.enqueue(new retrofit2.Callback() {
+            @Override
+            public void onResponse(Call call, retrofit2.Response response) {
+
+                mprogressBar.setVisibility(View.INVISIBLE);
+                    Log.w("response",new Gson().toJson(response.body()));
+                try {
+                    JSONObject object=new JSONObject(new Gson().toJson(response.body()));
+                    selected_image_url=object.getString("image_url");
+                    Picasso.with(patient_sign_up.this)
+                            .load("http://microtec1.egytag.com"+selected_image_url)
+                            .placeholder(R.drawable.user)
+                            .into(doctor_image, new Callback() {
+                                @Override
+                                public void onSuccess() {}
+                                @Override public void onError() {
+                                }
+                            });
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_insurance_model_list.add(item);
-                }
+
             }
 
-        }
-
-        insurance_adapter.filterList(filtered_insurance_model_list);
-    }
-    private void filter_govs(String text) {
-        filtered_govs_List.clear();
-        for (patient_gov_model item : govs) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_govs_List.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_govs_List.add(item);
-                }
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                mprogressBar.setVisibility(View.INVISIBLE);
             }
 
-        }
 
-        adapter.filterList(filtered_govs_List);
-    }
-    private void filter_city(String text) {
-        filtered_cities_List.clear();
-        for (patient_city_model item : cities) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_cities_List.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filtered_cities_List.add(item);
-                }
-            }
-
-        }
-
-        adapter2.filterList(filtered_cities_List);
-    }
-    public String getStringImage(Bitmap bmp) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageBytes = baos.toByteArray();
-        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        return encodedImage;
-
-    }
-    private void SendImage(final String image)
-    {
-
-
-
-        String url = "http://microtec1.egytag.com/api/upload/image/default";
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost(url);
-        MultipartEntityBuilder mpEntity = MultipartEntityBuilder.create();
-
-        if (image != null) {
-            File file = new File(image);
-            Log.d("EDIT USER PROFILE", "UPLOAD: file length = " + file.length());
-            Log.d("EDIT USER PROFILE", "UPLOAD: file exist = " + file.exists());
-            mpEntity.addPart("fileToUpload", new FileBody(file, "application/octet"));
-        }
-        httppost.setEntity(mpEntity.build());
-        try {
-            HttpResponse response = httpclient.execute(httppost);
-            Log.w("saddsjak",response.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    });
+}
+    @Override
+    public void pass_data(patient_city_model city_model, pass_city_data listner) {
+        this.city_model=city_model;
+        city.setText(city_model.name);
     }
 
+
+    @Override
+    public void pass_data(patient_gov_model gov_model, pass_gov_data listner) {
+        this.gov_model=gov_model;
+        governorates.setText(gov_model.name);
+    }
+
+    @Override
+    public void pass_data(patient_insurance_model insurance_model, pass_insurance_data listner) {
+        this.insurance_model=insurance_model;
+        insurance_company.setText(insurance_model.name);
+    }
 }

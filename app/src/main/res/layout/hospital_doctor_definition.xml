@@ -43,6 +43,36 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     />
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    >
+                    <TextView
+                        android:id="@+id/notifications"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:drawableLeft="@drawable/notifications"
+                        android:layout_marginRight="20dp"
+
+                        />
+
+                    <TextView
+                        android:id="@+id/number_of_notifications"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginStart="9dp"
+                        android:layout_marginLeft="9dp"
+                        android:layout_marginTop="7dp"
+                        android:background="@drawable/circle"
+                        android:text="15"
+                        android:textSize="6dp"
+                        android:textAlignment="center"/>
+                </RelativeLayout>
 
             </android.support.v7.widget.Toolbar>
             <FrameLayout
@@ -87,8 +117,9 @@
                 android:background="@drawable/rounded_edit_text1"
                 android:drawableLeft="@drawable/status"
                 android:drawablePadding="15dp"
-                android:hint="@string/full_name"
-                android:textSize="15dp" />
+                android:hint="@string/status"
+                android:textSize="15dp"
+                />
             <EditText
                 android:id="@+id/full_name"
                 android:layout_width="250dp"
@@ -197,6 +228,38 @@
                 android:drawablePadding="15dp"
                 android:hint="@string/doctor_information"
                 android:textSize="15dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/type"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"/>
+                <RadioGroup
+                    android:id="@+id/radioGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center"
+                    >
+                    <RadioButton
+                        android:id="@+id/female"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/female"/>
+                    <RadioButton
+                        android:id="@+id/male"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/male"
+                        android:checked="true"/>
+
+                </RadioGroup>
+            </LinearLayout>
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

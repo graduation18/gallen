@@ -1,5 +1,6 @@
 package luckysms.gaber.example.com.gallen.hospital_module.Activities;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,12 +37,14 @@ import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.hospital_module.Adapters.hospital_search_result_list_adapter;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.clinic_model;
 import luckysms.gaber.example.com.gallen.hospital_module.Model.doctor_model;
 import luckysms.gaber.example.com.gallen.hospital_module.Model.search_doctor_name_model;
 import luckysms.gaber.example.com.gallen.hospital_module.Model.speciality_model;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_doctor_data_fragment;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
 
 public class hospital_search_by_doctor_name extends AppCompatActivity {
     private TextView back,number_of_notifications,notifications;
@@ -65,7 +68,8 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent back=new Intent(hospital_search_by_doctor_name.this,hospital_start_activity.class);
+                startActivity(back);
             }
         });
         doctor_name.addTextChangedListener(new TextWatcher() {
@@ -97,7 +101,6 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
         search_result_recycler.addOnItemTouchListener(new RecyclerTouchListener(this, search_result_recycler, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, final int position) {
-
             }
 
             @Override
@@ -105,11 +108,10 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
             }
         }));
         mprogressBar.setVisibility(View.VISIBLE);
-        get_doctor_data();
+        get_doctor_data(getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
 
     }
-
-    private void get_doctor_data()
+    private void get_doctor_data(final int id)
     {
 
 
@@ -140,27 +142,67 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
                                 JSONArray doctor_list=doc.getJSONArray("doctor_list");
 
                                 for (int d=0;d<doctor_list.length();d++){
-                                    JSONObject doctor_obj=doctor_list.getJSONObject(d);
-                                    JSONObject doctor=doctor_obj.getJSONObject("doctor");
-                                    String doctor__id=doctor.getString("_id");
+                                    JSONObject doctor=doctor_list.getJSONObject(d);
+
+                                    String doctor__id="";
+                                    if (doctor.has("_id")){doctor__id=doctor.getString("_id");}
                                     int doctor_id=doctor.getInt("id");
                                     String  doctor_email=doctor.getString("email");
-                                    String  doctor_code=doctor.getString("code");
+                                    String  doctor_info=doctor.getString("info");
+                                    boolean  doctor_active=doctor.getBoolean("active");
+                                    boolean  doctor_accept_code=doctor.getBoolean("accept_code");
+
+                                    String doctor_availabilty=getResources().getString(R.string.not_active);
+                                    if (doctor_active){
+                                        doctor_availabilty=getResources().getString(R.string.active);
+                                    }
+                                    String  doctor_code="";
+                                    if (doctor.has("code")){doctor.getString("code");}
                                     String  doctor_phone=doctor.getString("phone");
+                                    String  doctor_gender=doctor.getString("gender");
+                                    double  doctor_fee=doctor.getDouble("fee");
                                     String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
                                     String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
                                     JSONObject specialty=doctor.getJSONObject("specialty");
-                                    String specialty__id=specialty.getString("_id");
+                                    String specialty__id="";
+                                    if (specialty.has("_id")){specialty.getString("_id");}
                                     int specialty_id=specialty.getInt("id");
                                     JSONArray review_list=new JSONArray();
-                                    if (doctor_obj.has("review_list")){
-                                        review_list=doctor_obj.getJSONArray("review_list");
+                                    if (doctor.has("review_list")){
+                                        review_list=doctor.getJSONArray("review_list");
+                                    }
+                                    JSONObject clinic=new JSONObject();
+                                    if (doctor.has("clinic")){
+                                        clinic=doctor.getJSONObject("clinic");
+                                    }
+                                    double rating=0;
+                                    JSONArray rating_list=new JSONArray();
+                                    if (doctor.has("rating_list")){
+                                        rating_list=doctor.getJSONArray("rating_list");
+                                        for (int a=0;a<rating_list.length();a++){
+                                            JSONObject rate=rating_list.getJSONObject(a);
+                                            rating=rating+rate.getInt("rate");
+                                        }
+                                        rating=rating/rating_list.length();
                                     }
                                     String specialty_name=new String (specialty.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    doctor_model doctor_model=new doctor_model(doctor_name,"","","",false,4.5f,200
-                                            ,doctor_id,"","Male",review_list.toString(),doctor_code,doctor_email,doctor_phone);
-                                    speciality_model speciality_model=new speciality_model(specialty__id,"ss",specialty_name,specialty_id);
-                                    doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model));
+                                    doctor_model doctor_model=new doctor_model(doctor_name,doctor_availabilty,
+                                            "",doctor_image,doctor_accept_code
+                                            ,Float.parseFloat(String.valueOf(rating)),doctor_fee
+                                            ,doctor_id,doctor_info,doctor_gender,
+                                            review_list.toString(),doctor_code,doctor_email,doctor_phone,doctor__id);
+                                    patient_speciality_model speciality_model=new patient_speciality_model(specialty__id,"ss",specialty_name,specialty_id);
+                                    clinic_model clinic_model=new clinic_model(
+                                            clinic.getString("name"), clinic.getString("address"), clinic.getString("phone")
+                                            , clinic.getString("website"),clinic.getString("email"),clinic.getString("image_url"),
+                                            clinic.getInt("id"),clinic.getBoolean("active"),clinic.getJSONObject("hospital").toString(),
+                                            clinic.getJSONObject("gov").toString(),clinic.getJSONObject("city").toString(),
+                                            clinic.getJSONArray("insurance_company_list").toString(),
+                                            clinic.getJSONArray("doctor_list").toString(), clinic.getJSONArray("nurse_list").toString()
+                                            ,clinic.getDouble("latitude"),
+                                            clinic.getDouble("longitude")
+                                    );
+                                    doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model,clinic_model));
                                 }
 
                                 adapter.notifyDataSetChanged();
@@ -190,12 +232,10 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
                     return pars;
                 }
                 @Override
-                public byte[] getBody() throws AuthFailureError {
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
                     JSONObject object=new JSONObject();
                     try {
-                        object.put("id",1);
-
-
+                        object.put("id",id);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -223,6 +263,7 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
 
 
     }
+
     private void filter(String text) {
         filteredList.clear();
         for (search_doctor_name_model item : doctor_name_list) {
@@ -239,5 +280,8 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
         }
 
         adapter.filterList(filteredList);
+        if (filteredList.size()>0){
+            search_result_recycler.setVisibility(View.VISIBLE);
+        }
     }
 }

@@ -36,6 +36,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.fxn.pix.Pix;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -43,6 +45,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,16 +53,28 @@ import java.util.List;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.hospital_module.Custom.pass_clinic_data;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.clinic_model;
+import luckysms.gaber.example.com.gallen.hospital_module.Model.speciality_model;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.ApiConfig;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_speciality_data;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_settings;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.search_specilty_BottomSheetFragment;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
-public class hospital_doctor_edit extends Fragment {
+public class hospital_doctor_edit extends Fragment implements pass_speciality_data,pass_clinic_data {
     private View view;
     private ImageView doctor_image;
     private EditText doctor_code,full_name,doctor_phone,email_address,doctor_fee,doctor_info;
@@ -67,19 +82,24 @@ public class hospital_doctor_edit extends Fragment {
     private Button clinics,speciality,save,cancel;
     private TextView back,number_of_notifications,notifications;
     int PICK_IMAGE_MULTIPLE = 1;
-    private RecyclerView dialog_list;
-    private speciality_SpinAdapter speciality_adapter;
-    private ArrayList<patient_speciality_model> specialities=new ArrayList<>();
-    private ArrayList<patient_speciality_model> filteredList = new ArrayList<>();
-    private patient_speciality_model selected_speciality;
+    private pass_speciality_data mListener;
+    private pass_clinic_data clinic_mListener;
+    private clinic_model clinic_model;
+    private patient_speciality_model speciality_model;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
-    private String selected_image,doctor_name_s,doctor_availabilty_s,doctor_gender_s
-            ,doctor_graduated_s,doctor_image_s,doctor_notes_s,dotor_code_s,review_list_s,speciality_name_s,doctor_email_s,doctor_phone_s;
+    private String _id,selected_image_url,doctor_name_s,doctor_availabilty_s,doctor_gender_s
+            ,doctor_graduated_s,doctor_image_s,doctor_notes_s,dotor_code_s,review_list_s,doctor_email_s,doctor_phone_s;
     private boolean doctor_accept_discount_b;
     private double doctor_fee_d;
     private Float doctor_rating_f;
     private int id_i;
+    List<String> status_Array =  new ArrayList<String>();
+    List<String> discount_code_Array =  new ArrayList<String>();
+    private boolean majorchange;
+    private clinic_model old_clinic;
+
+
 
 
 
@@ -92,16 +112,20 @@ public class hospital_doctor_edit extends Fragment {
             doctor_gender_s=getArguments().getString("doctor_gender");
             doctor_graduated_s=getArguments().getString("doctor_graduated");
             doctor_image_s= getArguments().getString("doctor_image");
+            selected_image_url=doctor_image_s;
             doctor_notes_s=getArguments().getString("doctor_notes");
             dotor_code_s=getArguments().getString("dotor_code");
             doctor_phone_s=getArguments().getString("doctor_phone");
             doctor_email_s=getArguments().getString("doctor_email");
             review_list_s= getArguments().getString("review_list");
-            speciality_name_s= getArguments().getString("speciality_name");
+            speciality_model= (patient_speciality_model) getArguments().getSerializable("speciality");
+            clinic_model=(clinic_model)getArguments().getSerializable("clinic");
+            old_clinic=clinic_model;
             doctor_accept_discount_b= getArguments().getBoolean("doctor_accept_discount");
             doctor_fee_d= getArguments().getDouble("doctor_fee");
             doctor_rating_f=getArguments().getFloat("doctor_rating");
             id_i=getArguments().getInt("id");
+            _id=getArguments().getString("_id");
         }
     }
     @Nullable
@@ -129,7 +153,7 @@ public class hospital_doctor_edit extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment fragment=new patient_settings();
+                Fragment fragment=new hospital_doctor_edit_delete();
                 go_to(fragment);
             }
         });
@@ -148,6 +172,7 @@ public class hospital_doctor_edit extends Fragment {
                 String email_address_s=email_address.getText().toString();
                 String doctor_fee_s=doctor_fee.getText().toString();
                 String doctor_info_s=doctor_info.getText().toString();
+                String gender=doctor_gender_s;
                 boolean doctor_status_s=false;
                 if (doctor_status.getSelectedItem().toString().contains(getResources().getString(R.string.active))){
                     doctor_status_s=true;
@@ -161,88 +186,69 @@ public class hospital_doctor_edit extends Fragment {
                 JSONArray review_list=new JSONArray();
                 JSONObject hospital=new JSONObject();
                 JSONObject speciality=new JSONObject();
-
-                try {
-                    hospital.put("id",0);
-                    hospital.put("name","");
-                    speciality.put("id",selected_speciality.id);
-                    speciality.put("name",selected_speciality.name);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                if (selected_image.length()>0&&doctor_code_s.length()>0&&full_name_s.length()>0&&doctor_phone_s.length()>0
+                JSONObject clinic=new JSONObject();
+                if (selected_image_url.length()>0&&doctor_code_s.length()>0&&full_name_s.length()>0&&doctor_phone_s.length()>0
                         &&email_address_s.length()>0 &&doctor_fee_s.length()>0&&doctor_info_s.length()>0
-                        &&selected_speciality!=null){
-                    update_doctor(id_i,full_name_s,doctor_status_s,hospital,doctor_phone_s,email_address_s,selected_image,
-                            doctor_accept_code_s,rating_list,review_list, Integer.parseInt(doctor_fee_s),doctor_info_s,doctor_code_s);
+                        &&speciality_model!=null&&clinic_model!=null){
+                    try {
+                        hospital.put("id",getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
+                        hospital.put("name",getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("name",""));
+                        hospital.put("doctor_list",new JSONArray(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("doctor_list","")));
+                        speciality.put("id",speciality_model.id);
+                        speciality.put("name",speciality_model.name);
+                        speciality.put("_id",speciality_model._id);
+                        speciality.put("image_url",speciality_model.image_url);
+                        clinic.put("name",clinic_model.name);
+                        clinic.put("id",clinic_model.id);
+                        clinic.put("active",clinic_model.active);
+                        clinic.put("latitude",clinic_model.latitude);
+                        clinic.put("longitude",clinic_model.longitude);
+                        clinic.put("address",clinic_model.address);
+                        clinic.put("city",clinic_model.city);
+                        clinic.put("gov",clinic_model.gov);
+                        clinic.put("hospital",clinic_model.hospital);
+                        clinic.put("doctor_list",clinic_model.doctor_list);
+                        clinic.put("image_url",clinic_model.image_url);
+                        clinic.put("email",clinic_model.email);
+                        clinic.put("insurance_company_list",clinic_model.insurance_company_list);
+                        clinic.put("nurse_list",clinic_model.nurse_list);
+                        clinic.put("website",clinic_model.website);
+                        clinic.put("phone",clinic_model.phone);
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    update_doctor(id_i,_id,full_name_s,doctor_status_s,hospital,doctor_phone_s,email_address_s,selected_image_url,
+                            doctor_accept_code_s,rating_list,review_list
+                            , Double.parseDouble(doctor_fee_s),doctor_info_s
+                            ,doctor_code_s,speciality,gender,clinic);
                 }
             }
         });
         speciality.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog=new Dialog(getActivity());
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                dialog.setContentView(R.layout.dialog_list);
-                dialog_list= dialog.findViewById(R.id.dialog_list);
-                final EditText searchh=(EditText)dialog.findViewById(R.id.search_edt);
-                speciality_adapter=new speciality_SpinAdapter(getActivity(),specialities);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-                dialog_list.setLayoutManager(mLayoutManager);
-                dialog_list.setItemAnimator(new DefaultItemAnimator());
-                dialog_list.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
-                dialog_list.setAdapter(speciality_adapter);
-                dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
-                    @Override
-                    public void onClick(View v, final int position) {
-                        if (searchh.getText().length()>0){
-                            selected_speciality=filteredList.get(position);
-                            speciality.setText(selected_speciality.name);
-                            dialog.dismiss();
-                        }else {
-                            selected_speciality=specialities.get(position);
-                            speciality.setText(selected_speciality.name);
-                            dialog.dismiss();
-                        }
-
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-
-
-                searchh.addTextChangedListener(new TextWatcher() {
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start,
-                                                  int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start,
-                                              int before, int count) {
-
-                        filter(s.toString());
-
-
-                    }
-                });
-
-
-
-                mprogressBar.setVisibility(View.VISIBLE);
-
-                get_specialties_data();
-                dialog.show();
-
+                Bundle s=new Bundle();
+                luckysms.gaber.example.com.gallen.patient_module.Fragments.search_specilty_BottomSheetFragment bottomSheetFragment = new search_specilty_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                mListener=bottomSheetFragment;
+                mListener.pass_data(null,hospital_doctor_edit.this);
+            }
+        });
+        clinics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle s=new Bundle();
+                search_clinics_BottomSheetFragment bottomSheetFragment = new search_clinics_BottomSheetFragment();
+                bottomSheetFragment.setArguments(s);
+                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+                clinic_mListener=bottomSheetFragment;
+                clinic_mListener.pass_data(null,hospital_doctor_edit.this);
             }
         });
 
@@ -277,16 +283,9 @@ public class hospital_doctor_edit extends Fragment {
             ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
             for (String uri:returnValue){
                 try {
-                    selected_image=uri;
-                    Picasso.with(getActivity())
-                            .load(uri)
-                            .placeholder(R.drawable.user)
-                            .into(doctor_image, new Callback() {
-                                @Override
-                                public void onSuccess() {}
-                                @Override public void onError() {
-                                }
-                            });
+                    selected_image_url=uri;
+                    mprogressBar.setVisibility(View.VISIBLE);
+                    uploadImage(selected_image_url);
 
                 } catch (Exception e) {
                     Log.w("errrrrrrror",e.getMessage());
@@ -296,15 +295,16 @@ public class hospital_doctor_edit extends Fragment {
 
 
     }
-    private void update_doctor(final int id, final String name, final boolean active, final JSONObject hospital, final String phone
-                            , final String email , final String image_url, final boolean doctor_accept_code
-            , final JSONArray rating_list
-            , final JSONArray review_list, final int doctor_fee_s, final String doctor_info_s, final String doctor_code_s)
+    private void update_doctor(final int id,final String _id,final String name, final boolean active, final JSONObject hospital, final String phone
+            , final String email , final String image_url, final boolean doctor_accept_code
+            , final JSONArray rating_list,final JSONArray review_list, final double doctor_fee_s
+            , final String doctor_info_s,final String doctor_code_s, final JSONObject speciality,
+                               final String gender,final JSONObject clinic)
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/doctors/update";
+            String url = "http://microtec1.egytag.com/api/doctors/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -320,6 +320,59 @@ public class hospital_doctor_edit extends Fragment {
                         JSONObject res = new JSONObject(response);
                         if (res.has("done")) {
                             if (res.getBoolean("done")) {
+                                    JSONObject object=new JSONObject();
+                                    object.put("name",name);
+                                    object.put("active",active);
+                                    object.put("hospital",hospital);
+                                    object.put("phone",phone);
+                                    object.put("email",email);
+                                    object.put("image_url",image_url);
+                                    object.put("accept_code",doctor_accept_code);
+                                    object.put("rating_list",rating_list);
+                                    object.put("review_list",review_list);
+                                    object.put("fee",doctor_fee_s);
+                                    object.put("info",doctor_info_s);
+                                    object.put("code",doctor_code_s);
+                                    object.put("id",id);
+                                    object.put("_id",_id);
+                                    object.put("speciality",speciality);
+                                    object.put("gender",gender);
+                                    object.put("clinic",clinic);
+
+
+                                    if (old_clinic.id!=clinic_model.id) {
+                                        JSONArray list = new JSONArray();
+                                        JSONArray jsonArray = new JSONArray(old_clinic.doctor_list);
+                                        int len = jsonArray.length();
+                                        if (jsonArray != null) {
+                                            for (int i = 0; i < len; i++) {
+                                                JSONObject d = new JSONArray(old_clinic.doctor_list).getJSONObject(i);
+                                                //Excluding the item at position
+                                                if (!d.getString("name").equals(name)) {
+                                                    list.put(jsonArray.get(i));
+                                                }
+                                            }
+                                        }
+                                        mprogressBar.setVisibility(View.VISIBLE);
+                                        update_clinics_remove(list, old_clinic.id);
+                                        update_clinics(new JSONArray(clinic_model.doctor_list).put(object), clinic_model.id,object);
+                                    }else {
+                                        JSONArray list = new JSONArray();
+                                        JSONArray jsonArray = new JSONArray(clinic_model.doctor_list);
+                                        int len = jsonArray.length();
+                                        if (jsonArray != null) {
+                                            for (int i = 0; i < len; i++) {
+                                                JSONObject d = new JSONArray(clinic_model.doctor_list).getJSONObject(i);
+                                                Log.w("dsakjbsdahk", d.toString());
+                                                //Excluding the item at position
+                                                if (!d.getString("name").equals(name)) {
+                                                    list.put(jsonArray.get(i));
+                                                }
+                                            }
+                                        }
+                                        mprogressBar.setVisibility(View.VISIBLE);
+                                        update_clinics(list.put(object), clinic_model.id,object);
+                                    }
                             }
                         }
 
@@ -352,14 +405,18 @@ public class hospital_doctor_edit extends Fragment {
                         object.put("active",active);
                         object.put("hospital",hospital);
                         object.put("phone",phone);
+                        object.put("mobile",phone);
                         object.put("email",email);
                         object.put("image_url",image_url);
-                        object.put("doctor_accept_code",doctor_accept_code);
+                        object.put("accept_code",doctor_accept_code);
                         object.put("rating_list",rating_list);
                         object.put("review_list",review_list);
-                        object.put("doctor_fee_s",doctor_fee_s);
-                        object.put("doctor_info_s",doctor_info_s);
-                        object.put("doctor_code_s",doctor_code_s);
+                        object.put("fee",doctor_fee_s);
+                        object.put("info",doctor_info_s);
+                        object.put("code",doctor_code_s);
+                        object.put("speciality",speciality);
+                        object.put("gender",gender);
+                        object.put("clinic",clinic);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -387,12 +444,12 @@ public class hospital_doctor_edit extends Fragment {
 
 
     }
-    private void get_specialties_data()
+    private void update_clinics_remove(final JSONArray doctor_list,final int id)
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_specialties/all";
+            String url = "http://microtec1.egytag.com/api/clinics/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -406,46 +463,22 @@ public class hospital_doctor_edit extends Fragment {
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
-
-
-                        if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                specialities.clear();
-                                JSONArray list=res.getJSONArray("list");
-
-                                for (int i=0;i<list.length();i++){
-                                    JSONObject object=list.getJSONObject(i);
-                                    String _id=object.getString("_id");
-                                    String image_url=object.getString("image_url");
-                                    String name=new String(object.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    int id=object.getInt("id");
-                                    patient_speciality_model speciality=  new patient_speciality_model(_id,image_url,name,id);
-                                    specialities.add(speciality);
-
-
-                                }
-                                speciality_adapter.notifyDataSetChanged();
-
-
-                            }
+                        if (res.has("done")) {
+                            if (res.getBoolean("done")) { }
                         }
 
                     } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
                     mprogressBar.setVisibility(View.INVISIBLE);
 
                 }
-            }) {
+            }){
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> pars = new HashMap<String, String>();
@@ -454,6 +487,24 @@ public class hospital_doctor_edit extends Fragment {
                     return pars;
                 }
 
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",id);
+                        object.put("doctor_list",doctor_list);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
 
             };
             stringReq.setRetryPolicy(new DefaultRetryPolicy(
@@ -468,44 +519,204 @@ public class hospital_doctor_edit extends Fragment {
 
 
     }
-    private void filter(String text) {
-        filteredList.clear();
-        for (patient_speciality_model item : specialities) {
-            if (!item.name.isEmpty()){
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filteredList.add(item);
-                }
-            }else {
-                if (item.name.toLowerCase().contains(text.toLowerCase())) {
-                    filteredList.add(item);
-                }
+    private void update_clinics(final JSONArray doctor_list, final int id, final JSONObject jsonObject)
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com/api/clinics/update";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
             }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONArray list = new JSONArray();
+                                JSONArray jsonArray = new JSONArray(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("doctor_list",""));
+                                int len = jsonArray.length();
+                                if (jsonArray != null) {
+                                    for (int i = 0; i < len; i++) {
+                                        JSONObject d = new JSONArray(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("doctor_list","")).getJSONObject(i);
+                                        //Excluding the item at position
+                                        if (!new String(d.getString("name").getBytes("ISO-8859-1"), "UTF-8").equals(doctor_name_s)) {
+                                            list.put(jsonArray.get(i));
+                                        }
+                                    }
+                                }
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                update_hospital(list.put(jsonObject),getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",id);
+                        object.put("doctor_list",doctor_list);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
 
         }
 
-        speciality_adapter.filterList(filteredList);
+
     }
+    private void update_hospital(final JSONArray doctor_list,final int id)
+    {
+
+
+        try {
+            String url = "http://microtec1.egytag.com/api/hospitals/update";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                doctor_code.setText("");
+                                full_name.setText("");
+                                doctor_phone.setText("");
+                                email_address.setText("");
+                                doctor_fee.setText("");
+                                doctor_info.setText("");
+                                doctor_status.setSelection(0);
+                                hospital_doctor_edit.this.doctor_accept_code.setSelection(0);
+                                clinics.setText("");
+                                speciality.setText("");
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",id);
+                        object.put("doctor_list",doctor_list);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+
     private void fill_status(){
-        List<String> spinnerArray =  new ArrayList<String>();
-        spinnerArray.add(getActivity().getResources().getString(R.string.none));
-        spinnerArray.add(getActivity().getResources().getString(R.string.active));
-        spinnerArray.add(getActivity().getResources().getString(R.string.not_active));
+        status_Array.add(getActivity().getResources().getString(R.string.none));
+        status_Array.add(getActivity().getResources().getString(R.string.active));
+        status_Array.add(getActivity().getResources().getString(R.string.not_active));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                getActivity(), android.R.layout.simple_spinner_item, spinnerArray);
+                getActivity(), android.R.layout.simple_spinner_item, status_Array);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         doctor_status.setAdapter(adapter);
 
     }
     private void fill_discount_code(){
-        List<String> spinnerArray2 =  new ArrayList<String>();
-        spinnerArray2.add(getActivity().getResources().getString(R.string.none));
-        spinnerArray2.add(getActivity().getResources().getString(R.string.Accepts_the_discount_code));
-        spinnerArray2.add(getActivity().getResources().getString(R.string.not_Accepts_the_discount_code));
+        discount_code_Array.add(getActivity().getResources().getString(R.string.none));
+        discount_code_Array.add(getActivity().getResources().getString(R.string.Accepts_the_discount_code));
+        discount_code_Array.add(getActivity().getResources().getString(R.string.not_Accepts_the_discount_code));
 
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-                getActivity(), android.R.layout.simple_spinner_item, spinnerArray2);
+                getActivity(), android.R.layout.simple_spinner_item, discount_code_Array);
 
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         doctor_accept_code.setAdapter(adapter2);
@@ -517,7 +728,93 @@ public class hospital_doctor_edit extends Fragment {
         email_address.setText(doctor_email_s);
         doctor_fee.setText(String .valueOf(doctor_fee_d));
         doctor_info.setText(doctor_notes_s);
-        speciality.setText(speciality_name_s);
+        Log.w("sfasafs",doctor_image_s+" "+dotor_code_s);
+        Picasso.with(getActivity())
+                .load("http://microtec1.egytag.com"+doctor_image_s)
+                .placeholder(R.drawable.user)
+                .into(doctor_image, new Callback() {
+                    @Override
+                    public void onSuccess() {}
+                    @Override public void onError() {
+                    }
+                });
+        doctor_status.setSelection(status_Array.indexOf(doctor_availabilty_s));
+        if (doctor_accept_discount_b) {
+            doctor_accept_code.setSelection(1);
+        }else {
+            doctor_accept_code.setSelection(2);
+        }
+        try {
+            clinics.setText(new String(clinic_model.name.getBytes("ISO-8859-1"), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        speciality.setText(speciality_model.name);
     }
+    private void uploadImage(String imagePath) {
+        //creating a file
+        File file = new File(imagePath);
+        //creating request body for file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("fileToUpload", file.getName(), requestFile);
+//        RequestBody descBody = RequestBody.create(MediaType.parse("text/plain"), desc);
+        Log.e("requestFile",requestFile.toString());
+        //The gson builder
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        //creating retrofit object
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(ApiConfig.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        //creating our api
+        ApiConfig api = retrofit.create(ApiConfig.class);
+        //creating a call and calling the upload image method
+        Call call = api.uploadImage("upload/image/default",body);
+        //finally performing the call
+        call.enqueue(new retrofit2.Callback() {
+            @Override
+            public void onResponse(Call call, retrofit2.Response response) {
+
+                mprogressBar.setVisibility(View.INVISIBLE);
+                Log.w("response",new Gson().toJson(response.body()));
+                try {
+                    JSONObject object=new JSONObject(new Gson().toJson(response.body()));
+                    selected_image_url=object.getString("image_url");
+                    Picasso.with(getActivity())
+                            .load("http://microtec1.egytag.com"+selected_image_url)
+                            .placeholder(R.drawable.user)
+                            .into(doctor_image, new Callback() {
+                                @Override
+                                public void onSuccess() {}
+                                @Override public void onError() {
+                                }
+                            });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                mprogressBar.setVisibility(View.INVISIBLE);
+            }
+
+
+        });
+    }
+    @Override
+    public void pass_data(patient_speciality_model speciality_model, pass_speciality_data listner) {
+        this.speciality_model=speciality_model;
+        speciality.setText(speciality_model.name);
+    }
+    @Override
+    public void pass_data(luckysms.gaber.example.com.gallen.hospital_module.Model.clinic_model clinic_model, pass_clinic_data listner) {
+        this.clinic_model=clinic_model;
+        clinics.setText(clinic_model.name);
+    }
+
 
 }
