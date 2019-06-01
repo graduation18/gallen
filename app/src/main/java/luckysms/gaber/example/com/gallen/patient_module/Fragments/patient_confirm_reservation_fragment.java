@@ -4,9 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -42,26 +45,38 @@ import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Activities.complete_booking;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
+import luckysms.gaber.example.com.gallen.patient_module.Model.available_appointments_list_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.hospital_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_city_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_gov_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
 
 import static android.content.Context.MODE_PRIVATE;
 
 public class patient_confirm_reservation_fragment extends Fragment {
     private View view;
-    private TextView back,number_of_notifications,notifications,favorite
+    private TextView back,number_of_notifications,notifications
             ,name,speciality,discount_code,rating_ratio,location,fees,date,time,doctor_info;
     private Button map_location,confirm_booking,enter_discount_code;
-    private ImageView image;
+    private ImageView image,favorite;
     private RatingBar rating;
-    private int id,patient_id,clinic_id,hospital_id,day_id,from_id,to_id,speciallity_id;
-    private String doctor_name,doctor_speciality,doctor_availabilty,doctor_graduated,doctor_location,doctor_image
-            , day,from,to,hospital_name,clinic_name, patient_mobile,patient_name,patient_email,patient_birth_date;
-    private JSONObject patient_insurance;
-    private boolean doctor_accept_discount;
-    private Float doctor_rating;
-    private double doctor_fees;
+    private int patient_id;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
-
+    private available_appointments_list_model ticket;
+    private patient_speciality_model speciality_model;
+    private doctor_model doctor_model;
+    private hospital_model hospital_model;
+    private patient_insurance_model insurance_model;
+    private patient_gov_model gov_model;
+    private patient_city_model city_model;
+    private String patient_mobile,patient_name,patient_email,patient_birth_date,clinic_name,_name;
+    private int clinic_id;
+    private JSONObject patient_insurance;
+    private boolean fav_added;
 
     @Override
     public void onAttach(Context context) {
@@ -69,28 +84,18 @@ public class patient_confirm_reservation_fragment extends Fragment {
         if (getArguments()!=null) {
             Bundle args = getArguments();
             if (args != null) {
-                day = args.getString("day");
-                from = args.getString("from");
-                to = args.getString("to");
-                id = args.getInt("doctor_id");
-                day_id = args.getInt("day_id");
-                from_id = args.getInt("from_id");
-                to_id = args.getInt("to_id");
-                doctor_availabilty = args.getString("doctor_availabilty");
-                doctor_graduated = args.getString("doctor_graduated");
-                doctor_image = args.getString("doctor_image");
-                doctor_location = args.getString("doctor_location");
-                doctor_name = args.getString("doctor_name");
-                doctor_speciality = args.getString("doctor_speciality");
-                doctor_accept_discount = args.getBoolean("doctor_accept_discount");
-                doctor_fees = args.getDouble("doctor_fee");
-                doctor_rating = args.getFloat("doctor_rating");
-                hospital_name = args.getString("hospital_name");
-                clinic_name = args.getString("clinic_name");
-                clinic_id = args.getInt("clinic_id");
-                hospital_id = args.getInt("hospital_id");
-                speciallity_id = args.getInt("speciallity_id");
-                patient_id=getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0);
+                    city_model = (patient_city_model) args.getSerializable("city");
+                    gov_model = (patient_gov_model) args.getSerializable("governorate");
+                    _name = args.getString("name");
+                    ticket=(available_appointments_list_model)args.getSerializable("ticket");
+                    doctor_model= (doctor_model) args.getSerializable("doctor");
+                    hospital_model= (hospital_model) args.getSerializable("hospital");
+                    insurance_model= (patient_insurance_model) args.getSerializable("insurance_company");
+                    speciality_model= (patient_speciality_model) args.getSerializable("speciality");
+                    clinic_name=args.getString("clinic_name");
+                    clinic_id=args.getInt("clinic_id");
+                    fav_added=args.getBoolean("fav_added");
+                    patient_id=getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0);
             }
         }
 
@@ -106,7 +111,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
         back=(TextView)view.findViewById(R.id.back);
         number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
         notifications=(TextView)view.findViewById(R.id.notifications);
-        favorite=(TextView)view.findViewById(R.id.favorite);
+        favorite=(ImageView)view.findViewById(R.id.favorite);
         name=(TextView)view.findViewById(R.id.name);
         speciality=(TextView)view.findViewById(R.id.speciality);
         discount_code=(TextView)view.findViewById(R.id.discount_code);
@@ -122,10 +127,54 @@ public class patient_confirm_reservation_fragment extends Fragment {
         image=(ImageView)view.findViewById(R.id.image);
         rating=(RatingBar)view.findViewById(R.id.rating);
 
+
+        favorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mprogressBar.setVisibility(View.VISIBLE);
+                get_patient_data( doctor_model,getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
+
+            }
+        });
+
+
+
+        map_location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String url = "http://maps.google.com/maps?daddr=" + hospital_model.hospital_latitude + "," + hospital_model.hospital_longitude;
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
+        });
+
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment fragment=new patient_search_results_fragment();
+                Bundle args=new Bundle();
+                if (doctor_model!=null) {
+                    args.putSerializable("doctor", doctor_model);
+                }
+                if (hospital_model!=null) {
+                    args.putSerializable("hospital", hospital_model);
+
+                }
+                if (insurance_model!=null) {
+                    args.putSerializable("insurance_company",insurance_model);
+                }
+                if (gov_model!=null) {
+                    args.putSerializable("governorate", gov_model);
+                }
+                if (speciality_model!=null) {
+                    args.putSerializable("speciality", speciality_model);
+                }
+                if (city_model!=null) {
+                    args.putSerializable("city", city_model);
+                }
+
+                args.putString("name", _name);
+                Fragment fragment=new patient_doctor_data_fragment();
+                fragment.setArguments(args);
                 go_to(fragment);
             }
         });
@@ -152,7 +201,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
                 JSONArray analyses_list=new JSONArray();
                 JSONArray operation_list=new JSONArray();
                 JSONObject selected_shift=new JSONObject();
-                JSONObject image_url =new JSONObject();
+                String image_url = "";
                 JSONObject ticket_date =new JSONObject();
 
 
@@ -160,26 +209,28 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
                 try {
-                    selected_doctor.put("id",id);
-                    selected_doctor.put("name",doctor_name);
+                    selected_doctor.put("id",doctor_model.id);
+                    selected_doctor.put("name",doctor_model.doctor_name);
                     JSONObject day_ob=new JSONObject();
-                    day_ob.put("id",day_id);
-                    day_ob.put("en",day);
+                    day_ob.put("id",ticket.day_id);
+                    day_ob.put("en",ticket.day);
                     JSONObject from_obj=new JSONObject();
-                    from_obj.put("id",from_id);
-                    from_obj.put("en",from);
+                    from_obj.put("id",ticket.from_id);
+                    from_obj.put("en",ticket.from);
                     JSONObject to_obj=new JSONObject();
-                    to_obj.put("id",to_id);
-                    to_obj.put("en",to);
+                    to_obj.put("id",ticket.to_id);
+                    to_obj.put("en",ticket.to);
                     selected_time.put("day",day_ob);
                     selected_time.put("from",from_obj);
                     selected_time.put("to",to_obj);
 
-                    selected_hospital.put("id",hospital_id);
-                    selected_hospital.put("name",hospital_name);
+                    selected_hospital.put("id",hospital_model.hospital_id);
+                    selected_hospital.put("name",hospital_model.hospital_name);
+                    selected_hospital.put("latitude",hospital_model.hospital_latitude);
+                    selected_hospital.put("longitude",hospital_model.hospital_longitude);
 
-                    selected_specialty.put("id",speciallity_id);
-                    selected_specialty.put("name",doctor_speciality);
+                    selected_specialty.put("id",speciality_model.id);
+                    selected_specialty.put("name",speciality_model.name);
 
 
 
@@ -199,12 +250,12 @@ public class patient_confirm_reservation_fragment extends Fragment {
                     status.put("ar","انتظار");
                     status.put("name","waiting");
 
-                    image_url.put("image_url","dd");
+                    image_url=doctor_model.doctor_image;
 
                     selected_clinic.put("id",clinic_id);
                     selected_clinic.put("name",clinic_name);
 
-                    ticket_date.put("ticket_date",new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
+                    ticket_date.put("date",new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
 
 
 
@@ -215,8 +266,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                add_ticket(patient,selected_doctor,selected_time,selected_specialty,selected_hospital,status
-                        ,drugs_list,scans_list,analyses_list,operation_list,selected_shift,image_url,selected_clinic,ticket_date);
+                add_ticket(patient,status,selected_hospital,ticket_date,image_url);
 
             }
         });
@@ -227,16 +277,43 @@ public class patient_confirm_reservation_fragment extends Fragment {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if( keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-                    Fragment fragment=new patient_search_results_fragment();
+                    Bundle args=new Bundle();
+                    if (doctor_model!=null) {
+                        args.putSerializable("doctor", doctor_model);
+                    }
+                    if (hospital_model!=null) {
+                        args.putSerializable("hospital", hospital_model);
+
+                    }
+                    if (insurance_model!=null) {
+                        args.putSerializable("insurance_company",insurance_model);
+                    }
+                    if (gov_model!=null) {
+                        args.putSerializable("governorate", gov_model);
+                    }
+                    if (speciality_model!=null) {
+                        args.putSerializable("speciality", speciality_model);
+                    }
+                    if (city_model!=null) {
+                        args.putSerializable("city", city_model);
+                    }
+
+                    args.putString("name", _name);
+                    Fragment fragment=new patient_doctor_data_fragment();
+                    fragment.setArguments(args);
                     go_to(fragment);
                     return true;
                 }
                 return false;
             }
         });
+        if (fav_added) {
+            favorite.setImageResource(R.drawable.doctor_favourite_fill);
+        }
         mprogressBar.setVisibility(View.VISIBLE);
         get_data();
         get_doctor_data();
+
         return view;
     }
     public void go_to(Fragment fragment) {
@@ -247,37 +324,28 @@ public class patient_confirm_reservation_fragment extends Fragment {
     private void get_doctor_data()
     {
 
-        name.setText(doctor_name);
-        speciality.setText(doctor_speciality);
-        location.setText(doctor_location);
-        if (doctor_accept_discount){
+        name.setText(doctor_model.doctor_name);
+        speciality.setText(speciality_model.name);
+        location.setText(hospital_model.hospital_address);
+        if (doctor_model.doctor_accept_discount){
             discount_code.setVisibility(View.VISIBLE);
         }
-        rating.setRating(doctor_rating);
-        rating_ratio.setText(String .valueOf(doctor_rating));
-        fees.setText(fees.getText().toString()+" "+String .valueOf(doctor_fees));
-        Picasso.with(getActivity())
-                .load(doctor_image)
-                .placeholder(R.drawable.locations_map)
-                .into(image, new Callback() {
-                    @Override
-                    public void onSuccess() {}
-                    @Override public void onError() {
-                        Toast.makeText(getActivity(),"error loading image",Toast.LENGTH_LONG).show();
-                    }
-                });
+        rating.setRating(doctor_model.doctor_rating);
+        rating_ratio.setText(String .valueOf(Math.round(doctor_model.doctor_rating)));
+        fees.setText(fees.getText().toString()+" "+String .valueOf(doctor_model.doctor_fee));
+        String url2 =doctor_model.doctor_image;
+        new AsyncTaskLoadImage(image).execute(url2);
+        date.setText(ticket.day);
+        time.setText(ticket.from);
+        doctor_info.setText(doctor_model.doctor_notes);
 
     }
-
-    private void add_ticket(final JSONObject patient, final JSONObject selected_doctor, final JSONObject selected_time
-            , final JSONObject selected_specialty, final JSONObject selected_hospital, final JSONObject status
-            , final JSONArray drugs_list, final JSONArray scans_list, final JSONArray analyses_list
-            , final JSONArray operation_list, final JSONObject selected_shift, final JSONObject image_url
-            , final JSONObject selected_clinic,final JSONObject ticket_date) {
+    private void add_ticket(final JSONObject patient, final JSONObject status ,final JSONObject selected_hospital
+                            ,final JSONObject ticket_date,final String image_url) {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/tickets/add";
+            String url = "http://intmicrotec.neat-url.com:6566/api/tickets/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -330,24 +398,12 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
                     try {
-                        object.put("selected_doctor",selected_doctor);
-                        object.put("selected_time",selected_time);
+                        object.put("id",ticket.ticket_id);
                         object.put("patient",patient);
-                        object.put("selected_specialty",selected_specialty);
-                        object.put("selected_hospital",selected_hospital);
-                        object.put("drugs_list",drugs_list);
-                        object.put("operation_list",operation_list);
-                        object.put("scans_list",scans_list);
-                        object.put("analyses_list",analyses_list);
-                        object.put("selected_shift",selected_shift);
                         object.put("status",status);
-                        object.put("image_url",image_url);
-                        object.put("date",new Date().getTime());
-                        object.put("selected_clinic",selected_clinic);
+                        object.put("selected_hospital",selected_hospital);
                         object.put("ticket_date",ticket_date);
-
-
-
+                        object.put("image_url",image_url);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -373,13 +429,12 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
     }
-
     private void get_data()
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/patients/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -459,6 +514,277 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
     }
+    private void favourite_update(final doctor_model doctor_model, final int id)
+    {
 
 
+        try {
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/update";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                Toast.makeText(getActivity(),getResources().getString(R.string.added_to_favourite),Toast.LENGTH_LONG).show();
+
+                                JSONObject doctor=new JSONObject();
+                                doctor.put("id",doctor_model.id);
+                                doctor.put("name",doctor_model.doctor_name);
+                                doctor.put("image_url",doctor_model.doctor_image);
+                                doctor.put("fee",doctor_model.doctor_fee);
+                                doctor.put("rating",Math.round(doctor_model.doctor_rating));
+                                doctor.put("accept_discount",doctor_model.doctor_accept_discount);
+                                doctor.put("speciality",speciality_model.name);
+                                JSONArray favourite_list;
+                                String favs=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("favourite_list","");
+                                if (favs.length()>0){
+                                    favourite_list=new JSONArray(favs);
+                                    if (fav_added){
+                                        for (int i=0;i<favourite_list.length();i++){
+                                            JSONObject objects=favourite_list.getJSONObject(i);
+                                            if (objects.getInt("id")==id){
+                                                favourite_list.remove(i);
+                                            }
+                                        }
+                                        favorite.setImageResource( R.drawable.doctor_favourite);
+                                        fav_added=false;
+                                    }else {
+                                        favorite.setImageResource( R.drawable.doctor_favourite_fill);
+                                        favourite_list.put(doctor);
+                                        fav_added=true;
+                                    }
+                                }else {
+                                    favourite_list=new JSONArray();
+                                    if (fav_added){
+                                        for (int i=0;i<favourite_list.length();i++){
+                                            JSONObject objects=favourite_list.getJSONObject(i);
+                                            if (objects.getInt("id")==id){
+                                                favourite_list.remove(i);
+                                            }
+                                        }
+                                        fav_added=false;
+                                        favorite.setImageResource( R.drawable.doctor_favourite);
+                                    }else {
+                                        favorite.setImageResource( R.drawable.doctor_favourite_fill);
+                                        favourite_list.put(doctor);
+                                        fav_added=true;
+                                    }
+                                }
+                                getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                        .putString("favourite_list",favourite_list.toString())
+                                        .commit();
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+
+
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id", id);
+                        JSONObject doctor=new JSONObject();
+                        doctor.put("id",doctor_model.id);
+                        doctor.put("name",doctor_model.doctor_name);
+                        doctor.put("image_url",doctor_model.doctor_image);
+                        doctor.put("rating",Math.round(doctor_model.doctor_rating));
+                        doctor.put("accept_discount",doctor_model.doctor_accept_discount);
+                        JSONArray review_list=new JSONArray(doctor_model.review_list);
+                        doctor.put("review_list",review_list);
+                        doctor.put("fee",doctor_model.doctor_fee);
+                        doctor.put("gender",doctor_model.doctor_gender);
+                        doctor.put("notes",doctor_model.doctor_notes);
+                        doctor.put("graduated",doctor_model.doctor_graduated);
+                        JSONArray favourite_list;
+                        String favs=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("favourite_list","");
+                        Log.w("favsfavs",favs);
+                        if (favs.length()>0){
+                            favourite_list=new JSONArray(favs);
+                            Log.w("favsfavs", String.valueOf(favourite_list));
+                            if (fav_added){
+                                for (int i=0;i<favourite_list.length();i++){
+                                    JSONObject objects=favourite_list.getJSONObject(i);
+                                    if (objects.getInt("id")==id){
+                                        favourite_list.remove(i);
+                                    }
+                                }
+
+                            }else {
+                                favourite_list.put(doctor);
+                            }
+
+                        }else {
+                            favourite_list=new JSONArray();
+                            if (fav_added){
+                                for (int i=0;i<favourite_list.length();i++){
+                                    JSONObject objects=favourite_list.getJSONObject(i);
+                                    if (objects.getInt("id")==id){
+                                        favourite_list.remove(i);
+                                    }
+                                }
+
+                            }else {
+                                favourite_list.put(doctor);
+                            }
+                        }
+                        object.put("favourite_list",favourite_list);
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+
+
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    private void get_patient_data(final doctor_model doctor_model,final int id)
+    {
+
+
+        try {
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/all";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    //do other things with the received JSONObject
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONArray list=res.getJSONArray("list");
+                                for (int i=0;i<list.length();i++) {
+                                    JSONObject doc = list.getJSONObject(i);
+                                    if (doc.has("favourite_list")){
+                                        getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                                .putString("favourite_list",doc.getJSONArray("favourite_list").toString())
+                                                .commit();
+
+                                    }
+
+
+                                }
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                favourite_update(doctor_model,id);
+                            }
+
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        JSONObject _id=new JSONObject();
+                        _id.put("id",id);
+                        object.put("where",_id);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
 }

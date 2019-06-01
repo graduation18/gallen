@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_start_screen;
 
 public class hospital_defintions extends AppCompatActivity {
     private RequestQueue queue;
@@ -83,7 +84,7 @@ public class hospital_defintions extends AppCompatActivity {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/user/logout";
+            String url = "http://intmicrotec.neat-url.com:6566/api/user/logout";
             if (queue == null) {
                 queue = Volley.newRequestQueue(hospital_defintions.this);
             }
@@ -105,8 +106,9 @@ public class hospital_defintions extends AppCompatActivity {
                                         .putString("password"," ")
                                         .putBoolean("state",false)
                                         .commit();
-                                hospital_defintions.this.finish();
-
+                                Intent intent = new Intent(getApplicationContext(), patient_start_screen.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
                             }
                         }
 
@@ -129,5 +131,11 @@ public class hospital_defintions extends AppCompatActivity {
         }
 
 
+    }
+
+    public void back(View view) {
+        Intent back=new Intent(hospital_defintions.this,hospital_start_activity.class);
+        startActivity(back);
+        finish();
     }
 }

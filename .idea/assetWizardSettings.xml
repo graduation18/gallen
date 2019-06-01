@@ -33,9 +33,10 @@
                         </option>
                         <option name="values">
                           <map>
+                            <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="f0f0f0" />
-                            <entry key="outputName" value="ic_tune_black_24dp" />
-                            <entry key="sourceFile" value="C:\Users\gaber" />
+                            <entry key="outputName" value="ic_filter_results_button" />
+                            <entry key="sourceFile" value="C:\Users\gaber\Downloads\filter-results-button.svg" />
                           </map>
                         </option>
                       </PersistentState>

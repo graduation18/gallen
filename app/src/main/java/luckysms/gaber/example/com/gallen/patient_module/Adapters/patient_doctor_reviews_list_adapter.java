@@ -16,6 +16,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Model.approval_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.reviews_list_model;
 
@@ -27,13 +28,16 @@ public class patient_doctor_reviews_list_adapter extends RecyclerView.Adapter<pa
 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name,date_time;
+        public TextView name,date_time,patient_name;
         public RatingBar rating;
+        public ImageView patient_image_url;
         public MyViewHolder(View view) {
             super(view);
             name=(TextView) view.findViewById(R.id.name);
             date_time=(TextView) view.findViewById(R.id.date_time);
+            patient_name=(TextView) view.findViewById(R.id.patient_name);
             rating=(RatingBar)view.findViewById(R.id.rating);
+            patient_image_url=(ImageView)view.findViewById(R.id.patient_image_url);
 
         }
     }
@@ -64,6 +68,9 @@ public class patient_doctor_reviews_list_adapter extends RecyclerView.Adapter<pa
         holder.name.setText(data.name);
         holder.date_time.setText(data.date_time);
         holder.rating.setRating(data.rating);
+        holder.patient_name.setText(data.patient_name);
+        new AsyncTaskLoadImage(holder.patient_image_url).execute("http://intmicrotec.neat-url.com:6566"+data.patient_image_url);
+
 
 
     }

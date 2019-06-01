@@ -149,6 +149,22 @@
     <string name="website">Website</string>
     <string name="status">status</string>
     <string name="please_select_speciality_first">please select speciality first</string>
+    <string name="add_doctor_definition">Add Doctor Definition</string>
+    <string name="please_select_government_first">please select government first</string>
+    <string name="please_select_city_first">please select city first</string>
+    <string name="please_select_insurance_company_first">please select insurance company first</string>
+    <string name="please_fill_data_fields">please fill data fields</string>
+    <string name="please_select_clinic_first">please select clinic first</string>
+    <string name="number_is_too_long">number is too long</string>
+    <string name="number_is_too_short">number is too short</string>
+    <string name="Detectin_Price">Detectin Price :</string>
+    <string name="no_reviews_yet">no Reviews yet</string>
+    <string name="added_to_reviews">Added To Reviews</string>
+    <string name="selected_appointment">Selected Appointment</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="user_exists">Previous User Exists with same E-mail or Phone number</string>
+    <string name="booked_up">Booked Up</string>
+    <string name="not_reserved">Not Reserved</string>
 
 
 </resources>

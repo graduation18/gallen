@@ -116,7 +116,7 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/hospitals/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(hospital_search_by_doctor_name.this);
             }
@@ -162,7 +162,7 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
                                     String  doctor_gender=doctor.getString("gender");
                                     double  doctor_fee=doctor.getDouble("fee");
                                     String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
+                                    String doctor_image= "http://intmicrotec.neat-url.com:6566"+doctor.getString("image_url");
                                     JSONObject specialty=doctor.getJSONObject("specialty");
                                     String specialty__id="";
                                     if (specialty.has("_id")){specialty.getString("_id");}
@@ -200,7 +200,7 @@ public class hospital_search_by_doctor_name extends AppCompatActivity {
                                             clinic.getJSONArray("insurance_company_list").toString(),
                                             clinic.getJSONArray("doctor_list").toString(), clinic.getJSONArray("nurse_list").toString()
                                             ,clinic.getDouble("latitude"),
-                                            clinic.getDouble("longitude")
+                                            clinic.getDouble("longitude"),specialty_name,specialty_id
                                     );
                                     doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model,clinic_model));
                                 }

@@ -1,6 +1,8 @@
 package luckysms.gaber.example.com.gallen.patient_module.Model;
 
-public class doctor_model {
+import java.io.Serializable;
+
+public class doctor_model implements Serializable {
     public String doctor_name,doctor_availabilty,doctor_graduated,doctor_image,doctor_notes,doctor_gender,review_list;
     public boolean doctor_accept_discount;
     public Float doctor_rating;

@@ -7,18 +7,18 @@ public class appointments_list_model {
            ,selected_hospital_id,selected_clinic_id,patient_id,status_id,id;
    public String selected_time_name,selected_shift_name,selected_doctor_name,selected_specialty_name
            ,selected_hospital_name,selected_clinic_name,patient__id,patient_image_url,patient_name,patient_mobile,patient_insurance,status_ar
-           ,status_en,status_name,image_url,_id;
+           ,status_en,status_name,image_url,_id,date;
 
     public JSONArray drugs_list,scans_list,analyses_list,operation_list;
-   public long date;
    public double latitude,longitude;
     public appointments_list_model(
             String selected_time_name, String selected_shift_name, String selected_doctor_name, String selected_specialty_name
             , String selected_hospital_name, String selected_clinic_name, String patient__id, String patient_image_url, String patient_name
-            , String patient_mobile,String patient_insurance, String status_ar, String status_en, String status_name, long date, String image_url, String _id,
+            , String patient_mobile,String patient_insurance, String status_ar, String status_en, String status_name, String  date, String image_url, String _id,
             int selected_time_id, int selected_shift_id, int selected_doctor_id, int selected_specialty_id
             , int selected_hospital_id, int selected_clinic_id, int patient_id, int status_id, int id
             , JSONArray drugs_list,JSONArray scans_list,JSONArray analyses_list,JSONArray operation_list
+            ,double latitude,double longitude
     ){
         this.selected_time_name=selected_time_name;
         this.selected_shift_name=selected_shift_name;
@@ -50,6 +50,8 @@ public class appointments_list_model {
         this.scans_list=scans_list;
         this.analyses_list=analyses_list;
         this.operation_list=operation_list;
+        this.latitude=latitude;
+        this.longitude=longitude;
 
     }
 

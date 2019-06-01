@@ -46,8 +46,9 @@ public class hospital_start_activity extends AppCompatActivity {
     }
 
     public void create_doctor_account(View view) {
-        Intent create_doctor_account=new Intent(hospital_start_activity.this,hospital_search_by_doctor_name.class);
-        startActivity(create_doctor_account);
+        Intent basic_activity=new Intent(this,basic_activity.class);
+        basic_activity.putExtra("fragment","create_doctor_account");
+        startActivity(basic_activity);
     }
 
     public void definition_and_addition(View view) {
@@ -59,7 +60,7 @@ public class hospital_start_activity extends AppCompatActivity {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/hospitals/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
             }
@@ -83,12 +84,17 @@ public class hospital_start_activity extends AppCompatActivity {
                             bar.setVisibility(View.INVISIBLE);
                             JSONObject doc=res.getJSONObject("doc");
                             try {
-                                getSharedPreferences("personal_data", MODE_PRIVATE).edit().putString("name", new String (doc.getString("name").getBytes("ISO-8859-1"), "UTF-8"))
+                                getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                        .putString("name", new String (doc.getString("name").getBytes("ISO-8859-1"), "UTF-8"))
                                         .putString("image_url", doc.getString("image_url"))
                                         .putString("latitude",doc.getString("latitude"))
                                         .putString("longitude",doc.getString("longitude"))
-                                        .putString("doctor_list",doc.getJSONArray("doctor_list").toString())
+                                        .putString("doctor_list",new String(doc.getJSONArray("doctor_list").toString().getBytes("ISO-8859-1"), "UTF-8"))
                                 .commit();
+
+                                Log.w("dsakjbsdahk", new String(doc.getJSONArray("doctor_list").toString()
+                                        .getBytes("ISO-8859-1"), "UTF-8"));
+                                //Log.w("dsakjbsdahk", doc.getJSONArray("doctor_list").toString());
 
 
                             } catch (UnsupportedEncodingException e) {

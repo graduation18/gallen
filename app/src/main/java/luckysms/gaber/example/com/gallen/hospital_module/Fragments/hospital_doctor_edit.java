@@ -132,7 +132,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        view = inflater.inflate(R.layout.hospital_doctor_definition, container, false);
+        view = inflater.inflate(R.layout.hospital_doctor_definition_edit, container, false);
         back=(TextView)view.findViewById(R.id.back);
         number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
         notifications=(TextView)view.findViewById(R.id.notifications);
@@ -153,6 +153,25 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Bundle bundle=new Bundle();
+                bundle.putString("doctor_name",doctor_name_s);
+                bundle.putString("doctor_availabilty",doctor_availabilty_s);
+                bundle.putString("doctor_gender",doctor_gender_s);
+                bundle.putString("doctor_graduated",doctor_graduated_s);
+                bundle.putString("doctor_image",doctor_image_s);
+                bundle.putString("_id",_id);
+                bundle.putString("doctor_notes",doctor_notes_s);
+                bundle.putString("dotor_code",dotor_code_s);
+                bundle.putString("doctor_phone",doctor_phone_s);
+                bundle.putString("review_list",review_list_s);
+                bundle.putString("doctor_email",doctor_email_s);
+                bundle.putSerializable("speciality",speciality_model);
+                bundle.putSerializable("clinic",clinic_model);
+                bundle.putBoolean("doctor_accept_discount",doctor_accept_discount_b);
+                bundle.putDouble("doctor_fee",doctor_fee_d);
+                bundle.putFloat("doctor_rating",doctor_rating_f);
+                bundle.putInt("id",id_i);
+                bundle.putString("_id",_id);
                 Fragment fragment=new hospital_doctor_edit_delete();
                 go_to(fragment);
             }
@@ -174,12 +193,12 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                 String doctor_info_s=doctor_info.getText().toString();
                 String gender=doctor_gender_s;
                 boolean doctor_status_s=false;
-                if (doctor_status.getSelectedItem().toString().contains(getResources().getString(R.string.active))){
+                if (doctor_status.getSelectedItem().toString().equals(getResources().getString(R.string.active))){
                     doctor_status_s=true;
                 }
 
                 boolean doctor_accept_code_s=false;
-                if (doctor_accept_code.getSelectedItem().toString().contains(getResources().getString(R.string.Accepts_the_discount_code))){
+                if (doctor_accept_code.getSelectedItem().toString().equals(getResources().getString(R.string.Accepts_the_discount_code))){
                     doctor_accept_code_s=true;
                 }
                 JSONArray rating_list=new JSONArray();
@@ -188,7 +207,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                 JSONObject speciality=new JSONObject();
                 JSONObject clinic=new JSONObject();
                 if (selected_image_url.length()>0&&doctor_code_s.length()>0&&full_name_s.length()>0&&doctor_phone_s.length()>0
-                        &&email_address_s.length()>0 &&doctor_fee_s.length()>0&&doctor_info_s.length()>0
+                        &&email_address_s.length()>0 &&doctor_fee_s.length()>0
                         &&speciality_model!=null&&clinic_model!=null){
                     try {
                         hospital.put("id",getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
@@ -204,14 +223,14 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                         clinic.put("latitude",clinic_model.latitude);
                         clinic.put("longitude",clinic_model.longitude);
                         clinic.put("address",clinic_model.address);
-                        clinic.put("city",clinic_model.city);
-                        clinic.put("gov",clinic_model.gov);
-                        clinic.put("hospital",clinic_model.hospital);
-                        clinic.put("doctor_list",clinic_model.doctor_list);
+                        clinic.put("city",new JSONObject(clinic_model.city));
+                        clinic.put("gov",new JSONObject(clinic_model.gov));
+                        clinic.put("hospital",new JSONObject(clinic_model.hospital));
+                        clinic.put("doctor_list",new JSONArray(clinic_model.doctor_list));
                         clinic.put("image_url",clinic_model.image_url);
                         clinic.put("email",clinic_model.email);
-                        clinic.put("insurance_company_list",clinic_model.insurance_company_list);
-                        clinic.put("nurse_list",clinic_model.nurse_list);
+                        clinic.put("insurance_company_list",new JSONArray(clinic_model.insurance_company_list));
+                        clinic.put("nurse_list",new JSONArray(clinic_model.nurse_list));
                         clinic.put("website",clinic_model.website);
                         clinic.put("phone",clinic_model.phone);
 
@@ -226,6 +245,22 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                             doctor_accept_code_s,rating_list,review_list
                             , Double.parseDouble(doctor_fee_s),doctor_info_s
                             ,doctor_code_s,speciality,gender,clinic);
+                }else {
+                    if (speciality_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_speciality_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (clinic_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_clinic_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (doctor_phone_s.length()!=13){
+                        if (doctor_phone_s.length()<13){
+                            Toast.makeText(getActivity(),getResources().getString(R.string.number_is_too_long),Toast.LENGTH_LONG).show();
+                        }else if (doctor_phone_s.length()>13){
+                            Toast.makeText(getActivity(),getResources().getString(R.string.number_is_too_short),Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_fill_data_fields),Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
@@ -233,7 +268,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
             @Override
             public void onClick(View v) {
                 Bundle s=new Bundle();
-                luckysms.gaber.example.com.gallen.patient_module.Fragments.search_specilty_BottomSheetFragment bottomSheetFragment = new search_specilty_BottomSheetFragment();
+                search_specilty_BottomSheetFragment bottomSheetFragment = new search_specilty_BottomSheetFragment();
                 bottomSheetFragment.setArguments(s);
                 bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
                 mListener=bottomSheetFragment;
@@ -304,7 +339,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/doctors/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/doctors/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -335,7 +370,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                                     object.put("code",doctor_code_s);
                                     object.put("id",id);
                                     object.put("_id",_id);
-                                    object.put("speciality",speciality);
+                                    object.put("specialty",speciality);
                                     object.put("gender",gender);
                                     object.put("clinic",clinic);
 
@@ -414,7 +449,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                         object.put("fee",doctor_fee_s);
                         object.put("info",doctor_info_s);
                         object.put("code",doctor_code_s);
-                        object.put("speciality",speciality);
+                        object.put("specialty",speciality);
                         object.put("gender",gender);
                         object.put("clinic",clinic);
 
@@ -449,7 +484,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/clinics/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -524,7 +559,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/clinics/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -547,19 +582,18 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                                     for (int i = 0; i < len; i++) {
                                         JSONObject d = new JSONArray(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("doctor_list","")).getJSONObject(i);
                                         //Excluding the item at position
-                                        if (!new String(d.getString("name").getBytes("ISO-8859-1"), "UTF-8").equals(doctor_name_s)) {
+                                        if (!d.getString("name").equals(doctor_name_s)) {
                                             list.put(jsonArray.get(i));
                                         }
                                     }
                                 }
+                                Log.w("dsakjbsdahk", jsonObject.toString());
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 update_hospital(list.put(jsonObject),getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
                             }
                         }
 
                     } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }
@@ -616,7 +650,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/hospitals/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -730,7 +764,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
         doctor_info.setText(doctor_notes_s);
         Log.w("sfasafs",doctor_image_s+" "+dotor_code_s);
         Picasso.with(getActivity())
-                .load("http://microtec1.egytag.com"+doctor_image_s)
+                .load("http://intmicrotec.neat-url.com:6566"+doctor_image_s)
                 .placeholder(R.drawable.user)
                 .into(doctor_image, new Callback() {
                     @Override
@@ -744,11 +778,8 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
         }else {
             doctor_accept_code.setSelection(2);
         }
-        try {
-            clinics.setText(new String(clinic_model.name.getBytes("ISO-8859-1"), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+
+        clinics.setText(clinic_model.name);
         speciality.setText(speciality_model.name);
     }
     private void uploadImage(String imagePath) {
@@ -783,7 +814,7 @@ public class hospital_doctor_edit extends Fragment implements pass_speciality_da
                     JSONObject object=new JSONObject(new Gson().toJson(response.body()));
                     selected_image_url=object.getString("image_url");
                     Picasso.with(getActivity())
-                            .load("http://microtec1.egytag.com"+selected_image_url)
+                            .load("http://intmicrotec.neat-url.com:6566"+selected_image_url)
                             .placeholder(R.drawable.user)
                             .into(doctor_image, new Callback() {
                                 @Override

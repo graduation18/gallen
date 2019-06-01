@@ -189,7 +189,7 @@ public class hospital_search_edit_doctor extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/hospitals/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -236,7 +236,7 @@ public class hospital_search_edit_doctor extends Fragment {
                                     String  doctor_gender=doctor.getString("gender");
                                     double  doctor_fee=doctor.getDouble("fee");
                                     String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
+                                    String doctor_image= doctor.getString("image_url");
                                     JSONObject specialty=doctor.getJSONObject("specialty");
                                     String specialty__id="";
                                     if (specialty.has("_id")){specialty.getString("_id");}
@@ -267,15 +267,25 @@ public class hospital_search_edit_doctor extends Fragment {
                                             review_list.toString(),doctor_code,doctor_email,doctor_phone,doctor__id);
                                     patient_speciality_model speciality_model=new patient_speciality_model(specialty__id,"ss",specialty_name,specialty_id);
                                     clinic_model clinic_model=new clinic_model(
-                                            clinic.getString("name"), clinic.getString("address"), clinic.getString("phone")
-                                            , clinic.getString("website"),clinic.getString("email"),clinic.getString("image_url"),
-                                            clinic.getInt("id"),clinic.getBoolean("active"),clinic.getJSONObject("hospital").toString(),
-                                            clinic.getJSONObject("gov").toString(),clinic.getJSONObject("city").toString(),
-                                            clinic.getJSONArray("insurance_company_list").toString(),
-                                            clinic.getJSONArray("doctor_list").toString(), clinic.getJSONArray("nurse_list").toString()
+                                            new String(clinic.getString("name").getBytes("ISO-8859-1"), "UTF-8")
+                                            , new String(clinic.getString("address").getBytes("ISO-8859-1"), "UTF-8")
+                                            , clinic.getString("phone")
+                                            , clinic.getString("website")
+                                            ,clinic.getString("email")
+                                            ,clinic.getString("image_url"),
+                                            clinic.getInt("id")
+                                            ,clinic.getBoolean("active"),
+                                            new String(clinic.getJSONObject("hospital").toString().getBytes("ISO-8859-1"), "UTF-8"),
+                                            new String (clinic.getJSONObject("gov").toString().getBytes("ISO-8859-1"), "UTF-8")
+                                            ,new String(clinic.getJSONObject("city").toString().getBytes("ISO-8859-1"), "UTF-8"),
+                                            new String (clinic.getJSONArray("insurance_company_list").toString().getBytes("ISO-8859-1"), "UTF-8"),
+                                            new String (clinic.getJSONArray("doctor_list").toString().getBytes("ISO-8859-1"), "UTF-8")
+                                            ,  new String (clinic.getJSONArray("nurse_list").toString().getBytes("ISO-8859-1"), "UTF-8")
                                             ,clinic.getDouble("latitude"),
-                                            clinic.getDouble("longitude")
+                                            clinic.getDouble("longitude"),
+                                            specialty_name,specialty_id
                                     );
+
                                     doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model,clinic_model));
                                 }
 

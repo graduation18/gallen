@@ -102,6 +102,7 @@ public class hospital_doctor_edit_delete extends Fragment {
             doctor_rating_f=getArguments().getFloat("doctor_rating");
             id_i=getArguments().getInt("id");
             _id=getArguments().getString("_id");
+
             clinic_model=(clinic_model)getArguments().getSerializable("clinic");
 
         }
@@ -130,6 +131,7 @@ public class hospital_doctor_edit_delete extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Fragment fragment=new hospital_search_edit_doctor();
                 go_to(fragment);
             }
@@ -179,12 +181,14 @@ public class hospital_doctor_edit_delete extends Fragment {
 
         return view;
     }
-    public void go_to(Fragment fragment) {
+    public void go_to(Fragment fragment)
+    {
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout, fragment)
                 .commit();
     }
-    private void set_data(){
+    private void set_data()
+    {
         doctor_code.setText(dotor_code_s);
         full_name.setText(doctor_name_s);
         doctor_phone.setText(doctor_phone_s);
@@ -198,6 +202,15 @@ public class hospital_doctor_edit_delete extends Fragment {
 
         }
         speciality.setText(speciality_model.name);
+        Picasso.with(getActivity())
+                .load("http://intmicrotec.neat-url.com:6566"+doctor_image_s)
+                .placeholder(R.drawable.user)
+                .into(doctor_image, new Callback() {
+                    @Override
+                    public void onSuccess() {}
+                    @Override public void onError() {
+                    }
+                });
 
     }
     private void delete_doctor(final int id)
@@ -205,7 +218,192 @@ public class hospital_doctor_edit_delete extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/doctors/delete";
+            String url = "http://intmicrotec.neat-url.com:6566/api/doctors/delete";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONArray list = new JSONArray();
+                                JSONArray jsonArray = new JSONArray(clinic_model.doctor_list);
+                                int len = jsonArray.length();
+                                if (jsonArray != null) {
+                                    for (int i = 0; i < len; i++) {
+                                        JSONObject d = new JSONArray(clinic_model.doctor_list).getJSONObject(i);
+                                        //Excluding the item at position
+                                        if (!d.getString("name").equals(doctor_name_s)) {
+                                            list.put(jsonArray.get(i));
+                                        }
+                                    }
+                                }
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                update_clinics_remove(list, clinic_model.id);
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",id);
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    private void update_clinics_remove(final JSONArray doctor_list,final int id)
+    {
+
+
+        try {
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/update";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONArray list = new JSONArray();
+                                JSONArray jsonArray = new JSONArray(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("doctor_list",""));
+                                int len = jsonArray.length();
+                                if (jsonArray != null) {
+                                    for (int i = 0; i < len; i++) {
+                                        JSONObject d = new JSONArray(getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("doctor_list","")).getJSONObject(i);
+                                        //Excluding the item at position
+                                        if (!d.getString("name").equals(doctor_name_s)) {
+                                            list.put(jsonArray.get(i));
+                                        }
+                                    }
+                                }
+
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                update_hospital(list,getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",id);
+                        object.put("doctor_list",doctor_list);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+            };
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+    private void update_hospital(final JSONArray doctor_list,final int id)
+    {
+
+
+        try {
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -246,12 +444,11 @@ public class hospital_doctor_edit_delete extends Fragment {
                 }
 
                 @Override
-                public byte[] getBody() throws AuthFailureError {
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
                     JSONObject object=new JSONObject();
                     try {
                         object.put("id",id);
-
-
+                        object.put("doctor_list",doctor_list);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

@@ -8,7 +8,7 @@ import retrofit2.http.Part;
 import retrofit2.http.Url;
 
 public interface ApiConfig {
-    static String BASE_URL="http://microtec1.egytag.com/api/";
+    static String BASE_URL="http://intmicrotec.neat-url.com:6566/api/";
     @Multipart
     @POST
     Call<Object> uploadImage(@Url String url, @Part MultipartBody.Part image);

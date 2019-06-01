@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
@@ -154,25 +155,13 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
         appointments_list_model data = contact_list.get(position);
         if (holder.getItemViewType()==0){
             MyViewHolder_finshed finshed=(MyViewHolder_finshed)holder;
-            finshed.name.setText(data.selected_doctor_name);
-            Date date=new Date(data.date);
-            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
-            String date_s = df2.format(date);
-            SimpleDateFormat df1 = new SimpleDateFormat("hh:mm a");
-            String time_s = df1.format(date);
-            finshed.date.setText(date_s);
-            finshed.time.setText(time_s);
+            finshed.time.setText(data.selected_time_name);
+            finshed.date.setText(data.date);
             finshed.speciality.setText(data.selected_specialty_name);
-            Picasso.with(context)
-                    .load(data.image_url)
-                    .placeholder(R.drawable.pharmcy)
-                    .into(finshed.image, new Callback() {
-                        @Override
-                        public void onSuccess() {}
-                        @Override public void onError() {
-                            Toast.makeText(context,"error loading image",Toast.LENGTH_LONG).show();
-                        }
-                    });
+            new AsyncTaskLoadImage(finshed.image).execute(data.image_url);
+
+
+            finshed.name.setText(data.selected_doctor_name);
 
 
 
@@ -180,47 +169,21 @@ public class patient_appointments_list_adapter extends RecyclerView.Adapter<Recy
         }else if (holder.getItemViewType()==1){
             MyViewHolder_not_finshed not_finshed=(MyViewHolder_not_finshed)holder;
             not_finshed.name.setText(data.selected_doctor_name);
-            Date date=new Date(data.date);
-            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
-            String date_s = df2.format(date);
-            SimpleDateFormat df1 = new SimpleDateFormat("hh:mm a");
-            String time_s = df1.format(date);
-            not_finshed.date.setText(date_s);
-            not_finshed.time.setText(time_s);
+
+            not_finshed.time.setText(data.selected_time_name);
+            not_finshed.date.setText(data.date);
             not_finshed.speciality.setText(data.selected_specialty_name);
-            Picasso.with(context)
-                    .load(data.image_url)
-                    .placeholder(R.drawable.pharmcy)
-                    .into(not_finshed.image, new Callback() {
-                        @Override
-                        public void onSuccess() {}
-                        @Override public void onError() {
-                            Toast.makeText(context,"error loading image",Toast.LENGTH_LONG).show();
-                        }
-                    });
+            new AsyncTaskLoadImage(not_finshed.image).execute(data.image_url);
 
 
         }else if (holder.getItemViewType()==2){
             MyViewHolder_cancelled cancelled=(MyViewHolder_cancelled)holder;
             cancelled.name.setText(data.selected_doctor_name);
-            Date date=new Date(data.date);
-            SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
-            String date_s = df2.format(date);
-            SimpleDateFormat df1 = new SimpleDateFormat("hh:mm a");
-            String time_s = df1.format(date);
-            cancelled.date.setText(date_s);
-            cancelled.time.setText(time_s);
+            cancelled.date.setText(data.date);
+            cancelled.time.setText(data.selected_time_name);
             cancelled.speciality.setText(data.selected_specialty_name);
-            Picasso.with(context)
-                    .load(data.image_url)
-                    .placeholder(R.drawable.pharmcy)
-                    .into(cancelled.image, new Callback() {
-                        @Override
-                        public void onSuccess() {}
-                        @Override public void onError() {
-                            Toast.makeText(context,"error loading image",Toast.LENGTH_LONG).show();
-                        }
-                    });
+            new AsyncTaskLoadImage(cancelled.image).execute(data.image_url);
+
         }
 
 

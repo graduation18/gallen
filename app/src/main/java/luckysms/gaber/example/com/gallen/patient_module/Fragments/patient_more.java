@@ -115,7 +115,7 @@ public class patient_more extends Fragment  {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/user/logout";
+            String url = "http://intmicrotec.neat-url.com:6566//api/user/logout";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -133,6 +133,7 @@ public class patient_more extends Fragment  {
                             if (res.getBoolean("done")) {
                                 getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                                         .putString("_id", "")
+                                        .putInt("id", 0)
                                         .putString("email","")
                                         .putString("password"," ")
                                         .putBoolean("state",false)

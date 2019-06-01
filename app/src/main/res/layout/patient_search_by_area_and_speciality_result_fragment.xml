@@ -89,14 +89,19 @@
                     />
                 <android.support.v7.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="120dp"
                     android:background="@color/white"
                     android:layout_margin="5dp"
                     app:cardCornerRadius="15dp"
                     >
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:orientation="horizontal">
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -136,19 +141,35 @@
                                 android:layout_marginLeft="25dp"
                                 android:layout_marginTop="5dp"/>
                         </LinearLayout>
+
+                    </LinearLayout>
                         <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
                             android:padding="10dp">
                             <Button
                                 android:id="@+id/filters"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:drawableLeft="@drawable/ic_tune_black_24dp"
+                                android:drawableLeft="@drawable/ic_filter_results_button"
                                 android:background="@null"
-                                android:layout_margin="@dimen/h5"
+                                android:layout_margin="5dp"
                                 android:hint="@string/filters"
+                                android:layout_gravity="center"
+                                />
+                            <Button
+                                android:id="@+id/clearfilters"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                 android:hint="@string/clear_filters"
+                                android:layout_gravity="center"
+                                android:background="@null"
+                                android:layout_margin="5dp"
+                                android:drawableLeft="@drawable/ic_tune_black_24dp"
+
+
                                 />
                         </LinearLayout>
                     </LinearLayout>
@@ -169,11 +190,23 @@
                     android:layout_margin="5dp"
                     app:cardCornerRadius="15dp"
                     >
+                    <TextView
+                        android:id="@+id/text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:text="@string/no_result_found"
+                        android:textSize="20dp"
+                        android:textColor="@color/green_light"
+                        android:drawableLeft="@drawable/doctor_info"
+                        android:textAlignment="center"/>
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/search_result_recycler"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_margin="5dp"
+                        android:visibility="gone"
+                        android:layoutDirection="ltr"
 
                         />
 

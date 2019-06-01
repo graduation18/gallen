@@ -591,7 +591,7 @@ public class hospital_doctor_edit_working_times extends Fragment {
                     shift.put("times_list",times_list);
                     doctor_list.put(shift);
                     if (selected_doctor!=null) {
-                        get_clinic_by_doctor(selected_doctor.doctor_model.id);
+
                     }else {
                         Toast.makeText(getActivity(),getResources().getText(R.string.please_select_doctor_first),Toast.LENGTH_LONG).show();
                     }
@@ -614,7 +614,7 @@ public class hospital_doctor_edit_working_times extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/clinics/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -688,114 +688,13 @@ public class hospital_doctor_edit_working_times extends Fragment {
 
 
     }
-    private void get_clinic_by_doctor(final int doctor_id)
-    {
 
-
-        try {
-            String url = "http://microtec1.egytag.com:30001/api/clinics/all";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(getActivity());
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-                        if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                for (int i=0;i<list.length();i++) {
-                                    JSONObject clinic=list.getJSONObject(i);
-                                    int id=clinic.getInt("id");
-                                    String name=clinic.getString("name");
-                                    boolean active=clinic.getBoolean("active");
-                                    JSONObject hospital=clinic.getJSONObject("hospital");
-                                    JSONObject gov=clinic.getJSONObject("gov");
-                                    JSONObject city=clinic.getJSONObject("city");
-                                    String address=clinic.getString("address");
-                                    String phone=clinic.getString("phone");
-                                    String website=clinic.getString("website");
-                                    String email=clinic.getString("email");
-                                    String image_url=clinic.getString("image_url");
-                                    JSONArray insurance_company_list=clinic.getJSONArray("insurance_company_list");
-                                    JSONArray doctor_list=clinic.getJSONArray("doctor_list");
-                                    JSONArray nurse_list=clinic.getJSONArray("nurse_list");
-                                    double latitude=clinic.getDouble("latitude");
-                                    double longitude=clinic.getDouble("longitude");
-                                    update_clinic(id,doctor_list);
-                                    selected_clinic=new clinic_model(name,address,phone,website,email,image_url
-                                            ,id,active,hospital.toString(),gov.toString(),city.toString(),insurance_company_list.toString(),doctor_list.toString(),nurse_list.toString(),latitude,longitude);
-                                }
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
-
-                }
-            }){
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-                    return pars;
-                }
-
-                @Override
-                public byte[] getBody() throws AuthFailureError {
-                    JSONObject object=new JSONObject();
-                    try {
-                        JSONObject where=new JSONObject();
-                        where.put("doctor_list.doctor.id",doctor_id);
-                        object.put("where",where);
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.w("sadkjsdkjlljksda",object.toString());
-                    return object.toString().getBytes();
-
-                };
-
-                public String getBodyContentType()
-                {
-                    return "application/json; charset=utf-8";
-                }
-
-            };
-            stringReq.setRetryPolicy(new DefaultRetryPolicy(
-                    10000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
     private void get_specialties_data()
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/medical_specialties/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/medical_specialties/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -913,7 +812,7 @@ public class hospital_doctor_edit_working_times extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/tickets/add";
+            String url = "http://intmicrotec.neat-url.com:6566/api/tickets/add";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -1076,7 +975,7 @@ public class hospital_doctor_edit_working_times extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/hospitals/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -1122,7 +1021,7 @@ public class hospital_doctor_edit_working_times extends Fragment {
                                     String  doctor_gender=doctor.getString("gender");
                                     double  doctor_fee=doctor.getDouble("fee");
                                     String doctor_name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
-                                    String doctor_image= "http://microtec1.egytag.com"+doctor.getString("image_url");
+                                    String doctor_image= "http://intmicrotec.neat-url.com:6566"+doctor.getString("image_url");
                                     JSONObject specialty=doctor.getJSONObject("specialty");
                                     String specialty__id="";
                                     if (specialty.has("_id")){specialty.getString("_id");}
@@ -1159,7 +1058,7 @@ public class hospital_doctor_edit_working_times extends Fragment {
                                             clinic.getJSONObject("gov").toString(),clinic.getJSONObject("city").toString()
                                             ,clinic.getJSONArray("insurance_company_list").toString(),clinic.getJSONArray("doctor_list").toString()
                                             ,clinic.getJSONArray("nurse_list").toString(),clinic.getDouble("latitude"),
-                                            clinic.getDouble("longitude")
+                                            clinic.getDouble("longitude"),specialty_name,specialty_id
                                     );
                                     doctor_name_list.add(new search_doctor_name_model(doctor_model,speciality_model,clinic_model));
                                 }

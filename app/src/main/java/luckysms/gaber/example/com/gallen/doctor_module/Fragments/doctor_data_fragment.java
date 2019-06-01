@@ -73,8 +73,8 @@ public class doctor_data_fragment extends Fragment {
     private RatingBar rating;
     private RecyclerView available_appointments_recycler,reviews_recycler;
     private List<available_appointments_list_model> contact_list = new ArrayList<>();
-    private List<reviews_list_model> reviews_list = new ArrayList<>();
     private patient_doctor_available_appointments_list_adapter data_adapter;
+    private List<reviews_list_model> reviews_list = new ArrayList<>();
     private patient_doctor_reviews_list_adapter reviews_list_adapter;
     appointment_Listener mCallback;
     private RequestQueue queue;
@@ -102,7 +102,7 @@ public class doctor_data_fragment extends Fragment {
         rating=(RatingBar)view.findViewById(R.id.rating);
         vistors_reviews=(Button)view.findViewById(R.id.vistors_reviews);
         available_appointments_recycler = view.findViewById(R.id.available_appointments_recycler);
-        data_adapter = new patient_doctor_available_appointments_list_adapter(getActivity(), contact_list);
+        data_adapter = new patient_doctor_available_appointments_list_adapter(getActivity(), contact_list,true);
         LinearLayoutManager layoutManager
                 = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
         available_appointments_recycler.setLayoutManager(layoutManager);
@@ -142,7 +142,7 @@ public class doctor_data_fragment extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/doctors/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/doctors/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -169,7 +169,7 @@ public class doctor_data_fragment extends Fragment {
                                 String  doctor_location=new String ((doc.getJSONObject("gov").getString("name")
                                             +doc.getJSONObject("city").getString("name")
                                             +doc.getString("address")).getBytes("ISO-8859-1"),"UTF-8");
-                                String doctor_image= "http://microtec1.egytag.com"+doc.getString("image_url");
+                                String doctor_image= "http://intmicrotec.neat-url.com:6566"+doc.getString("image_url");
                                     boolean doctor_accept_discount=true;
                                      Float doctor_rating=4f;
                                      double doctor_fees=200;
@@ -270,7 +270,7 @@ public class doctor_data_fragment extends Fragment {
     {
 
         try {
-            String url = "http://microtec1.egytag.com/api/tickets/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/tickets/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -297,6 +297,7 @@ public class doctor_data_fragment extends Fragment {
                                     for (int i=0;i<list.length();i++) {
                                         JSONObject object = list.getJSONObject(i);
                                         JSONObject selected_time=object.getJSONObject("selected_time");
+                                        int ticket_id=object.getInt("id");
                                         JSONObject status=new JSONObject();
                                         int status_id=0;
                                         if (object.has("status")) {
@@ -304,7 +305,7 @@ public class doctor_data_fragment extends Fragment {
                                             status_id=status.getInt("id");
                                         }
 
-                                        if (status_id==0){
+
                                             JSONObject day_ob=selected_time.getJSONObject("day_ob");
                                             int day_id=day_ob.getInt("id");
                                             String day_name=day_ob.getString("en");
@@ -314,9 +315,10 @@ public class doctor_data_fragment extends Fragment {
                                             JSONObject to_obj=selected_time.getJSONObject("to_obj");
                                             int to_id=to_obj.getInt("id");
                                             String to_name=to_obj.getString("en");
-                                            contact_list.add(new available_appointments_list_model(day_name,from_name,to_name,day_id,from_id,to_id));
+                                            contact_list.add(new available_appointments_list_model(day_name,from_name
+                                                    ,to_name,day_id,from_id,to_id,ticket_id,status_id));
 
-                                        }
+
                                     }
                                     data_adapter.notifyDataSetChanged();
                                 }else {
@@ -356,7 +358,7 @@ public class doctor_data_fragment extends Fragment {
                     JSONObject object=new JSONObject();
                     try {
                         JSONObject where=new JSONObject();
-                        where.put("doctor_list.doctor.id",getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
+                        where.put("selected_doctor.id",getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
                         where.put("date",new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
                         where.put("status.id",0);
                         object.put("where",where);

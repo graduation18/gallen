@@ -45,6 +45,7 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.rilixtech.CountryCodePicker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,6 +92,7 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
     private EditText hospital_code,full_name,hospital_address,email_address,website,hospital_phone;
     private Button speciality,governorates,area,insurance_company,save;
     private TextView back,number_of_notifications,notifications;
+    private CountryCodePicker cpp;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
     private pass_speciality_data mListener;
@@ -101,7 +103,6 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
     private patient_gov_model gov_model;
     private patient_insurance_model insurance_model;
     private patient_speciality_model speciality_model;
-
     private double latitude ;
     private double longitude;
     private String address;
@@ -125,6 +126,7 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
         insurance_company=(Button)view.findViewById(R.id.insurance_company);
         save=(Button)view.findViewById(R.id.save);
         mprogressBar = (ProgressBar)view.findViewById(R.id.progressBar);
+        cpp=(CountryCodePicker)view.findViewById(R.id.ccp);
         check_forall_permissions();
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,15 +151,16 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
                 String hospital_address_s=hospital_address.getText().toString();
                 String email_address_s=email_address.getText().toString();
                 String website_s=website.getText().toString();
-                String hospital_phone_s=hospital_phone.getText().toString();
+                String hospital_phone_s="+"+cpp.getSelectedCountryCode()+hospital_phone.getText().toString();
                 JSONObject hospital=new JSONObject();
                 JSONObject gov=new JSONObject();
                 JSONObject city=new JSONObject();
                 JSONArray insurance_company_list=new JSONArray();
+                JSONObject specialty=new JSONObject();
 
 
                 if (hospital_code_s.length()>0&&full_name_s.length()>0&&
-                        email_address_s.length()>0&&hospital_phone_s.length()>0&&city_model!=null
+                        email_address_s.length()>0&&hospital_phone_s.length()==13&&city_model!=null
                         &&speciality_model!=null&&gov_model!=null&&insurance_model!=null) {
 
                     try {
@@ -170,6 +173,9 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
                         city.put("id",city_model.id);
                         city.put("name",city_model.name);
 
+                        specialty.put("name",speciality_model.name);
+                        specialty.put("id",speciality_model.id);
+
                         JSONObject insurance_company =new JSONObject();
                         insurance_company.put("id",insurance_model.id);
                         insurance_company.put("name",insurance_model.name);
@@ -179,9 +185,32 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
                             mprogressBar.setVisibility(View.VISIBLE);
                             add_clinic(full_name_s,true,hospital,gov,city
                                     ,address,hospital_phone_s,website_s,email_address_s,getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("image_url", "hospital"),
-                                    insurance_company_list,new JSONArray(),new JSONArray());
+                                    insurance_company_list,new JSONArray(),new JSONArray(),specialty);
                     } catch (JSONException e) {
                         e.printStackTrace();
+                    }
+
+                }else {
+                    if (speciality_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_speciality_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (gov_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_government_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (city_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_city_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (insurance_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_insurance_company_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (hospital_phone_s.length()!=13){
+                        if (hospital_phone_s.length()<13){
+                            Toast.makeText(getActivity(),getResources().getString(R.string.number_is_too_long),Toast.LENGTH_LONG).show();
+                        }else if (hospital_phone_s.length()>13){
+                            Toast.makeText(getActivity(),getResources().getString(R.string.number_is_too_short),Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_fill_data_fields),Toast.LENGTH_LONG).show();
                     }
 
                 }
@@ -255,12 +284,12 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
     }
     private void add_clinic(final String name, final boolean active, final JSONObject hospital, final JSONObject gov, final JSONObject city, final String address, final String phone
             , final String website, final String email , final String image_url , final JSONArray insurance_company_list,
-                            final JSONArray doctor_list , final JSONArray nurse_list)
+                            final JSONArray doctor_list , final JSONArray nurse_list,final JSONObject specialty)
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/clinics/add";
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/add";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -323,6 +352,7 @@ public class hospital_clinic_definition extends Fragment implements pass_gov_dat
                         object.put("website",website);
                         object.put("email",email);
                         object.put("image_url",image_url);
+                        object.put("specialty",specialty);
                         object.put("insurance_company_list",insurance_company_list);
                         object.put("doctor_list",doctor_list);
                         object.put("nurse_list",nurse_list);

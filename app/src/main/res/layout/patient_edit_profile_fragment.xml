@@ -135,6 +135,15 @@
                 android:drawablePadding="15dp"
                 android:hint="@string/insurance_company"
                 android:textSize="15dp" />
+            <Button
+                android:id="@+id/country"
+                android:layout_width="250dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:background="@drawable/round_button_2"
+                android:hint="@string/country"
+                />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

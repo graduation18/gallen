@@ -37,6 +37,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.mukesh.countrypicker.CountryPicker;
+import com.mukesh.countrypicker.CountryPickerListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,7 +69,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
     private Button confirm;
     private TextView back,number_of_notifications,notifications;
     private EditText full_name,mobile_number,email_address,date_of_birth;
-    private Button insurance_company;
+    private Button insurance_company,country;
     private RequestQueue queue;
     private int insurance_company_i;
     private ProgressBar mprogressBar;
@@ -90,6 +92,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
         date_of_birth=(EditText) view.findViewById(R.id.date_of_birth);
         email_address=(EditText) view.findViewById(R.id.email_address);
         insurance_company=(Button) view.findViewById(R.id.insurance_company);
+        country=(Button)view.findViewById(R.id.country);
         back=(TextView)view.findViewById(R.id.back);
         number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
         notifications=(TextView)view.findViewById(R.id.notifications);
@@ -116,6 +119,21 @@ public class patient_update_data extends Fragment implements pass_insurance_data
             }
 
         });
+        country.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final CountryPicker picker = CountryPicker.newInstance("Select Country");  // dialog title
+                picker.setListener(new CountryPickerListener() {
+                    @Override
+                    public void onSelectCountry(String name, String code, String dialCode, int flagDrawableResID) {
+                        // Implement your code here
+                        country.setText(name);
+                        picker.dismiss();
+                    }
+                });
+                picker.show(getChildFragmentManager(), "COUNTRY_PICKER");
+            }
+        });
 
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,8 +143,11 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                 String email_address_s=email_address.getText().toString();
                 String date_of_birth_s=date_of_birth.getText().toString();
                 String insurance_company_s=insurance_company.getText().toString();
+                String country_s=country.getText().toString();
+                Log.w("khdsddsaasdk",date_of_birth_s);
 
-                update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s,insurance_company_s,insurance_model.id,insurance_model.name);
+                update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s
+                        ,insurance_company_s,insurance_model.id,insurance_model.name,country_s);
             }
         });
 
@@ -167,12 +188,12 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                 .commit();
     }
     private void update(final String full_name_s, final String mobile_number_s, final String email_address_s
-            , final String date_of_birth_s, final String insurance_company_s,final  int insurance_company_i,final String insurance_company__i)
+            , final String date_of_birth_s, final String insurance_company_s,final  int insurance_company_i,final String insurance_company__i,final String country_s)
     {
 
 
         try {
-                String url = "http://microtec1.egytag.com/api/patients/update";
+                String url = "http://intmicrotec.neat-url.com:6566/api/patients/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -226,12 +247,14 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                         object.put("name",full_name_s);
                         object.put("mobile",mobile_number_s);
                         object.put("email",email_address_s);
-                        object.put("birth_date",date_of_birth_s);
+                        object.put("birth_date_day",date_of_birth_s);
                         JSONObject insurance=new JSONObject();
                         insurance.put("name",insurance_company_s);
                         insurance.put("id",insurance_company_i);
                         insurance.put("_id",insurance_company__i);
                         object.put("insurance_company",insurance);
+                        object.put("country",country_s);
+
 
 
                     } catch (JSONException e) {
@@ -262,7 +285,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/patients/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -285,8 +308,8 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                                 mobile_number.setText(doc.getString("mobile"));
                                 full_name.setText(new String (doc.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
                                 email_address.setText(doc.getString("username"));
-                                date_of_birth.setText(doc.getString("birth_date"));
-                                JSONObject insurance=doc.getJSONObject("insurance");
+                                date_of_birth.setText(doc.getString("birth_date_day"));
+                                JSONObject insurance=doc.getJSONObject("insurance_company");
                                 insurance_company.setText(new String(insurance.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
                                 insurance_model=new patient_insurance_model("","",insurance.getString("name"),insurance.getInt("id"));
 
@@ -366,14 +389,12 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                     public void onDateSet(DatePicker view, int year,
                                           int monthOfYear, int dayOfMonth) {
 
-                        date_of_birth.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                        date_of_birth.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
 
                     }
                 }, mYear, mMonth, mDay);
         datePickerDialog.show();
     }
-
-
     @Override
     public void pass_data(patient_insurance_model insurance_model, pass_insurance_data listner) {
         this.insurance_model=insurance_model;

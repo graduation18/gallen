@@ -185,7 +185,7 @@ public class search_clinics_BottomSheetFragment extends BottomSheetDialogFragmen
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/clinics/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -219,6 +219,9 @@ public class search_clinics_BottomSheetFragment extends BottomSheetDialogFragmen
                                     JSONObject hospital=object.getJSONObject("hospital");
                                     JSONObject gov=object.getJSONObject("gov");
                                     JSONObject city=object.getJSONObject("city");
+                                    JSONObject specialty=object.getJSONObject("specialty");
+                                    int specialty_id=specialty.getInt("id");
+                                    String specialty_name=new String(specialty.getString("name").getBytes("ISO-8859-1"), "UTF-8");
                                     String  address = "";
                                             if(object.has("address")){address=object.getString("address");}
                                     String phone=object.getString("phone");
@@ -240,11 +243,11 @@ public class search_clinics_BottomSheetFragment extends BottomSheetDialogFragmen
                                     }
                                     Log.w("sdaddasadsdsaas",name);
 
-                                    clinic_model speciality=  new clinic_model( name, address, phone, website, email, image_url
+                                    clinic_model clinic=  new clinic_model( name, address, phone, website, email, image_url
                                             , id, active, hospital.toString(),  gov.toString(), city.toString()
                                             , insurance_company_list.toString(),
-                                            doctor_list.toString(),  nurse_list.toString(), latitude, longitude);
-                                    clinics_list.add(speciality);
+                                            doctor_list.toString(),  nurse_list.toString(), latitude, longitude,specialty_name,specialty_id);
+                                    clinics_list.add(clinic);
 
 
                                 }

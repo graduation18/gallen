@@ -16,6 +16,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
@@ -82,24 +83,9 @@ public class patient_favourite_list_adapter extends RecyclerView.Adapter<patient
         holder.graduated_from.setText(data.doctor_graduated);
         holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_fee));
         holder.rating.setRating(data.doctor_rating);
-        /*Picasso.with(context)
-                .load(data.doctor_model.doctor_image)
-                .placeholder(R.drawable.pharmcy)
-                .into(holder.image, new Callback() {
-                    @Override
-                    public void onSuccess() {}
-                    @Override public void onError() {
-                    }
-                });*/
-        Picasso.with(context)
-                .load(data.doctor_image)
-                .placeholder(R.drawable.pharmcy)
-                .into(holder.image, new Callback() {
-                    @Override
-                    public void onSuccess() {}
-                    @Override public void onError() {
-                    }
-                });
+
+        String url =data.doctor_image;
+        new AsyncTaskLoadImage(holder.image).execute(url);
 
 
 

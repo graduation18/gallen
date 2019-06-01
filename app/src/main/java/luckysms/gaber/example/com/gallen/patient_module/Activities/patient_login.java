@@ -104,7 +104,7 @@ public class patient_login extends AppCompatActivity {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/user/login";
+            String url = "http://intmicrotec.neat-url.com:6566/api/user/login";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
             }
@@ -135,6 +135,8 @@ public class patient_login extends AppCompatActivity {
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .putString("accessToken",res.getString("accessToken"))
                                         .putString("type",user.getString("type"))
+                                        .putString("image_url",user.getString("image_url"))
+                                        .putString("name",user.getString("name"))
                                         .commit();
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 Intent got_confirm_code = new Intent(patient_login.this, patient_confirm_code.class);

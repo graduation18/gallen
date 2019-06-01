@@ -173,7 +173,7 @@ public class search_gov_BottomSheetFragment extends BottomSheetDialogFragment im
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/goves/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/goves/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

@@ -1,5 +1,6 @@
 package luckysms.gaber.example.com.gallen.hospital_module.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ import com.fxn.pix.Pix;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.rilixtech.CountryCodePicker;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -49,6 +51,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,6 +106,8 @@ public class hospital_doctor_definition extends Fragment implements pass_special
     private RequestQueue queue;
     private ProgressBar mprogressBar;
     private String selected_image_url="";
+    private CountryCodePicker cpp;
+
 
     @Nullable
     @Override
@@ -127,6 +133,7 @@ public class hospital_doctor_definition extends Fragment implements pass_special
         doctor_image=(ImageView)view.findViewById(R.id.doctor_image);
         group=(RadioGroup)view.findViewById(R.id.radioGroup);
         selected_gender=(RadioButton)view.findViewById(R.id.male);
+        cpp=(CountryCodePicker)view.findViewById(R.id.ccp);
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,22 +161,23 @@ public class hospital_doctor_definition extends Fragment implements pass_special
             }
         });
         save.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("NewApi")
             @Override
             public void onClick(View v) {
                 String doctor_code_s=doctor_code.getText().toString();
                 String full_name_s=full_name.getText().toString();
-                String doctor_phone_s=doctor_phone.getText().toString();
+                String doctor_phone_s="+"+cpp.getSelectedCountryCode()+doctor_phone.getText().toString();
                 String email_address_s=email_address.getText().toString();
                 String doctor_fee_s=doctor_fee.getText().toString();
                 String doctor_info_s=doctor_info.getText().toString();
                 String gender=selected_gender.getText().toString();
                 boolean doctor_status_s=false;
-                if (doctor_status.getSelectedItem().toString().contains(getResources().getString(R.string.active))){
+                if (doctor_status.getSelectedItem().toString().equals(getResources().getString(R.string.active))){
                     doctor_status_s=true;
                 }
 
                 boolean doctor_accept_code_s=false;
-                if (doctor_accept_code.getSelectedItem().toString().contains(getResources().getString(R.string.Accepts_the_discount_code))){
+                if (doctor_accept_code.getSelectedItem().toString().equals(getResources().getString(R.string.Accepts_the_discount_code))){
                     doctor_accept_code_s=true;
                 }
                 JSONArray rating_list=new JSONArray();
@@ -177,8 +185,8 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                 JSONObject hospital=new JSONObject();
                 JSONObject speciality=new JSONObject();
                 JSONObject clinic=new JSONObject();
-                if (selected_image_url.length()>0&&doctor_code_s.length()>0&&full_name_s.length()>0&&doctor_phone_s.length()>0
-                        &&email_address_s.length()>0 &&doctor_fee_s.length()>0&&doctor_info_s.length()>0
+                if (selected_image_url.length()>0&&doctor_code_s.length()>0&&full_name_s.length()>0&&doctor_phone_s.length()==13
+                        &&email_address_s.length()>0 &&doctor_fee_s.length()>0
                         &&speciality_model!=null&&clinic_model!=null){
                 try {
                     hospital.put("id",getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getInt("id",0));
@@ -193,20 +201,22 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                     clinic.put("latitude",clinic_model.latitude);
                     clinic.put("longitude",clinic_model.longitude);
                     clinic.put("address",clinic_model.address);
-                    clinic.put("city",clinic_model.city);
-                    clinic.put("gov",clinic_model.gov);
-                    clinic.put("hospital",clinic_model.hospital);
-                    clinic.put("doctor_list",clinic_model.doctor_list);
-                    clinic.put("image_url",clinic_model.image_url);
+                    clinic.put("city",new JSONObject(new String (clinic_model.city.getBytes("ISO-8859-1"), "UTF-8")));
+                    clinic.put("gov",new JSONObject(new String (clinic_model.gov.getBytes("ISO-8859-1"), "UTF-8")));
+                    clinic.put("image_url",clinic_model.image_url.getBytes("UTF-8"));
                     clinic.put("email",clinic_model.email);
-                    clinic.put("insurance_company_list",clinic_model.insurance_company_list);
-                    clinic.put("nurse_list",clinic_model.nurse_list);
+                    clinic.put("insurance_company_list",new JSONArray(new String(clinic_model.insurance_company_list.getBytes("ISO-8859-1"), "UTF-8")));
+                    clinic.put("nurse_list",new JSONArray(clinic_model.nurse_list));
                     clinic.put("website",clinic_model.website);
                     clinic.put("phone",clinic_model.phone);
+                    clinic.put("doctor_list",new JSONArray(new String (clinic_model.doctor_list.getBytes("ISO-8859-1"), "UTF-8")));
+                    clinic.put("hospital",hospital);
 
 
 
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
 
@@ -215,6 +225,22 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                             doctor_accept_code_s,rating_list,review_list
                             , Integer.parseInt(doctor_fee_s),doctor_info_s
                             ,doctor_code_s,speciality,gender,clinic);
+                }else {
+                    if (speciality_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_speciality_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (clinic_model==null){
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_select_clinic_first),Toast.LENGTH_LONG).show();
+                    }
+                    else if (doctor_phone_s.length()!=13){
+                        if (doctor_phone_s.length()<13){
+                            Toast.makeText(getActivity(),getResources().getString(R.string.number_is_too_long),Toast.LENGTH_LONG).show();
+                        }else if (doctor_phone_s.length()>13){
+                            Toast.makeText(getActivity(),getResources().getString(R.string.number_is_too_short),Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        Toast.makeText(getActivity(),getResources().getString(R.string.please_fill_data_fields),Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
@@ -222,7 +248,10 @@ public class hospital_doctor_definition extends Fragment implements pass_special
             @Override
             public void onClick(View v) {
                 Bundle s=new Bundle();
-                luckysms.gaber.example.com.gallen.patient_module.Fragments.search_specilty_BottomSheetFragment bottomSheetFragment = new search_specilty_BottomSheetFragment();
+                if (clinic_model!=null) {
+                    s.putInt("speciality_id", clinic_model.specialty_id);
+                }
+                search_specilty_BottomSheetFragment bottomSheetFragment = new search_specilty_BottomSheetFragment();
                 bottomSheetFragment.setArguments(s);
                 bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
                 mListener=bottomSheetFragment;
@@ -295,7 +324,7 @@ public class hospital_doctor_definition extends Fragment implements pass_special
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/doctors/add";
+            String url = "http://intmicrotec.neat-url.com:6566/api/doctors/add";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -324,14 +353,19 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                                 object.put("fee",doctor_fee_s);
                                 object.put("info",doctor_info_s);
                                 object.put("code",doctor_code_s);
-                                object.put("id",res.getInt("id"));
-                                object.put("_id",res.getString("_id"));
-                                object.put("speciality",speciality);
+                                object.put("id",res.getJSONObject("doc").getInt("id"));
+                                object.put("_id",res.getJSONObject("doc").getString("_id"));
+                                object.put("specialty",speciality);
                                 object.put("gender",gender);
                                 object.put("clinic",clinic);
 
                                 mprogressBar.setVisibility(View.VISIBLE);
-                                update_clinics(new JSONArray(clinic_model.doctor_list).put(object),clinic_model.id,object);
+                                if (clinic_model.doctor_list.length()>0){
+                                    update_clinics(new JSONArray(clinic_model.doctor_list).put(object),clinic_model.id,object);
+                                }else {
+                                    update_clinics(new JSONArray().put(object),clinic_model.id,object);
+
+                                }
                             }
                         }
 
@@ -372,7 +406,7 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                         object.put("fee",doctor_fee_s);
                         object.put("info",doctor_info_s);
                         object.put("code",doctor_code_s);
-                        object.put("speciality",speciality);
+                        object.put("specialty",speciality);
                         object.put("gender",gender);
                         object.put("clinic",clinic);
                     } catch (JSONException e) {
@@ -401,12 +435,13 @@ public class hospital_doctor_definition extends Fragment implements pass_special
 
 
     }
+    @SuppressLint("NewApi")
     private void update_clinics(final JSONArray doctor_list, final int id, final JSONObject object)
     {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/clinics/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/clinics/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -423,10 +458,20 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                         if (res.has("done")) {
                             if (res.getBoolean("done")) {
                                 mprogressBar.setVisibility(View.VISIBLE);
-                                JSONArray array=new JSONArray(getActivity().getSharedPreferences("personal_data",MODE_PRIVATE)
-                                        .getString("doctor_list",""));
-                                array.put(object);
-                                update_hospital(array,getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+                                if (getActivity().getSharedPreferences("personal_data",MODE_PRIVATE)
+                                        .getString("doctor_list","").length()>0){
+                                    String unicodeUrl =getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getString("doctor_list","");
+                                     JSONArray array=new JSONArray(unicodeUrl);
+                                    array.put(object);
+                                    update_hospital(array,getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+
+                                }else {
+                                    JSONArray array=new JSONArray();
+                                    array.put(object);
+                                    update_hospital(array,getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+
+                                }
+
                             }
                         }
 
@@ -487,7 +532,7 @@ public class hospital_doctor_definition extends Fragment implements pass_special
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/hospitals/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -629,7 +674,7 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                     JSONObject object=new JSONObject(new Gson().toJson(response.body()));
                     selected_image_url=object.getString("image_url");
                     Picasso.with(getActivity())
-                            .load("http://microtec1.egytag.com"+selected_image_url)
+                            .load("http://intmicrotec.neat-url.com:6566"+selected_image_url)
                             .placeholder(R.drawable.user)
                             .into(doctor_image, new Callback() {
                                 @Override

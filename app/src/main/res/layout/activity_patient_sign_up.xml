@@ -92,7 +92,8 @@
                     android:layout_gravity="center"
                     android:background="@drawable/rounded_edit_text1"
                     android:drawableLeft="@drawable/phone_call"
-                    android:drawablePadding="15dp">
+                    android:drawablePadding="15dp"
+                    android:layoutDirection="ltr">
                     <com.rilixtech.CountryCodePicker
                         android:id="@+id/ccp"
                         android:layout_width="wrap_content"
@@ -104,9 +105,8 @@
                         />
                     <EditText
                         android:id="@+id/mobile_number"
-                        android:layout_width="250dp"
-                        android:layout_height="40dp"
-                        android:padding="8dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
                         android:hint="@string/mobile_number"
@@ -142,18 +142,22 @@
                         android:drawablePadding="15dp"
                         android:hint="@string/password"
                         android:padding="8dp"
-                        android:textSize="15dp" />
+                        android:textSize="15dp"
+                        android:inputType="textPassword"
+                        />
 
                     <Button
                         android:id="@+id/see_password"
-                        android:layout_width="15dp"
-                        android:layout_height="10dp"
+                        android:layout_width="25dp"
+                        android:layout_height="15dp"
                         android:layout_alignEnd="@+id/password"
                         android:layout_alignRight="@+id/password"
                         android:layout_alignBottom="@+id/password"
                         android:layout_marginEnd="25dp"
                         android:layout_marginRight="25dp"
                         android:layout_marginBottom="14dp"
+                        android:scaleX=".5"
+                        android:scaleY=".5"
                         android:background="@drawable/eye_show_password" />
                 </RelativeLayout>
                 <RelativeLayout
@@ -172,18 +176,21 @@
                         android:drawableLeft="@drawable/password"
                         android:drawablePadding="15dp"
                         android:hint="@string/confirm_password"
-                        android:textSize="15dp" />
+                        android:textSize="15dp"
+                        android:inputType="textPassword"/>
 
                     <Button
                         android:id="@+id/see_confirm_password"
-                        android:layout_width="15dp"
-                        android:layout_height="10dp"
+                        android:layout_width="25dp"
+                        android:layout_height="15dp"
                         android:layout_alignEnd="@+id/confirm_password"
                         android:layout_alignRight="@+id/confirm_password"
                         android:layout_alignBottom="@+id/confirm_password"
                         android:layout_marginEnd="25dp"
                         android:layout_marginRight="25dp"
                         android:layout_marginBottom="15dp"
+                        android:scaleX=".5"
+                        android:scaleY=".5"
                         android:background="@drawable/eye_show_password" />
                 </RelativeLayout>
                 <EditText
@@ -198,6 +205,28 @@
                     android:drawablePadding="15dp"
                     android:hint="@string/date_of_birth"
                     android:textSize="15dp" />
+
+                <Button
+                    android:id="@+id/country"
+                    android:layout_width="250dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/round_button_2"
+                    android:hint="@string/country"
+                    />
+                <Button
+                    android:id="@+id/governorates"
+                    android:layout_width="250dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/rounded_edit_text1"
+                    android:hint="@string/all_governorates"
+                    android:padding="5dp"
+                    android:textAlignment="center"
+                    android:textSize="15dp"
+                    android:completionThreshold="1"/>
                 <Button
                     android:id="@+id/city"
                     android:layout_width="250dp"
@@ -211,28 +240,6 @@
                     android:textSize="15dp"
                     android:completionThreshold="1"/>
 
-                <Button
-                    android:id="@+id/governorates"
-                    android:layout_width="250dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/rounded_edit_text1"
-                    android:hint="@string/all_governorates"
-                    android:padding="5dp"
-                    android:textAlignment="center"
-                    android:textSize="15dp"
-                    android:completionThreshold="1"/>
-
-                <Button
-                    android:id="@+id/country"
-                    android:layout_width="250dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/round_button_2"
-                    android:hint="@string/country"
-                    />
 
                 <Button
                 android:id="@+id/insurance_company"

@@ -1,6 +1,8 @@
 package luckysms.gaber.example.com.gallen.patient_module.Model;
 
-public class patient_city_model {
+import java.io.Serializable;
+
+public class patient_city_model implements Serializable {
     public String _id,image_url,name,gov_id,gov_name;
     public int id,govid;
     public patient_city_model(String _id, String image_url, String name, String gov_id, String gov_name, int id, int govid){

@@ -95,13 +95,12 @@ public class patient_search_by_area_fragment extends Fragment implements pass_go
     private Button city,governorates;
     private FusedLocationProviderClient mFusedLocationClient;
     private String state;
-    private int speciality_id;
-    private String speciality_s;
     private boolean visitor;
     private pass_city_data mListener_city;
     private pass_gov_data mListener_gov;
     private patient_city_model city_model;
     private patient_gov_model gov_model;
+    private patient_speciality_model speciality_model;
 
 
     @Override
@@ -109,8 +108,8 @@ public class patient_search_by_area_fragment extends Fragment implements pass_go
         super.onAttach(context);
         if (getArguments()!=null){
             visitor=getArguments().getBoolean("visitor");
-            speciality_id = getArguments().getInt("speciality");
-            speciality_s=getArguments().getString("speciality_s");
+            speciality_model = (patient_speciality_model) getArguments().getSerializable("speciality");
+
         }
     }
 
@@ -227,22 +226,12 @@ public class patient_search_by_area_fragment extends Fragment implements pass_go
                 Fragment fragment=new patient_search_results_fragment();
                 Bundle args = new Bundle();
                 if (city_model!=null){
-                    args.putInt("city",city_model.id);
-                }else {
-                    args.putInt("city",0);
+                    args.putSerializable("city",city_model);
                 }
-
                 if (gov_model!=null){
-                    args.putInt("governorate",gov_model.id);
-                    }else {
-                    args.putInt("governorate",0);
-
+                    args.putSerializable("governorate",gov_model);
                 }
-                args.putInt("speciality",0);
-                args.putInt("speciality",speciality_id);
-                args.putString("city_s",city.getText().toString());
-                args.putString("governorate_s",governorates.getText().toString());
-                args.putString("speciality_s",speciality_s);
+                args.putSerializable("speciality",speciality_model);
                 if (visitor){
                     args.putBoolean("visitor",true);
                 }

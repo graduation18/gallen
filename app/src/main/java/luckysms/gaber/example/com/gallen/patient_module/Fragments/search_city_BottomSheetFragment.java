@@ -172,7 +172,7 @@ public class search_city_BottomSheetFragment extends BottomSheetDialogFragment i
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/cities/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/cities/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

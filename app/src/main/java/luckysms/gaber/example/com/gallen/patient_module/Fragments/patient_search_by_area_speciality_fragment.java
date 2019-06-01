@@ -123,7 +123,6 @@ public class patient_search_by_area_speciality_fragment extends Fragment impleme
                                               bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
                                               mListener=bottomSheetFragment;
                                               mListener.pass_data(null,patient_search_by_area_speciality_fragment.this);
-
                                           }
                                       });
         view.setFocusableInTouchMode(true);
@@ -154,8 +153,7 @@ public class patient_search_by_area_speciality_fragment extends Fragment impleme
                 if (speciality_model!=null) {
                     Fragment fragment = new patient_search_by_area_fragment();
                     Bundle args = new Bundle();
-                    args.putInt("speciality", speciality_model.id);
-                    args.putString("speciality_s", speciality_model.name);
+                    args.putSerializable("speciality", speciality_model);
                     if (visitor) {
                         args.putBoolean("visitor", true);
                     }

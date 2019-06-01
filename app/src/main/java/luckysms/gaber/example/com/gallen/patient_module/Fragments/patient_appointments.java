@@ -92,8 +92,11 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
             }
         });
-        mprogressBar.setVisibility(View.VISIBLE);
-        get_appointments(getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+
+        if (getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0)!=0) {
+            mprogressBar.setVisibility(View.VISIBLE);
+            get_appointments(getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+        }
         return view;
     }
 
@@ -102,7 +105,7 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/tickets/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/tickets/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -132,12 +135,12 @@ public class patient_appointments extends Fragment implements appointment_Listen
                                     String _id=appointment.getString("_id");
                                     int id=appointment.getInt("id");
                                     String image_url = appointment.getString("image_url");
-                                    long date=appointment.getInt("date");
+                                    String  date=appointment.getJSONObject("ticket_date").getString("date");
                                     JSONObject status=appointment.getJSONObject("status");
                                     int status_id=status.getInt("id");
-                                    String status_name=new String (status.getString("name").getBytes("ISO-8859-1"),"UTF-8");
                                     String status_en=status.getString("en");
                                     String status_ar=status.getString("ar");
+
 
 
                                     JSONArray drugs_list=appointment.getJSONArray("drugs_list");
@@ -164,6 +167,8 @@ public class patient_appointments extends Fragment implements appointment_Listen
                                     JSONObject selected_hospital=appointment.getJSONObject("selected_hospital");
                                     int selected_hospital_id=selected_hospital.getInt("id");
                                     String  selected_hospital_name=new String (selected_hospital.getString("name").getBytes("ISO-8859-1"),"UTF-8");
+                                    String  selected_hospital_latitude=new String (selected_hospital.getString("latitude").getBytes("ISO-8859-1"),"UTF-8");
+                                    String  selected_hospital_longitude=new String (selected_hospital.getString("longitude").getBytes("ISO-8859-1"),"UTF-8");
 
                                     JSONObject selected_specialty=appointment.getJSONObject("selected_specialty");
                                     int selected_specialty_id=selected_specialty.getInt("id");
@@ -191,12 +196,15 @@ public class patient_appointments extends Fragment implements appointment_Listen
                                          selected_time_id=selected_time.getInt("id");
 
                                     }
-                                    String  selected_time_name=new String (selected_time.getString("day").getBytes("ISO-8859-1"),"UTF-8");
+                                    String time=(selected_time.getJSONObject("day").getString("en")+" "+selected_time.getJSONObject("from").getString("en"));
+                                    String  selected_time_name=new String (time.getBytes("ISO-8859-1"),"UTF-8");
 
                                     appointments_list_model doctor=new appointments_list_model(selected_time_name,selected_shift_name,selected_doctor_name,selected_specialty_name,selected_hospital_name
-                                    ,selected_clinic_name,patient__id,patient_image_url,patient_name,patient_mobile,patient_insurance,status_ar,status_en,status_name,date,
+                                    ,selected_clinic_name,patient__id,patient_image_url,patient_name,patient_mobile,patient_insurance,status_ar,status_en,status_en,date,
                                             image_url,_id,selected_time_id,selected_shift_id,selected_doctor_id
-                                            ,selected_specialty_id,selected_hospital_id,selected_clinic_id,patient_id,status_id,id,drugs_list,scans_list,analyses_list,operation_list);
+                                            ,selected_specialty_id,selected_hospital_id,selected_clinic_id,patient_id
+                                            ,status_id,id,drugs_list,scans_list,analyses_list,operation_list,Double.parseDouble(selected_hospital_latitude)
+                                            ,Double.parseDouble(selected_hospital_longitude));
 
 
                                     Log.w("dkljasdlasjkd",patient_name);
@@ -295,7 +303,7 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
 
         try {
-            String url = "http://microtec1.egytag.com:30001/api/tickets/update";
+            String url = "http://intmicrotec.neat-url.com:6566/api/tickets/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

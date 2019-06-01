@@ -163,7 +163,7 @@ public class search_insurance_BottomSheetFragment extends BottomSheetDialogFragm
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/medical_insurance_companies/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/medical_insurance_companies/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

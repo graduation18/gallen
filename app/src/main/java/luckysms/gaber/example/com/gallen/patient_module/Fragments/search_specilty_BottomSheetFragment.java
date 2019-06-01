@@ -1,6 +1,7 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -71,8 +72,17 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
     RecyclerView dialog_list;
     private pass_speciality_data mListener;
     private BottomSheetBehavior mBehavior;
+    private int speciality_id=0;
 
 
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (getArguments()!=null){
+            speciality_id=getArguments().getInt("speciality_id",0);
+        }
+    }
 
     public search_specilty_BottomSheetFragment() {
         // Required empty public constructor
@@ -110,7 +120,7 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
         dialog_list.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), dialog_list, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View v, final int position) {
-                if (searchh.getText().length()>0){
+                if (searchh.getText().length()>0||speciality_id>0){
                     speciality_model=filteredList.get(position);
                     mListener.pass_data(speciality_model,search_specilty_BottomSheetFragment.this);
                     dismiss();
@@ -156,6 +166,8 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
 
 
 
+
+
         dialog.setContentView(view);
         mBehavior = BottomSheetBehavior.from((View) view.getParent());
         return dialog;
@@ -180,7 +192,7 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/medical_specialties/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/medical_specialties/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -216,6 +228,9 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
 
                                 }
                                 adapter.notifyDataSetChanged();
+                                if (speciality_id>0){
+                                    filter_by_id(speciality_id);
+                                }
 
 
                             }
@@ -267,6 +282,24 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
                 }
             }else {
                 if (item.name.toLowerCase().contains(text.toLowerCase())) {
+                    filteredList.add(item);
+                }
+            }
+
+        }
+
+        adapter.filterList(filteredList);
+    }
+    private void filter_by_id(int id)
+    {
+        filteredList.clear();
+        for (patient_speciality_model item : specialities) {
+            if (!item.name.isEmpty()){
+                if (item.id==id) {
+                    filteredList.add(item);
+                }
+            }else {
+                if (item.id==id) {
                     filteredList.add(item);
                 }
             }

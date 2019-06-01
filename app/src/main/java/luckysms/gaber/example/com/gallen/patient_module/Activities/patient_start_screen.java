@@ -46,14 +46,14 @@ public class patient_start_screen extends AppCompatActivity {
     public void sign_up(View view) {
         Intent sign_up=new Intent(this,patient_sign_up.class);
         mprogressBar.setVisibility(View.VISIBLE);
-        login("musab","123",sign_up);
+        login("13322","h1",sign_up);
     }
 
     public void not_now(View view) {
         mprogressBar.setVisibility(View.VISIBLE);
         Intent not_now=new Intent(patient_start_screen.this,patient_main_screen.class);
         not_now.putExtra("visitor",true);
-        login("musab","123",not_now);
+        login("13322","h1",not_now);
     }
 
 
@@ -62,7 +62,7 @@ public class patient_start_screen extends AppCompatActivity {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/user/login";
+            String url = "http://intmicrotec.neat-url.com:6566/api/user/login";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
             }
@@ -74,14 +74,6 @@ public class patient_start_screen extends AppCompatActivity {
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
-                        if (res.has("error")) {
-                            if (res.getString("error").equals("email not set")){
-                                Toast.makeText(patient_start_screen.this,getResources().getString(R.string.email_not_set),Toast.LENGTH_LONG).show();
-                                mprogressBar.setVisibility(View.INVISIBLE);
-
-                            }
-
-                        }
                         getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                                 .putString("accessToken",res.getString("accessToken"))
                                 .commit();

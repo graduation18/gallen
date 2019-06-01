@@ -75,14 +75,14 @@ public class patient_favorites extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         favorite_recycler.setLayoutManager(mLayoutManager);
         favorite_recycler.setItemAnimator(new DefaultItemAnimator());
-        favorite_recycler.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 5));
+        favorite_recycler.addItemDecoration(new MyDividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL, 10));
         favorite_recycler.setAdapter(data_adapter);
         favorite_recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), favorite_recycler, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View v, final int position) {
                 Bundle args = new Bundle();
-                args.putInt("doctor_id", contact_list.get(position).id);
-                Fragment doctor_profile = new patient_doctor_data_fragment();
+                args.putSerializable("doctor", contact_list.get(position));
+                Fragment doctor_profile = new patient_favourite_doctor_data_fragment();
                 doctor_profile.setArguments(args);
                 go_to(doctor_profile);
             }
@@ -98,7 +98,10 @@ public class patient_favorites extends Fragment {
 
             }
         });
-        get_patient_data();
+        if (getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0)!=0) {
+            mprogressBar.setVisibility(View.VISIBLE);
+            get_patient_data();
+        }
 
         return view;
     }
@@ -108,7 +111,7 @@ public class patient_favorites extends Fragment {
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/patients/view";
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -118,7 +121,7 @@ public class patient_favorites extends Fragment {
                 public void onResponse(String response) {
                     //do other things with the received JSONObject
                     mprogressBar.setVisibility(View.INVISIBLE);
-
+                    contact_list.clear();
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
@@ -132,17 +135,18 @@ public class patient_favorites extends Fragment {
                                 for (int i=0;i<favourite_list.length();i++) {
                                     JSONObject doctor = favourite_list.getJSONObject(i);
                                     int id=doctor.getInt("id");
-                                    String name=new String (doctor.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    String name=new String (doctor.getString("name")
+                                            .getBytes("ISO-8859-1"), "UTF-8");
                                     String image_url=doctor.getString("image_url");
                                     Float rating=Float.parseFloat(String.valueOf(doctor.getDouble("rating")));
                                     boolean accept_discount= doctor.getBoolean("accept_discount");
-                                    String review_list=doctor.getJSONArray("review_list").toString();
+                                    String review_list=new String(doctor.getJSONArray("review_list").toString().getBytes("ISO-8859-1"), "UTF-8");
                                     int fee=doctor.getInt("fee");
                                     String gender=doctor.getString("gender");
-                                    String notes=doctor.getString("notes");
-                                    String graduated=doctor.getString("graduated");
+                                    String notes=new String(doctor.getString("notes").getBytes("ISO-8859-1"), "UTF-8");;
 
-                                    doctor_model doctor_model=new doctor_model(name,"active",graduated,image_url,accept_discount
+
+                                    doctor_model doctor_model=new doctor_model(name,"active","",image_url,accept_discount
                                             ,rating,fee,id,notes,gender,review_list);
                                     contact_list.add(doctor_model);
                                 }
@@ -215,7 +219,7 @@ public class patient_favorites extends Fragment {
     public void go_to(Fragment fragment) {
         favourite_layout.setVisibility(View.GONE);
         getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frameLayout, fragment)
+                .replace(R.id.favorite_frameLayout, fragment)
                 .commit();
     }
 

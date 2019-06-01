@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">galen</string>
-    <string name="sign_in">تسحيل الدخول</string>
+    <string name="sign_in">تسجيل الدخول</string>
     <string name="sign_up">انشاء حساب جديد</string>
     <string name="not_now">زائر</string>
     <string name="mobile_number_email_address">رقم الهاتف / البريد الاليكتروني</string>
@@ -73,8 +73,8 @@
     <string name="vistors_ratings">تقيمات المرضى</string>
     <string name="password_not_matched">الرقم السري وتاكيد الرقم السلري غير متطابقين</string>
     <string name="auto_location">موقعك الحالي</string>
-    <string name="select_governate">اختار محافظة</string>
-    <string name="all_governorates">جميع المحافظات</string>
+    <string name="select_governate">اختار منطقة</string>
+    <string name="all_governorates">جميع المناطق</string>
     <string name="enter_city_name">ادخل اسم المدينة</string>
     <string name="location_permission_denied">اذن الوصول للموقع تم رفضه لا يمكننا الوصول لموقعك الحالي</string>
     <string name="search_1">البحث</string>
@@ -149,6 +149,21 @@
     <string name="website">الموقع الاليكتروني</string>
     <string name="status">الحالة</string>
     <string name="please_select_speciality_first">من فضلك اختار التخصص اولا</string>
+    <string name="add_doctor_definition">اضف صفحة تعريفية للطبيب</string>
+    <string name="please_select_government_first">من فضلك اختر المنطقة اولا</string>
+    <string name="please_select_city_first">من فضلك اختر المدينة اولا</string>
+    <string name="please_select_insurance_company_first">من فضلك اختر شركة التامين اولا</string>
+    <string name="please_fill_data_fields">من فضلك املء البانات المطلوبة اولا</string>
+    <string name="please_select_clinic_first">من فضلك اختر العيادة اولا </string>
+    <string name="number_is_too_long">رقم الهاتف طويل للغاية</string>
+    <string name="number_is_too_short">رقم الهاتف قصير للغاية</string>
+    <string name="Detectin_Price">سعر الكشف</string>
+    <string name="no_reviews_yet">لايوجد تقيمات الى الان</string>
+    <string name="added_to_reviews">تم الاضافة الى التقيمات</string>
+    <string name="selected_appointment">الموعد المحدد</string>
+    <string name="clear_filters">امسح التصنيفات</string>
+    <string name="user_exists">يوجد مستخدم سابق مسجل بنفس البريد الاليكتروني او رقم الهاتف</string>
+
 
 
 </resources>

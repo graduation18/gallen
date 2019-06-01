@@ -65,9 +65,10 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="right"
                     android:orientation="vertical"
                     android:layout_marginLeft="15dp"
+
 
                     >
                     <TextView
@@ -97,6 +98,7 @@
                             android:layout_weight="1"
                             android:layout_margin="10dp"
                             android:textColor="@color/green_light"
+                            android:textSize="10dp"
                             android:drawableTop="@drawable/locations_map"
                             />
                         <Button
@@ -108,6 +110,7 @@
                             android:layout_weight="1"
                             android:layout_margin="10dp"
                             android:textColor="@color/white"
+                            android:textSize="10dp"
                             android:drawableLeft="@drawable/btn_cancel"
                             />
                     </TableRow>

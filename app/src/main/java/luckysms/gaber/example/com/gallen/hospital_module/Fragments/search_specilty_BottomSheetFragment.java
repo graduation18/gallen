@@ -159,7 +159,7 @@ public class search_specilty_BottomSheetFragment extends BottomSheetDialogFragme
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/medical_specialties/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/medical_specialties/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

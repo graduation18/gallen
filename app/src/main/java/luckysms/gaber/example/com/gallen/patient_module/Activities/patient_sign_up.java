@@ -250,9 +250,12 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                 String password_s=password.getText().toString();
                 String confirm_password_s=confirm_password.getText().toString();
                 String date_of_birth_s=date_of_birth.getText().toString();
+                Log.w("khdsddsaasdk",date_of_birth_s);
                 String insurance_company_s=insurance_company.getText().toString();
-                int insurance_company_i=insurance_model.id;
-
+                int insurance_company_i=0;
+                if (insurance_model!=null) {
+                     insurance_company_i = insurance_model.id;
+                }
 
                 String gender=selected_gender.getText().toString();
                 int gender_id;
@@ -267,7 +270,7 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                 String city_s=city.getText().toString();
                 String country_s=country.getText().toString();
                if (full_name_s.length()>0&&mobile_number_s.length()==13&&email_address_s.length()>0&&password_s.length()>0&&
-                       confirm_password_s.length()>0&&date_of_birth_s.length()>0&&insurance_company_s.length()>0&&country_s.length()>0){
+                       confirm_password_s.length()>0&&date_of_birth_s.length()>0&&country_s.length()>0){
                    if (confirm_password_s.equals(password_s)) {
                        mprogressBar.setVisibility(View.VISIBLE);
                        sign_up(full_name_s, mobile_number_s, email_address_s, password_s, date_of_birth_s
@@ -306,7 +309,7 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
 
 
         try {
-            String url = "http://microtec1.egytag.com/api/register/add";
+            String url = "http://intmicrotec.neat-url.com:6566/api/register/add";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
             }
@@ -320,19 +323,30 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                                Toast.makeText(patient_sign_up.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
+                                if (res.getString("error").contains(" User Exists")){
+                                    Toast.makeText(patient_sign_up.this,getResources().getString(R.string.user_exists),Toast.LENGTH_LONG).show();
+
+                                }else {
+                                    Toast.makeText(patient_sign_up.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                                }
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
+
                                 JSONObject user = res.getJSONObject("user");
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                                         .putInt("id",user.getJSONObject("ref_info").getInt("id"))
+                                        .putString("image_url",user.getString("image_url"))
+                                        .putString("name",user.getString("name"))
                                         .putBoolean("state",true)
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .commit();
-                                login(full_name_s,mobile_number_s,email_address_s,password_s,date_of_birth_s,insurance_company_s
-                                        ,gender,gender_id,insurance_company_i,gov_id,city_id,city_name,gov_name,country,selected_image_url);
-
+                                Intent got_confirm_code = new Intent(patient_sign_up.this, patient_confirm_code.class);
+                                Log.w("dsaldj",mobile_number_s);
+                                got_confirm_code.putExtra("phone_number", mobile_number_s);
+                                startActivity(got_confirm_code);
+                                finish();
                             }
                         }
 
@@ -365,104 +379,7 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                         object.put("patient_mobile", mobile_number_s);
                         object.put("patient_user_name", email_address_s);
                         object.put("patient_password", password_s);
-
-
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.w("sadkjsdkjlljksda",object.toString());
-                    return object.toString().getBytes();
-
-                };
-
-                public String getBodyContentType()
-                {
-                    return "application/json; charset=utf-8";
-                }
-
-
-
-
-
-
-            };
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-
-    private void update(final String full_name_s, final String mobile_number_s, final String email_address_s
-            , final String password_s, final String date_of_birth_s, final String insurance_company_s, final String gender, final int gender_id
-            , final int insurance_company_i, final int gov_id, final int city_id, final String city_name, final String gov_name
-            , final String country, final int id, final String selected_image_url)
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com/api/patients/update";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-                        if (res.has("error")) {
-                            Toast.makeText(patient_sign_up.this,getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                Intent not_now=new Intent(patient_sign_up.this,patient_main_screen.class);
-                                startActivity(not_now);
-                                finish();
-                                Toast.makeText(patient_sign_up.this,getResources().getString(R.string.welcome),Toast.LENGTH_LONG).show();
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-
-                    return pars;
-                }
-
-
-
-                @Override
-                public byte[] getBody() throws com.android.volley.AuthFailureError {
-                    JSONObject object=new JSONObject();
-                    try {
-                        object.put("id", id);
-                        object.put("name", full_name_s);
-                        object.put("mobile", mobile_number_s);
-                        object.put("user_name", email_address_s);
-                        object.put("password", password_s);
-                        object.put("birth_date", date_of_birth_s);
+                        object.put("birth_date_day", date_of_birth_s);
                         JSONObject gen=new JSONObject();
                         gen.put("name", gender);
                         gen.put("id", gender_id);
@@ -486,7 +403,6 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
 
 
 
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -514,84 +430,6 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
 
 
     }
-    private void login(final String full_name_s, final String mobile_number_s, final String email_address_s
-            , final String password_s, final String date_of_birth_s, final String insurance_company_s, final String gender, final int gender_id
-            , final int insurance_company_i, final int gov_id, final int city_id, final String city_name, final String gov_name
-            , final String country, final String selected_image_url)
-    {
-
-
-        try {
-            String url = "http://microtec1.egytag.com/api/user/login";
-            if (queue == null) {
-                queue = Volley.newRequestQueue(this);
-            }
-            // Request a string response from the provided URL.
-            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    //do other things with the received JSONObject
-                    Log.w("dsakjbsdahk", response);
-                    try {
-                        JSONObject res = new JSONObject(response);
-                        if (res.has("error")) {
-                            if (res.getString("error").equals("email not set")){
-                                Toast.makeText(patient_sign_up.this,getResources().getString(R.string.email_not_set),Toast.LENGTH_LONG).show();
-
-                            }else if (res.getString("error").equals("email or password error")){
-                                Toast.makeText(patient_sign_up.this,getResources().getString(R.string.email_or_password_error),Toast.LENGTH_LONG).show();
-
-                            }
-
-                        } else if (res.has("done")) {
-                            if (res.getBoolean("done")) {
-                                JSONObject user = res.getJSONObject("user");
-                                getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                        .putInt("id",user.getJSONObject("ref_info").getInt("id"))
-                                        .putBoolean("state",true)
-                                        .putString("language",Locale.getDefault().getLanguage())
-                                        .putString("accessToken",res.getString("accessToken"))
-                                        .commit();
-                                update(full_name_s,mobile_number_s,email_address_s,password_s,date_of_birth_s,insurance_company_s
-                                        ,gender,gender_id,insurance_company_i,gov_id,city_id,city_name,gov_name,country,user.getJSONObject("ref_info").getInt("id"),selected_image_url);
-
-                            }
-                        }
-
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_LONG).show();
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
-
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("email", email_address_s);
-                    pars.put("password", password_s);
-                    return pars;
-                }
-            };
-            queue.add(stringReq);
-
-        } catch (Exception e) {
-
-        }
-
-
-    }
-
 
 
 
@@ -610,7 +448,7 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                     public void onDateSet(DatePicker view, int year,
                                           int monthOfYear, int dayOfMonth) {
 
-                        date_of_birth.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                        date_of_birth.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
 
                     }
                 }, mYear, mMonth, mDay);
@@ -673,7 +511,7 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                     JSONObject object=new JSONObject(new Gson().toJson(response.body()));
                     selected_image_url=object.getString("image_url");
                     Picasso.with(patient_sign_up.this)
-                            .load("http://microtec1.egytag.com"+selected_image_url)
+                            .load("http://intmicrotec.neat-url.com:6566"+selected_image_url)
                             .placeholder(R.drawable.user)
                             .into(doctor_image, new Callback() {
                                 @Override
@@ -700,14 +538,11 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
         this.city_model=city_model;
         city.setText(city_model.name);
     }
-
-
     @Override
     public void pass_data(patient_gov_model gov_model, pass_gov_data listner) {
         this.gov_model=gov_model;
         governorates.setText(gov_model.name);
     }
-
     @Override
     public void pass_data(patient_insurance_model insurance_model, pass_insurance_data listner) {
         this.insurance_model=insurance_model;

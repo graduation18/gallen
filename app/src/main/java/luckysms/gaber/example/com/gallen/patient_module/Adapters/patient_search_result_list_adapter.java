@@ -1,7 +1,11 @@
 package luckysms.gaber.example.com.gallen.patient_module.Adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +18,14 @@ import android.widget.Toast;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
 public class patient_search_result_list_adapter extends RecyclerView.Adapter<patient_search_result_list_adapter.MyViewHolder>  {
@@ -86,27 +95,10 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
         holder.hospital_name.setText(data.hospital_model.hospital_name);
         holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_model.doctor_fee));
         holder.rating.setRating(data.doctor_model.doctor_rating);
-        /*Picasso.with(context)
-                .load(data.doctor_model.doctor_image)
-                .placeholder(R.drawable.pharmcy)
-                .into(holder.image, new Callback() {
-                    @Override
-                    public void onSuccess() {}
-                    @Override public void onError() {
-                    }
-                });*/
-        Picasso.with(context)
-                .load(data.hospital_model.hospital_image_url)
-                .placeholder(R.drawable.pharmcy)
-                .into(holder.hospital_image, new Callback() {
-                    @Override
-                    public void onSuccess() {}
-                    @Override public void onError() {
-                    }
-                });
-
-
-
+        String url = "http://intmicrotec.neat-url.com:6566"+data.doctor_model.doctor_image;
+        new AsyncTaskLoadImage(holder.image).execute(url);
+        String url2 ="http://intmicrotec.neat-url.com:6566"+data.hospital_model.hospital_image_url;
+        new AsyncTaskLoadImage(holder.hospital_image).execute(url2);
 
     }
 
