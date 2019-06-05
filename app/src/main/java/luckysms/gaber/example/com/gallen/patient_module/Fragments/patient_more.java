@@ -11,7 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -37,6 +40,7 @@ public class patient_more extends Fragment  {
     public LinearLayout more_layout;
     private RequestQueue queue;
     private ProgressBar mprogressBar;
+    private FrameLayout sign_out_frame;
 
 
 
@@ -52,8 +56,16 @@ public class patient_more extends Fragment  {
         about_us=(Button)view.findViewById(R.id.about_us);
         sign_out=(Button)view.findViewById(R.id.sign_out);
         more_layout=(LinearLayout)view.findViewById(R.id.more_layout);
+        sign_out_frame=(FrameLayout)view.findViewById(R.id.sign_out_frame);
+        Animation fadein = AnimationUtils.loadAnimation(getActivity(), R.anim.fadein);
+        Animation bounce = AnimationUtils.loadAnimation(getActivity(), R.anim.bounce);
 
-
+        settings.startAnimation(bounce);
+        approval_list.startAnimation(bounce);
+        contact_us.startAnimation(bounce);
+        about_us.startAnimation(bounce);
+        sign_out.startAnimation(fadein);
+        sign_out_frame.startAnimation(fadein);
         patient_settings inst = patient_settings.instance();
 
         if (inst==null){
@@ -115,7 +127,7 @@ public class patient_more extends Fragment  {
 
 
         try {
-            String url = "http://intmicrotec.neat-url.com:6566//api/user/logout";
+            String url = "http://intmicrotec.neat-url.com:6566/api/user/logout";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }

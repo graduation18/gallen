@@ -222,7 +222,7 @@ public class search_insurance_BottomSheetFragment extends BottomSheetDialogFragm
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> pars = new HashMap<String, String>();
                     pars.put("Content-Type", "application/json");
-                    pars.put("Cookie", "access_token="+getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    //pars.put("Cookie", "access_token="+getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
                     return pars;
                 }
 

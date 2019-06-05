@@ -52,6 +52,8 @@ public class patient_change_password extends Fragment {
     private RequestQueue queue;
     private String old_pass,correct_pass;
     private ProgressBar mprogressBar;
+    private JSONObject user_info;
+
 
 
 
@@ -175,6 +177,7 @@ public class patient_change_password extends Fragment {
                     try {
                         object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
                         object.put("password",password_s);
+                        object.put("user_info",user_info);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -226,6 +229,7 @@ public class patient_change_password extends Fragment {
                             if (res.getBoolean("done")) {
                                 JSONObject doc=res.getJSONObject("doc");
                                 correct_pass=doc.getString("password");
+                                user_info=doc.getJSONObject("user_info");
                                 Log.w("sssss",correct_pass);
 
 

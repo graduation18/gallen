@@ -135,7 +135,7 @@ public class patient_login extends AppCompatActivity {
                                         .putString("language",Locale.getDefault().getLanguage())
                                         .putString("accessToken",res.getString("accessToken"))
                                         .putString("type",user.getString("type"))
-                                        .putString("image_url",user.getString("image_url"))
+                                        .putString("image_url",user.getJSONObject("profile").getString("image_url"))
                                         .putString("name",user.getString("name"))
                                         .commit();
                                 mprogressBar.setVisibility(View.VISIBLE);

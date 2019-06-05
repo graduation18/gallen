@@ -93,7 +93,7 @@ public class hospital_start_activity extends AppCompatActivity {
                                 .commit();
 
                                 Log.w("dsakjbsdahk", new String(doc.getJSONArray("doctor_list").toString()
-                                        .getBytes("ISO-8859-1"), "UTF-8"));
+                                        .getBytes("ISO-8859-1"), "UTF-8")+" "+doc.getString("latitude"));
                                 //Log.w("dsakjbsdahk", doc.getJSONArray("doctor_list").toString());
 
 

@@ -388,7 +388,8 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                                     JSONArray doctor_list=hospital.getJSONArray("doctor_list");
 
                                     for (int d=0;d<doctor_list.length();d++){
-                                        JSONObject doctor=doctor_list.getJSONObject(d);
+                                        JSONObject doctor_obj=doctor_list.getJSONObject(d);
+                                        JSONObject doctor=doctor_obj.getJSONObject("doctor");
                                         String doctor__id=doctor.getString("_id");
                                         String doctor_name=new String(doctor.getString("name") .getBytes("ISO-8859-1"), "UTF-8");
                                         int doctor_id=doctor.getInt("id");
@@ -526,7 +527,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                     try {
                         if(name != null && !name.isEmpty()) {
                             JSONObject name_object=new JSONObject();
-                            name_object.put("doctor_list.name", name);
+                            name_object.put("doctor_list.doctor.name", name);
                             object.put("where", name_object);
                         }
 
@@ -535,7 +536,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                         if(speciality_model!=null||city_model!=null||gov_model!=null){
                             JSONObject where=new JSONObject();
                             if (speciality_model!=null){
-                                where.put("doctor_list.specialty.id", speciality_model.id);
+                                where.put("doctor_list.doctor.specialty.id", speciality_model.id);
 
                             }
 

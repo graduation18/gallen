@@ -414,6 +414,7 @@ public class patient_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    Log.w("sadkjsdkjlljksda",error.getMessage());
                     Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
                     mprogressBar.setVisibility(View.INVISIBLE);
 
@@ -424,7 +425,6 @@ public class patient_doctor_data_fragment extends Fragment {
                     Map<String, String> pars = new HashMap<String, String>();
                     pars.put("Content-Type", "application/json");
                     pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-
                     return pars;
                 }
 

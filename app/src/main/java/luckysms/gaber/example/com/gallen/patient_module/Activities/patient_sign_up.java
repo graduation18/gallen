@@ -337,7 +337,7 @@ public class patient_sign_up extends AppCompatActivity implements pass_gov_data,
                                 JSONObject user = res.getJSONObject("user");
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
                                         .putInt("id",user.getJSONObject("ref_info").getInt("id"))
-                                        .putString("image_url",user.getString("image_url"))
+                                        .putString("image_url",user.getJSONObject("profile").getString("image_url"))
                                         .putString("name",user.getString("name"))
                                         .putBoolean("state",true)
                                         .putString("language",Locale.getDefault().getLanguage())
