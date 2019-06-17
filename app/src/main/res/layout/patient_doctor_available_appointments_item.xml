@@ -8,7 +8,7 @@
     android:background="@drawable/round_button_7"
     android:layoutDirection="ltr"
     android:padding="10dp"
-    app:cardCornerRadius="10dp"
+    app:cardCornerRadius="30dp"
     android:layout_margin="10dp"
     android:outlineSpotShadowColor="@color/black"
     android:outlineAmbientShadowColor="@color/black"
@@ -27,17 +27,21 @@
         android:layout_height="wrap_content"
         android:textColor="@color/green_light"
         android:layout_gravity="center"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginTop="10dp"
+            android:textAlignment="center"
+            />
         <TextView
             android:id="@+id/time"
-            android:layout_width="250dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
+            android:textColor="@color/green_light"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
+            android:textAlignment="center"
             />
         <Button
             android:id="@+id/book_now"
-            android:layout_width="250dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:background="@drawable/round_button_6"

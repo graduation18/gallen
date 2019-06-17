@@ -101,9 +101,29 @@ public class patient_login extends AppCompatActivity {
     }
     private void login(final String mobile_number_email_address_s, final String password_s)
     {
+        /*if (mobile_number_email_address_s.equals("mousab")&&password_s.equals("123")){
+            mprogressBar.setVisibility(View.INVISIBLE);
+            getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                    .putInt("id",12)
+                    .putString("password", password_s)
+                    .putString("language",Locale.getDefault().getLanguage())
+                    .putString("accessToken","eefc4a709d47408ca92377639e2721c9")
+                    .putString("type","patient")
+                    .putString("image_url","/api/images/Patients.png")
+                    .putString("name","mousab")
+                    .putBoolean("state",true)
+                    .putString("phone","+201286387994")
+                    .commit();
+            Intent intent=new Intent(patient_login.this,patient_main_screen.class);
+            finishAffinity();
+            startActivity(intent);
 
+        }else {
+            mprogressBar.setVisibility(View.INVISIBLE);
+            Toast.makeText(patient_login.this,getResources().getString(R.string.email_or_password_error),Toast.LENGTH_LONG).show();
+        }*/
 
-        try {
+       try {
             String url = "http://intmicrotec.neat-url.com:6566/api/user/login";
             if (queue == null) {
                 queue = Volley.newRequestQueue(this);
@@ -124,6 +144,10 @@ public class patient_login extends AppCompatActivity {
                             }else if (res.getString("error").equals("email or password error")){
                                 Toast.makeText(patient_login.this,getResources().getString(R.string.email_or_password_error),Toast.LENGTH_LONG).show();
 
+                            }else if (res.getString("error").contains("Login Error , You Are Loged")){
+                                Log.w("njhjhkjhk","jkjjhhjkhkkj");
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                logout(mobile_number_email_address_s,password_s);
                             }
 
                         } else if (res.has("done")) {
@@ -158,22 +182,37 @@ public class patient_login extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_LONG).show();
                     mprogressBar.setVisibility(View.INVISIBLE);
                 }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("Content-Type", "application/x-www-form-urlencoded");
-                    return pars;
-                }
+            })
+           {
+               @Override
+               public Map<String, String> getHeaders() throws AuthFailureError {
+               Map<String, String> pars = new HashMap<String, String>();
+               pars.put("Content-Type", "application/json");
+               pars.put("Cookie", "access_token="+getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
 
-                @Override
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> pars = new HashMap<String, String>();
-                    pars.put("email", mobile_number_email_address_s);
-                    pars.put("password", password_s);
-                    return pars;
-                }
-            };
+               return pars;
+           }
+               @Override
+               public byte[] getBody() throws com.android.volley.AuthFailureError {
+               JSONObject object=new JSONObject();
+               try {
+                   object.put("password",password_s);
+                   object.put("email",mobile_number_email_address_s);
+               } catch (JSONException e) {
+                   e.printStackTrace();
+               }
+               Log.w("sadkjsdkjlljksda",object.toString());
+               return object.toString().getBytes();
+           };
+
+               public String getBodyContentType()
+               {
+                   return "application/json; charset=utf-8";
+               }
+
+
+
+           };
             queue.add(stringReq);
 
         } catch (Exception e) {
@@ -182,6 +221,79 @@ public class patient_login extends AppCompatActivity {
 
 
     }
+    private void logout(final String mobile_number_email_address_s, final String password_s)
+    {
+
+
+        try {
+            String url = "http://intmicrotec.neat-url.com:6566/api/user/logout";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(patient_login.this);
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                        .putString("_id", "")
+                                        .putInt("id", 0)
+                                        .putString("email","")
+                                        .putString("password"," ")
+                                        .putBoolean("state",false)
+                                        .commit();
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                login(mobile_number_email_address_s,password_s);
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(patient_login.this, "Error!", Toast.LENGTH_LONG).show();
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+
+            };;
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
+        }
+
+
+    }
+
 
 
 }

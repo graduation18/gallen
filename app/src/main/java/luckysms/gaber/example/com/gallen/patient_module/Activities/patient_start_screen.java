@@ -6,6 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -29,11 +33,24 @@ import luckysms.gaber.example.com.gallen.R;
 public class patient_start_screen extends AppCompatActivity {
     private RequestQueue queue;
     private ProgressBar mprogressBar;
+    private Button sign_in,sign_up,not_now;
+    private ImageView splash;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_login_screen);
         mprogressBar = (ProgressBar) findViewById(R.id.progressBar);
+        sign_in = (Button) findViewById(R.id.sign_in);
+        sign_up = (Button) findViewById(R.id.sign_up);
+        not_now = (Button) findViewById(R.id.not_now);
+        splash=(ImageView)findViewById(R.id.splash);
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fadein);
+        Animation bounce = AnimationUtils.loadAnimation(this, R.anim.bounce);
+        sign_in.startAnimation(bounce);
+        sign_up.startAnimation(bounce);
+        not_now.startAnimation(bounce);
+        splash.startAnimation(fadein);
+
 
 
     }

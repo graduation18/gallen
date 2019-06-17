@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
     android:orientation="vertical">
 
     <RelativeLayout
@@ -14,7 +21,6 @@
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="vertical" android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layoutDirection="ltr"
 
             >
 
@@ -73,6 +79,27 @@
                 </RelativeLayout>
 
             </android.support.v7.widget.Toolbar>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+                <com.alexzh.circleimageview.CircleImageView
+                    android:id="@+id/doctor_image"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_gravity="center"
+                    app:view_borderColor="@color/green_light"
+                    app:view_borderWidth="3dp"
+                    android:src="@drawable/user2"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|right"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:drawableRight="@drawable/doctor_camera"/>
+            </FrameLayout>
 
             <EditText
                 android:id="@+id/full_name"
@@ -129,20 +156,30 @@
                 android:layout_height="40dp"
                 android:padding="8dp"
                 android:layout_gravity="center"
+                android:textAlignment="viewStart"
                 android:layout_margin="5dp"
                 android:background="@drawable/rounded_edit_text1"
                 android:drawableLeft="@drawable/insurance_companies"
                 android:drawablePadding="15dp"
                 android:hint="@string/insurance_company"
-                android:textSize="15dp" />
+                android:textSize="15dp"
+                tools:ignore="RtlCompat"
+                android:textStyle="normal"
+                />
             <Button
                 android:id="@+id/country"
                 android:layout_width="250dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:layout_margin="5dp"
+                android:textAlignment="viewStart"
                 android:background="@drawable/round_button_2"
                 android:hint="@string/country"
+                tools:ignore="RtlCompat"
+                android:textStyle="normal"
+                android:drawableLeft="@drawable/ic_near_me_black_24dp"
+                android:drawablePadding="15dp"
+
                 />
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -209,5 +246,6 @@
     </RelativeLayout>
 
 </FrameLayout>
+</ScrollView>
 
 

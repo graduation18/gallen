@@ -43,7 +43,10 @@ import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.favourite;
+import luckysms.gaber.example.com.gallen.patient_module.Model.hospital_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -52,7 +55,7 @@ public class patient_favorites extends Fragment {
     private View view;
     private TextView number_of_notifications,notifications,location,speciality,insurance_companies,text;
     private RecyclerView favorite_recycler;
-    private List<doctor_model> contact_list = new ArrayList<>();
+    private List<favourite> contact_list = new ArrayList<>();
     private patient_favourite_list_adapter data_adapter;
     private ProgressBar mprogressBar;
     private RequestQueue queue;
@@ -81,7 +84,7 @@ public class patient_favorites extends Fragment {
             @Override
             public void onClick(View v, final int position) {
                 Bundle args = new Bundle();
-                args.putSerializable("doctor", contact_list.get(position));
+                args.putSerializable("doctor", contact_list.get(position).doctor_model);
                 Fragment doctor_profile = new patient_favourite_doctor_data_fragment();
                 doctor_profile.setArguments(args);
                 go_to(doctor_profile);
@@ -111,6 +114,7 @@ public class patient_favorites extends Fragment {
 
 
         try {
+            final int[] counter = {0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -144,11 +148,42 @@ public class patient_favorites extends Fragment {
                                     int fee=doctor.getInt("fee");
                                     String gender=doctor.getString("gender");
                                     String notes=new String(doctor.getString("notes").getBytes("ISO-8859-1"), "UTF-8");;
+                                    JSONObject hospital=doctor.getJSONObject("hospital");
+                                    //hospital
+                                    String  hospital__id=hospital.getString("_id");
+                                    int  hospital_id=hospital.getInt("id");
+                                    String hospital_image_url=hospital.getString("image_url");
+                                    String hospital_name=new String(hospital.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    String hospital_address="";
+                                    if (hospital.has("address")){hospital_address=hospital.getString("address");}
+                                    String hospital_phone = null;
+                                    if (hospital.has("phone")) {
+                                        hospital_phone = hospital.getString("phone");
+                                    }
+                                    String hospital_mobile=hospital.getString("mobile");
+                                    String hospital_latitude=hospital.getString("latitude");
+                                    String hospital_longitude=hospital.getString("longitude");
+                                    hospital_address = hospital.getString("address");
+                                    hospital_model hospital_model=new hospital_model(hospital__id,
+                                            hospital_image_url,
+                                            hospital_name,
+                                            hospital_address,
+                                            hospital_phone,
+                                            hospital_mobile,
+                                            hospital_id,
+                                            hospital_latitude,
+                                            hospital_longitude);
 
-
+                                    JSONObject specialty=doctor.getJSONObject("specialty");
+                                    String specialty__id=specialty.getString("_id");
+                                    int specialty_id=specialty.getInt("id");
+                                    String specialty_name=new String (specialty.getString("name")
+                                            .getBytes("ISO-8859-1"), "UTF-8");
+                                    patient_speciality_model patient_speciality_model=new patient_speciality_model(specialty__id,
+                                            "ss",specialty_name,specialty_id);
                                     doctor_model doctor_model=new doctor_model(name,"active","",image_url,accept_discount
                                             ,rating,fee,id,notes,gender,review_list);
-                                    contact_list.add(doctor_model);
+                                    contact_list.add(new favourite(hospital_model,doctor_model,patient_speciality_model));
                                 }
                                 data_adapter.notifyDataSetChanged();
                                 if (contact_list.size()>0){
@@ -170,8 +205,14 @@ public class patient_favorites extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_patient_data();
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {

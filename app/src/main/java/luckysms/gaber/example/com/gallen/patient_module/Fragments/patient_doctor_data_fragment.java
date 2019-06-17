@@ -98,6 +98,8 @@ public class patient_doctor_data_fragment extends Fragment {
     private String _name,clinic_name;
     private int clinic_id;
     private boolean visitor;
+    private JSONObject user_info;
+
 
 
 
@@ -242,6 +244,14 @@ public class patient_doctor_data_fragment extends Fragment {
                     bottomSheetFragment.setArguments(s);
                     bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
 
+                }else {
+                    Bundle s=new Bundle();
+                    s.putInt("id",doctor_model.id);
+                    s.putBoolean("visitor",visitor);
+                    reviews_BottomSheetFragment bottomSheetFragment = new reviews_BottomSheetFragment();
+                    bottomSheetFragment.setArguments(s);
+                    bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+
                 }
 
 
@@ -303,6 +313,7 @@ public class patient_doctor_data_fragment extends Fragment {
 
 
         try {
+            final int[] counter = {0};
             String url = "http://intmicrotec.neat-url.com:6566/api/doctors/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -414,9 +425,16 @@ public class patient_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.w("sadkjsdkjlljksda",error.getMessage());
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+
+
+                    if (counter[0]<4) {
+                        get_data(doctor_model.id);
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -481,7 +499,7 @@ public class patient_doctor_data_fragment extends Fragment {
 
 
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -587,6 +605,7 @@ public class patient_doctor_data_fragment extends Fragment {
 
         }
     }
+
     private void favourite_update(final doctor_model doctor_model, final int id)
     {
 
@@ -598,7 +617,6 @@ public class patient_doctor_data_fragment extends Fragment {
             }
             // Request a string response from the provided URL.
             final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                 @Override
                 public void onResponse(String response) {
                     //do other things with the received JSONObject
@@ -607,7 +625,7 @@ public class patient_doctor_data_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -624,6 +642,12 @@ public class patient_doctor_data_fragment extends Fragment {
                                 doctor.put("gender",doctor_model.doctor_gender);
                                 doctor.put("notes",doctor_model.doctor_notes);
                                 doctor.put("graduated",doctor_model.doctor_graduated);
+                                JSONObject speciality=new JSONObject();
+                                speciality.put("name",speciality_model.name);
+                                speciality.put("id",speciality_model.id);
+                                speciality.put("_id",speciality_model._id);
+                                speciality.put("image_url",speciality_model.image_url);
+                                doctor.put("specialty",speciality);
                                 JSONArray favourite_list;
                                 String favs=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE)
                                         .getString("favourite_list","");
@@ -686,6 +710,7 @@ public class patient_doctor_data_fragment extends Fragment {
                     JSONObject object=new JSONObject();
                     try {
                         object.put("id", id);
+                        object.put("user_info",user_info.getJSONObject("user_info"));
                         JSONObject doctor=new JSONObject();
                         doctor.put("id",doctor_model.id);
                         doctor.put("name",doctor_model.doctor_name);
@@ -698,23 +723,49 @@ public class patient_doctor_data_fragment extends Fragment {
                         doctor.put("gender",doctor_model.doctor_gender);
                         doctor.put("notes",doctor_model.doctor_notes);
                         doctor.put("graduated",doctor_model.doctor_graduated);
-                        JSONArray favourite_list;
+                        JSONObject speciality=new JSONObject();
+                        speciality.put("name",speciality_model.name);
+                        speciality.put("id",speciality_model.id);
+                        speciality.put("_id",speciality_model._id);
+                        speciality.put("image_url",speciality_model.image_url);
+                        doctor.put("specialty",speciality);
+                        JSONObject hospital=new JSONObject();
+                        hospital.put("name",hospital_model.hospital_name);
+                        hospital.put("id",hospital_model.hospital_id);
+                        hospital.put("phone",hospital_model.hospital_phone);
+                        hospital.put("mobile",hospital_model.hospital_mobile);
+                        hospital.put("image_url",hospital_model.hospital_image_url);
+                        hospital.put("latitude",hospital_model.hospital_latitude);
+                        hospital.put("longitude",hospital_model.hospital_longitude);
+                        hospital.put("_id",hospital_model.hospital__id);
+                        hospital.put("address",hospital_model.hospital_address);
+
+
+
+                        doctor.put("hospital",hospital);
+
                         String favs=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE)
                                 .getString("favourite_list","");
                         Log.w("favsfavs",favs);
                         JSONArray list = new JSONArray();
-                        JSONArray jsonArray = new JSONArray(favs);
-                        int len = jsonArray.length();
-                        if (fav_added) {
-                            if (jsonArray != null) {
-                                for (int i = 0; i < len; i++) {
-                                    JSONObject objects = jsonArray.getJSONObject(i);
-                                    if (objects.getInt("id") != doctor_model.id) {
-                                        list.put(jsonArray.get(i));
+                        if (favs.length()>0) {
+
+                            JSONArray jsonArray = new JSONArray(favs);
+                            int len = jsonArray.length();
+                            if (fav_added) {
+                                if (jsonArray != null) {
+                                    for (int i = 0; i < len; i++) {
+                                        JSONObject objects = jsonArray.getJSONObject(i);
+                                        if (objects.getInt("id") != doctor_model.id) {
+                                            list.put(jsonArray.get(i));
+                                        }
                                     }
                                 }
+                            } else {
+                                list.put(doctor);
                             }
-                        }else {
+                        } else {
+
                             list.put(doctor);
                         }
                         object.put("favourite_list",list);
@@ -754,7 +805,7 @@ public class patient_doctor_data_fragment extends Fragment {
 
 
         try {
-            String url = "http://intmicrotec.neat-url.com:6566/api/patients/all";
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
             }
@@ -762,34 +813,35 @@ public class patient_doctor_data_fragment extends Fragment {
             final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
                     //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
 
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
-                                JSONArray list=res.getJSONArray("list");
-                                for (int i=0;i<list.length();i++) {
-                                    JSONObject doc = list.getJSONObject(i);
-                                    if (doc.has("favourite_list")){
-                                        getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).edit()
-                                                .putString("favourite_list",new String(doc.getJSONArray("favourite_list").toString()
-                                                        .getBytes("ISO-8859-1"), "UTF-8"))
-                                                .commit();
-
-                                    }
-
+                                user_info=res.getJSONObject("doc");
+                                if (user_info.has("favourite_list")){
+                                    getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                                            .putString("favourite_list",new String(user_info.getJSONArray("favourite_list").toString()
+                                                    .getBytes("ISO-8859-1"), "UTF-8"))
+                                            .commit();
 
                                 }
+
+
+
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 favourite_update(doctor_model,id);
-                            }
 
+
+
+
+                            }
                         }
 
                     } catch(JSONException e){
@@ -803,6 +855,7 @@ public class patient_doctor_data_fragment extends Fragment {
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
                     mprogressBar.setVisibility(View.INVISIBLE);
+
                 }
             }) {
                 @Override
@@ -818,9 +871,10 @@ public class patient_doctor_data_fragment extends Fragment {
                 public byte[] getBody() throws com.android.volley.AuthFailureError {
                     JSONObject object=new JSONObject();
                     try {
-                        JSONObject _id=new JSONObject();
-                        _id.put("id",id);
-                        object.put("where",_id);
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+
+
+
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -862,6 +916,7 @@ public class patient_doctor_data_fragment extends Fragment {
         }
 
     }
+
 
 
 

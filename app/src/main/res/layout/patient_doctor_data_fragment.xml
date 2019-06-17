@@ -163,23 +163,34 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="right"
                         android:gravity="right"
-                        android:layout_marginLeft="40dp"
+                        android:layout_marginLeft="30dp"
                         android:layout_toRightOf="@+id/discount_code"/>
-
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="30"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_gravity="right"
+                        android:layout_marginStart="14dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_toEndOf="@+id/rating_ratio"
+                        android:layout_toRightOf="@+id/rating_ratio"
+                        >
                         <RatingBar
                             android:id="@+id/rating"
                             style="?android:attr/ratingBarStyleSmall"
-                            android:layout_width="80dp"
-                            android:layout_height="30dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_gravity="right"
-                            android:layout_marginStart="14dp"
-                            android:layout_marginLeft="14dp"
-                            android:layout_toEndOf="@+id/rating_ratio"
-                            android:layout_toRightOf="@+id/rating_ratio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:stepSize="1"
+                            android:numStars="5"
+                            android:rating="0"
+                            android:clickable="false"
 
-                            android:gravity="right"
-                            android:numStars="5" />
+                            />
+                    </RelativeLayout>
+
                 </RelativeLayout>
                 <TableRow
                     android:layout_width="match_parent"

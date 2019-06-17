@@ -50,7 +50,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/sms_code"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        >
       <in.aabhasjindal.otptextview.OtpTextView
           android:id="@+id/otp_view"
           android:layout_width="match_parent"
@@ -61,6 +62,8 @@
           app:length="6"
           android:layout_gravity="center"
           android:textAlignment="center"
+          android:layoutDirection="ltr"
+
           />
 
     </LinearLayout>

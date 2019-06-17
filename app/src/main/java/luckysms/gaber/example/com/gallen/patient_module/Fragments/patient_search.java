@@ -9,7 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import luckysms.gaber.example.com.gallen.R;
@@ -19,6 +22,7 @@ public class patient_search extends Fragment  {
     private Button area_speciality,doctor_name;
     private LinearLayout search_layout;
     private  boolean visitor;
+    private FrameLayout doctor_name_layout,area_speciality_layout;
 
 
     @Override
@@ -38,6 +42,16 @@ public class patient_search extends Fragment  {
         doctor_name=(Button)view.findViewById(R.id.doctor_name);
         search_layout=(LinearLayout)view.findViewById(R.id.search_layout);
         search_layout.setVisibility(View.VISIBLE);
+        area_speciality_layout=(FrameLayout)view.findViewById(R.id.area_speciality_layout);
+        doctor_name_layout=(FrameLayout)view.findViewById(R.id.doctor_name_layout);
+        Animation fadein = AnimationUtils.loadAnimation(getActivity(), R.anim.fadein);
+        Animation bounce = AnimationUtils.loadAnimation(getActivity(), R.anim.bounce);
+
+
+        area_speciality.startAnimation(fadein);
+        doctor_name.startAnimation(fadein);
+        doctor_name_layout.startAnimation(bounce);
+        area_speciality_layout.startAnimation(bounce);
 
         area_speciality.setOnClickListener(new View.OnClickListener() {
             @Override

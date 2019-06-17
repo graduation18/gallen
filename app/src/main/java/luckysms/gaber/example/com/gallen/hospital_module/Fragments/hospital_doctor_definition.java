@@ -361,9 +361,9 @@ public class hospital_doctor_definition extends Fragment implements pass_special
 
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 if (clinic_model.doctor_list.length()>0){
-                                    update_clinics(new JSONArray(clinic_model.doctor_list).put(object),clinic_model.id,object);
+                                    update_clinics(new JSONArray(clinic_model.doctor_list).put(new JSONObject().put("doctor",object) ),clinic_model.id,object);
                                 }else {
-                                    update_clinics(new JSONArray().put(object),clinic_model.id,object);
+                                    update_clinics(new JSONArray().put(new JSONObject().put("doctor",object)),clinic_model.id,object);
 
                                 }
                             }
@@ -462,12 +462,12 @@ public class hospital_doctor_definition extends Fragment implements pass_special
                                         .getString("doctor_list","").length()>0){
                                     String unicodeUrl =getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getString("doctor_list","");
                                      JSONArray array=new JSONArray(unicodeUrl);
-                                    array.put(object);
+                                    array.put(new JSONObject().put("doctor",object));
                                     update_hospital(array,getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
 
                                 }else {
                                     JSONArray array=new JSONArray();
-                                    array.put(object);
+                                    array.put(new JSONObject().put("doctor",object));
                                     update_hospital(array,getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
 
                                 }

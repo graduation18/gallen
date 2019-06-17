@@ -21,9 +21,14 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -56,6 +61,7 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
     private TextView text,rating_ratio,vistors;
     private RatingBar ratingBar;
     private JSONArray review_list;
+    private boolean visitor;
 
     public reviews_BottomSheetFragment() {
         // Required empty public constructor
@@ -67,6 +73,7 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
         super.onAttach(context);
         if (getArguments()!=null){
             id=getArguments().getInt("id");
+            visitor=getArguments().getBoolean("visitor");
 
         }
     }
@@ -106,24 +113,29 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
         add_review.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                reviews_BottomSheetFragment.this.dialog=new Dialog(getActivity());
-                reviews_BottomSheetFragment.this.dialog.setContentView(R.layout.add_review);
-                Button add_review=(Button)reviews_BottomSheetFragment.this.dialog.findViewById(R.id.add_review);
-                final RatingBar rating=(RatingBar)reviews_BottomSheetFragment.this.dialog.findViewById(R.id.rating);
-                final EditText review=(EditText)reviews_BottomSheetFragment.this.dialog.findViewById(R.id.review);
-                add_review.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String review_s=review.getText().toString();
-                        Float rate=rating.getRating();
-                        if (review_s.length()>2) {
-                            mprogressBar.setVisibility(View.VISIBLE);
-                            review_update(id, review_list, rate, review_s);
-                            reviews_BottomSheetFragment.this.dialog.dismiss();
+                if (!visitor) {
+                    reviews_BottomSheetFragment.this.dialog = new Dialog(getActivity());
+                    reviews_BottomSheetFragment.this.dialog.setContentView(R.layout.add_review);
+                    Button add_review = (Button) reviews_BottomSheetFragment.this.dialog.findViewById(R.id.add_review);
+                    final RatingBar rating = (RatingBar) reviews_BottomSheetFragment.this.dialog.findViewById(R.id.rating);
+                    final EditText review = (EditText) reviews_BottomSheetFragment.this.dialog.findViewById(R.id.review);
+                    add_review.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String review_s = review.getText().toString();
+                            Float rate = rating.getRating();
+                            if (review_s.length() > 2) {
+                                mprogressBar.setVisibility(View.VISIBLE);
+                                review_update(id, review_list, rate, review_s);
+                                reviews_BottomSheetFragment.this.dialog.dismiss();
+                            }
                         }
-                    }
-                });
-                reviews_BottomSheetFragment.this.dialog.show();
+                    });
+                    reviews_BottomSheetFragment.this.dialog.show();
+                }else {
+                    Toast.makeText(getActivity(),getResources().getText(R.string.please_sign_in_first),Toast.LENGTH_LONG).show();
+
+                }
             }
         });
 
@@ -157,6 +169,7 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
 
 
         try {
+            final int[] counter = {0};
             String url = "http://intmicrotec.neat-url.com:6566/api/doctors/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -192,8 +205,14 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        review_update(doc_id,review_list,rate,comment);
+                        counter[0]++;
+                    }else {
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
+
                 }
             }) {
                 @Override
@@ -261,6 +280,7 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
 
 
         try {
+            final int[] counter = {0};
             String url = "http://intmicrotec.neat-url.com:6566/api/doctors/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -325,8 +345,13 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_data(id);
+                        counter[0]++;
+                    }else {
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {

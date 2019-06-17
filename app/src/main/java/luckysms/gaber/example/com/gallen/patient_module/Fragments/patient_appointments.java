@@ -48,6 +48,7 @@ import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.checkconnectivity;
 import luckysms.gaber.example.com.gallen.patient_module.Model.appointments_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
@@ -105,6 +106,7 @@ public class patient_appointments extends Fragment implements appointment_Listen
 
 
         try {
+            final int[] counter = {0};
             String url = "http://intmicrotec.neat-url.com:6566/api/tickets/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -229,17 +231,22 @@ public class patient_appointments extends Fragment implements appointment_Listen
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    if (error instanceof NetworkError) {
-                    } else if (error instanceof ServerError) {
-                    } else if (error instanceof AuthFailureError) {
-                    } else if (error instanceof ParseError) {
-                    } else if (error instanceof NoConnectionError) {
-                    } else if (error instanceof TimeoutError) {
-                        Toast.makeText(getContext(),
-                                "Oops. Timeout error!",
-                                Toast.LENGTH_LONG).show();
+                    if (counter[0]<4) {
+                        get_appointments(getActivity().getSharedPreferences("personal_data",MODE_PRIVATE).getInt("id",0));
+                        counter[0]++;
+                    }else {
+                        if (new checkconnectivity().isInternetAvailable()){
+                            Toast.makeText(getContext(),
+                                    getActivity().getResources().getString(R.string.try_again_later),
+                                    Toast.LENGTH_LONG).show();
+                        }else {
+                            Toast.makeText(getContext(),
+                                    getActivity().getResources().getString(R.string.Timeout_error),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
                     }
-                    mprogressBar.setVisibility(View.INVISIBLE);
+
                 }
             }) {
                 @Override

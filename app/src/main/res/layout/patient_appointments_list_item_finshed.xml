@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layoutDirection="ltr"
     >
 
@@ -44,28 +44,35 @@
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="left|center"
-                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="left"
                     >
 
-                    <ImageView
-                        android:id="@+id/image"
+                    <android.support.v7.widget.CardView
                         android:layout_width="90dp"
                         android:layout_height="100dp"
-                        android:padding="10dp"
-                        />
+                        app:cardCornerRadius="8dp"
+                        android:layout_margin="5dp"
+                        android:elevation="10dp">
 
+                        <ImageView
+                            android:id="@+id/image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@color/white"
+                            android:scaleType="centerCrop"
+                            />
+                    </android.support.v7.widget.CardView>
                     <ImageView
                         android:src="@drawable/image_rounded_frame"
                         android:layout_width="90dp"
-                        android:layout_height="100dp" />
-
+                        android:layout_height="100dp"
+                        android:visibility="gone"/>
                 </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="right"
                     android:orientation="vertical"
                     android:layout_marginLeft="15dp"
 
@@ -84,32 +91,35 @@
                         android:text="Specialist of Neurosurgery"
                         android:layout_margin="5dp"
                         android:drawablePadding="5dp"/>
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|center">
-                        <Button
-                            android:id="@+id/detect"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/detect"
-                            android:background="@drawable/round_button_5"
-                            android:layout_weight="1"
-                            android:layout_margin="10dp"
-                            android:textColor="@color/green_light"
-                            />
-                        <Button
-                            android:id="@+id/details"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/details"
-                            android:background="@drawable/round_button_3"
-                            android:layout_weight="1"
-                            android:layout_margin="10dp"
-                            android:textColor="@color/white"
-                            />
-                    </TableRow>
+
                 </LinearLayout>
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|right"
+                    android:layout_marginTop="70dp"
+                    android:layout_marginLeft="100dp">
+                    <Button
+                        android:id="@+id/detect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/detect"
+                        android:background="@drawable/round_button_5"
+                        android:layout_weight="1"
+                        android:layout_margin="10dp"
+                        android:textColor="@color/green_light"
+                        />
+                    <Button
+                        android:id="@+id/details"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/details"
+                        android:background="@drawable/round_button_3"
+                        android:layout_weight="1"
+                        android:layout_margin="10dp"
+                        android:textColor="@color/white"
+                        />
+                </TableRow>
 
 
             </android.support.v7.widget.CardView>

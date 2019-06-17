@@ -35,7 +35,7 @@ public class splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        Animation rotate = AnimationUtils.loadAnimation(this, R.anim.fadein);
+        Animation rotate = AnimationUtils.loadAnimation(this, R.anim.blink_anim);
 
 // Start animating the image
         final ImageView splash = (ImageView) findViewById(R.id.splash);
@@ -101,6 +101,11 @@ public class splash extends AppCompatActivity {
                     }else if (getSharedPreferences("personal_data",MODE_PRIVATE).getString("type","").equals("doctor")){
                         Intent main=new Intent(splash.this,basic_activity.class);
                         startActivity(main);
+                        finish();
+                        overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
+                    }else {
+                        Intent mobile_authentication=new Intent(splash.this,patient_start_screen.class);
+                        startActivity(mobile_authentication);
                         finish();
                         overridePendingTransition(R.anim.slide_in_left,R.anim.slide_out_right);
                     }

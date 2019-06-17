@@ -18,22 +18,25 @@ import java.util.List;
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.favourite;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
 public class patient_favourite_list_adapter extends RecyclerView.Adapter<patient_favourite_list_adapter.MyViewHolder>  {
 
     private Context context;
-    private List<doctor_model> contact_list;
+    private List<favourite> contact_list;
 
-    public void filterList(List<doctor_model> filteredList) {
+
+    public void filterList(List<favourite> filteredList) {
         contact_list = filteredList;
         notifyDataSetChanged();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name,speciality,schedules,discount_code,graduated_from,doctor_fee;
+        public TextView name,speciality,schedules,discount_code,graduated_from,doctor_fee,hospital_name;
         public Button book_now;
-        public ImageView image;
+        public ImageView image,hospital_image;
         public RatingBar rating;
         public MyViewHolder(View view) {
             super(view);
@@ -46,13 +49,16 @@ public class patient_favourite_list_adapter extends RecyclerView.Adapter<patient
             book_now=(Button)view.findViewById(R.id.book_now);
             rating=(RatingBar)view.findViewById(R.id.rating);
             image=(ImageView)view.findViewById(R.id.image);
+            hospital_image=(ImageView)view.findViewById(R.id.hospital_image);
+            hospital_name=(TextView) view.findViewById(R.id.hospital_name);
+
 
         }
     }
 
 
 
-    public patient_favourite_list_adapter(Context context, List<doctor_model> contact_list) {
+    public patient_favourite_list_adapter(Context context, List<favourite> contact_list) {
         this.context = context;
         this.contact_list = contact_list;
     }
@@ -72,19 +78,23 @@ public class patient_favourite_list_adapter extends RecyclerView.Adapter<patient
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
-        doctor_model data = contact_list.get(position);
-        holder.name.setText(data.doctor_name);
-        holder.schedules.setText(data.doctor_availabilty);
-        if (data.doctor_accept_discount) {
+        favourite data = contact_list.get(position);
+        holder.name.setText(data.doctor_model.doctor_name);
+        holder.schedules.setText(data.doctor_model.doctor_availabilty);
+        if (data.doctor_model.doctor_accept_discount) {
             holder.discount_code.setText(context.getResources().getText(R.string.Accepts_the_discount_code));
         }else {
             holder.discount_code.setText(context.getResources().getText(R.string.not_Accepts_the_discount_code));
         }
-        holder.graduated_from.setText(data.doctor_graduated);
-        holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_fee));
-        holder.rating.setRating(data.doctor_rating);
+        holder.graduated_from.setText(data.doctor_model.doctor_graduated);
+        holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_model.doctor_fee));
+        holder.rating.setRating(data.doctor_model.doctor_rating);
+        holder.speciality.setText(data.patient_speciality_model.name);
+        String url2 ="http://intmicrotec.neat-url.com:6566"+data.hospital_model.hospital_image_url;
+        new AsyncTaskLoadImage(holder.hospital_image).execute(url2);
+        holder.hospital_name.setText(data.hospital_model.hospital_name);
 
-        String url =data.doctor_image;
+        String url =data.doctor_model.doctor_image;
         new AsyncTaskLoadImage(holder.image).execute(url);
 
 

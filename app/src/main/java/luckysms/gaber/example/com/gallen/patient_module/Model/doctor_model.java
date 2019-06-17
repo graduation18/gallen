@@ -8,6 +8,7 @@ public class doctor_model implements Serializable {
     public Float doctor_rating;
     public int id;
     public double doctor_fee;
+
     public doctor_model(String doctor_name, String doctor_availabilty
             , String doctor_graduated, String doctor_image
             , boolean doctor_accept_discount, Float doctor_rating, double doctor_fee, int id,String doctor_notes

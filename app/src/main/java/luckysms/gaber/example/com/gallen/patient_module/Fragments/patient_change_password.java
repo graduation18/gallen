@@ -25,9 +25,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -35,12 +40,14 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_main_screen;
+import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -113,7 +120,7 @@ public class patient_change_password extends Fragment {
             }
         });
         mprogressBar.setVisibility(View.VISIBLE);
-        get_password();
+        get_data();
         return view;
     }
 
@@ -128,6 +135,7 @@ public class patient_change_password extends Fragment {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -142,7 +150,7 @@ public class patient_change_password extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -159,8 +167,22 @@ public class patient_change_password extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        update(password_s);
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
                 }
             }) {
                 @Override
@@ -177,7 +199,13 @@ public class patient_change_password extends Fragment {
                     try {
                         object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
                         object.put("password",password_s);
-                        object.put("user_info",user_info);
+                        object.put("name",user_info.getString("name"));
+                        object.put("mobile",user_info.getString("mobile"));
+                        object.put("username",user_info.getString("username"));
+                        object.put("email",user_info.getString("email"));
+                        object.put("image_url",user_info.getString("image_url"));
+                        object.put("type",user_info.getString("type"));
+                        object.put("user_info",user_info.getJSONObject("user_info"));
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -203,11 +231,12 @@ public class patient_change_password extends Fragment {
 
     }
 
-    private void get_password()
+    private void get_data()
     {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -223,14 +252,14 @@ public class patient_change_password extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
-                                JSONObject doc=res.getJSONObject("doc");
-                                correct_pass=doc.getString("password");
-                                user_info=doc.getJSONObject("user_info");
-                                Log.w("sssss",correct_pass);
+                                user_info=res.getJSONObject("doc");
+                                correct_pass=user_info.getString("password");
+
+
 
 
                             }
@@ -243,8 +272,23 @@ public class patient_change_password extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_data();
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
+
                 }
             }) {
                 @Override
@@ -261,6 +305,9 @@ public class patient_change_password extends Fragment {
                     JSONObject object=new JSONObject();
                     try {
                         object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+
+
+
 
                     } catch (JSONException e) {
                         e.printStackTrace();

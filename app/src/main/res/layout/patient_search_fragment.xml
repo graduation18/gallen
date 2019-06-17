@@ -26,7 +26,7 @@
         android:layout_marginRight="40dp"
         android:layout_marginLeft="40dp"
         android:layoutDirection="ltr"
-
+        android:id="@+id/area_speciality_layout"
         android:background="@drawable/round_button_1" >
         <Button
             android:id="@+id/area_speciality"
@@ -48,7 +48,8 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="40dp"
         android:layout_marginLeft="40dp"
-        android:background="@drawable/round_button_1" >
+        android:background="@drawable/round_button_1"
+        android:id="@+id/doctor_name_layout">
         <Button
             android:id="@+id/doctor_name"
             android:text="@string/name"

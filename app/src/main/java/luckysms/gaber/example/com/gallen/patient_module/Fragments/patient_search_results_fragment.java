@@ -265,7 +265,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
         }else if (gov_model!=null && city_model==null){
             location.setText(gov_model.name);
         }else if (gov_model==null && city_model!=null){
-            location.setText(city_model.gov_name + " , " + city_model.name);
+            location.setText(city_model.name);
         }
         if(speciality_model!=null) {
             speciality.setText(speciality_model.name);
@@ -287,6 +287,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -303,7 +304,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                         Log.w("dsakjbsdahk", res.toString());
 
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -499,17 +500,23 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    if (error instanceof NetworkError) {
-                    } else if (error instanceof ServerError) {
-                    } else if (error instanceof AuthFailureError) {
-                    } else if (error instanceof ParseError) {
-                    } else if (error instanceof NoConnectionError) {
-                    } else if (error instanceof TimeoutError) {
-                        Toast.makeText(getContext(),
-                                "Oops. Timeout error!",
-                                Toast.LENGTH_LONG).show();
+                    if (counter[0]<4) {
+                        search();
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
                     }
-                    mprogressBar.setVisibility(View.INVISIBLE);
+
 
                 }
             }) {

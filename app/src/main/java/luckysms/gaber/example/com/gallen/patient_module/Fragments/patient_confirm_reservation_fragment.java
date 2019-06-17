@@ -25,9 +25,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -38,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -326,7 +332,11 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
         name.setText(doctor_model.doctor_name);
         speciality.setText(speciality_model.name);
-        location.setText(hospital_model.hospital_address);
+        try {
+            location.setText(new String(hospital_model.hospital_address.getBytes("ISO-8859-1"), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         if (doctor_model.doctor_accept_discount){
             discount_code.setVisibility(View.VISIBLE);
         }
@@ -345,6 +355,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/tickets/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -359,7 +370,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -379,8 +390,22 @@ public class patient_confirm_reservation_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        add_ticket(patient,status,selected_hospital,ticket_date,image_url);
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
                 }
             }) {
                 @Override
@@ -434,6 +459,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -448,7 +474,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -470,8 +496,22 @@ public class patient_confirm_reservation_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                    if (counter[0]<4) {
+                        get_data();
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
                 }
             }) {
                 @Override
@@ -519,6 +559,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -534,7 +575,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -597,8 +638,22 @@ public class patient_confirm_reservation_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        favourite_update(doctor_model,id);
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
                 }
             }) {
                 @Override
@@ -699,6 +754,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -714,7 +770,7 @@ public class patient_confirm_reservation_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -743,8 +799,22 @@ public class patient_confirm_reservation_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_patient_data(doctor_model,id);
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
                 }
             }) {
                 @Override

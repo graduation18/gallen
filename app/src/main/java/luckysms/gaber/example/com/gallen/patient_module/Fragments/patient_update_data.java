@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,13 +38,19 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.fxn.pix.Pix;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mukesh.countrypicker.CountryPicker;
 import com.mukesh.countrypicker.CountryPickerListener;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -57,11 +64,20 @@ import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_login
 import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_main_screen;
 import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_sign_up;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.insurance_SpinAdapter;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.ApiConfig;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.pass_insurance_data;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 public class patient_update_data extends Fragment implements pass_insurance_data {
@@ -75,6 +91,13 @@ public class patient_update_data extends Fragment implements pass_insurance_data
     private ProgressBar mprogressBar;
     private patient_insurance_model insurance_model;
     private pass_insurance_data mListener_insurance;
+    private JSONObject user_info;
+    private ImageView image;
+    private String selected_image_url;
+    int PICK_IMAGE_MULTIPLE = 1;
+
+
+
 
 
 
@@ -96,6 +119,15 @@ public class patient_update_data extends Fragment implements pass_insurance_data
         back=(TextView)view.findViewById(R.id.back);
         number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
         notifications=(TextView)view.findViewById(R.id.notifications);
+        image=(ImageView)view.findViewById(R.id.image);
+
+
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                select_images();
+            }
+        });
 
 
         back.setOnClickListener(new View.OnClickListener() {
@@ -145,6 +177,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                 String insurance_company_s=insurance_company.getText().toString();
                 String country_s=country.getText().toString();
                 Log.w("khdsddsaasdk",date_of_birth_s);
+                mprogressBar.setVisibility(View.VISIBLE);
 
                 update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s
                         ,insurance_company_s,insurance_model.id,insurance_model.name,country_s);
@@ -193,6 +226,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
 
 
         try {
+            final int []counter={0};
                 String url = "http://intmicrotec.neat-url.com:6566/api/patients/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -208,7 +242,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -225,8 +259,14 @@ public class patient_update_data extends Fragment implements pass_insurance_data
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s,insurance_company_s,insurance_company_i
+                        ,insurance_company__i,country_s);
+                        counter[0]++;
+                    }else {
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -235,7 +275,6 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                     Map<String, String> pars = new HashMap<String, String>();
                     pars.put("Content-Type", "application/json");
                     pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
-
                     return pars;
                 }
 
@@ -254,6 +293,8 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                         insurance.put("_id",insurance_company__i);
                         object.put("insurance_company",insurance);
                         object.put("country",country_s);
+                        object.put("user_info",user_info.getJSONObject("user_info"));
+
 
 
 
@@ -285,6 +326,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
 
 
         try {
+            final int [] counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -305,14 +347,29 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
                                 JSONObject doc=res.getJSONObject("doc");
+                                user_info=res.getJSONObject("doc");
                                 mobile_number.setText(doc.getString("mobile"));
                                 full_name.setText(new String (doc.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
                                 email_address.setText(doc.getString("username"));
                                 date_of_birth.setText(doc.getString("birth_date_day"));
                                 JSONObject insurance=doc.getJSONObject("insurance_company");
-                                insurance_company.setText(new String(insurance.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
-                                insurance_model=new patient_insurance_model("","",insurance.getString("name"),insurance.getInt("id"));
+                                if (new String(insurance.getString("name").getBytes("ISO-8859-1"), "UTF-8").contains("none")
+                                        ||new String(insurance.getString("name").getBytes("ISO-8859-1"), "UTF-8").contains("بدون")){
+                                    insurance_company.setText(getActivity().getResources().getString(R.string.none));
+                                }
 
+                                insurance_model=new patient_insurance_model("","",insurance.getString("name"),insurance.getInt("id"));
+                                country.setText(doc.getJSONObject("country").getString("name"));
+                                String url2 ="http://intmicrotec.neat-url.com:6566"+doc.getString("image_url");
+                                Picasso.with(getActivity())
+                                        .load(url2)
+                                        .placeholder(R.drawable.user)
+                                        .into(image, new Callback() {
+                                            @Override
+                                            public void onSuccess() {}
+                                            @Override public void onError() {
+                                            }
+                                        });
 
 
 
@@ -328,8 +385,13 @@ public class patient_update_data extends Fragment implements pass_insurance_data
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_data();
+                        counter[0]++;
+                    }else {
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -399,5 +461,84 @@ public class patient_update_data extends Fragment implements pass_insurance_data
     public void pass_data(patient_insurance_model insurance_model, pass_insurance_data listner) {
         this.insurance_model=insurance_model;
         insurance_company.setText(insurance_model.name);
+    }
+    private void select_images()
+    {
+        Pix.start(this,
+                PICK_IMAGE_MULTIPLE,1);
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE_MULTIPLE) {
+            ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
+            for (String uri:returnValue){
+                try {
+                    Log.w("kdasjasdjls",uri);
+                    mprogressBar.setVisibility(View.VISIBLE);
+                    uploadImage(uri);
+
+
+                } catch (Exception e) {
+                    Log.w("errrrrrrror",e.getMessage());
+                }
+            }
+        }
+
+
+    }
+    private void uploadImage(String imagePath) {
+        //creating a file
+        File file = new File(imagePath);
+        //creating request body for file
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("fileToUpload", file.getName(), requestFile);
+//        RequestBody descBody = RequestBody.create(MediaType.parse("text/plain"), desc);
+        Log.e("requestFile",requestFile.toString());
+        //The gson builder
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        //creating retrofit object
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(ApiConfig.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        //creating our api
+        ApiConfig api = retrofit.create(ApiConfig.class);
+        //creating a call and calling the upload image method
+        Call call = api.uploadImage("upload/image/default",body);
+        //finally performing the call
+        call.enqueue(new retrofit2.Callback() {
+            @Override
+            public void onResponse(Call call, retrofit2.Response response) {
+
+                mprogressBar.setVisibility(View.INVISIBLE);
+                Log.w("response",new Gson().toJson(response.body()));
+                try {
+                    JSONObject object=new JSONObject(new Gson().toJson(response.body()));
+                    selected_image_url=object.getString("image_url");
+                    Picasso.with(getActivity())
+                            .load("http://intmicrotec.neat-url.com:6566"+selected_image_url)
+                            .placeholder(R.drawable.user)
+                            .into(image, new Callback() {
+                                @Override
+                                public void onSuccess() {}
+                                @Override public void onError() {
+                                }
+                            });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                mprogressBar.setVisibility(View.INVISIBLE);
+            }
+
+
+        });
     }
 }

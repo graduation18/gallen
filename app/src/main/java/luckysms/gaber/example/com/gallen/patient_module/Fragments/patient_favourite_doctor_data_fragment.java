@@ -25,9 +25,14 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -36,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,10 +58,12 @@ import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Liste
 import luckysms.gaber.example.com.gallen.patient_module.Model.available_appointments_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.hospital_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.nurse_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_city_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_gov_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -74,6 +82,11 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
     private ProgressBar mprogressBar;
     private boolean fav_added;
     private doctor_model doctor_model;
+    private patient_gov_model gov_model;
+    private patient_city_model city_model;
+    private patient_speciality_model speciality_model;
+    private hospital_model hospital_model;
+    private patient_insurance_model insurance_model;
     private String clinic_name;
     private int clinic_id;
 
@@ -126,34 +139,36 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
         available_appointments_recycler.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), available_appointments_recycler, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, final int position) {
-               /* Bundle args = new Bundle();
-                args.putString("day",contact_list.get(position).day);
-                args.putString("from",contact_list.get(position).from);
-                args.putString("to",contact_list.get(position).to);
-                args.putInt("day_id",contact_list.get(position).day_id);
-                args.putInt("from_id",contact_list.get(position).from_id);
-                args.putInt("to_id",contact_list.get(position).to_id);
+                Bundle args = new Bundle();
+                args.putString("clinic_name", clinic_name);
+                args.putInt("clinic_id", clinic_id);
+                args.putBoolean("fav_added", fav_added);
+                if (contact_list.get(position) != null) {
+                    args.putSerializable("ticket", contact_list.get(position));
+                }
+                if (doctor_model != null) {
+                    args.putSerializable("doctor", doctor_model);
+                }
+                if (hospital_model != null) {
+                    args.putSerializable("hospital", hospital_model);
+                }
+                if (insurance_model != null) {
+                    args.putSerializable("insurance_company", insurance_model);
+                }
+                if (speciality_model != null) {
+                    args.putSerializable("speciality", speciality_model);
+                }
+                if (gov_model != null) {
+                    args.putSerializable("governorate", gov_model);
+                }
+                if (city_model != null) {
+                    args.putSerializable("city", city_model);
+                }
 
-                args.putString("clinic_name",clinic_name);
-
-                args.putInt("clinic_id",clinic_id);
-                args.putInt("hospital_id",hospital_model.hospital_id);
-
-
-                args.putInt("doctor_id",doctor_model.id);
-                args.putString("doctor_availabilty",doctor_model.doctor_availabilty);
-                args.putString("doctor_graduated",doctor_model.doctor_graduated);
-                args.putString("doctor_image",doctor_model.doctor_image);
-                args.putString("doctor_location",hospital_model.hospital_address);
-                args.putString("doctor_name",doctor_model.doctor_name);
-                args.putString("doctor_speciality",speciality_model.name);
-                args.putBoolean("doctor_accept_discount",doctor_model.doctor_accept_discount);
-                args.putDouble("doctor_fee",doctor_model.doctor_fee);
-                args.putFloat("doctor_rating",doctor_model.doctor_rating);
-                args.putInt("ticket_id",contact_list.get(position).ticket_id);
-                Fragment fragment=new patient_confirm_reservation_fragment();
+                Fragment fragment = new patient_confirm_reservation_fragment();
                 fragment.setArguments(args);
-                go_to(fragment);*/
+                go_to(fragment);
+
             }
 
             @Override
@@ -222,6 +237,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
         mprogressBar.setVisibility(View.VISIBLE);
         get_data(doctor_model.id);
         get_doctor_available_appintments(doctor_model.id);
+        search();
         return view;
     }
 
@@ -237,6 +253,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
 
 
         try {
+            final int[] counter = {0};
             String url = "http://intmicrotec.neat-url.com:6566/api/doctors/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -252,7 +269,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -341,8 +358,14 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_data(doctor_model.id);
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -408,7 +431,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
 
 
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -536,7 +559,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -703,7 +726,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
                     try {
                         JSONObject res = new JSONObject(response);
                         if (res.has("error")) {
-                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
 
                         } else if (res.has("done")) {
                             if (res.getBoolean("done")) {
@@ -794,6 +817,280 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+    }
+    private void search()
+    {
+
+
+        try {
+            String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/all";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
+            }
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    try {
+                        JSONObject res = new JSONObject(response);
+
+                        Log.w("dsakjbsdahk", res.toString());
+
+                        if (res.has("error")) {
+                            //Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                contact_list.clear();
+                                JSONArray list=res.getJSONArray("list");
+
+                                for (int i=0;i<list.length();i++){
+                                    JSONObject hospital=list.getJSONObject(i);
+
+                                    hospital_model hospital_model= null;
+                                    doctor_model doctor_model = null;
+                                    patient_speciality_model patient_speciality_model = null;
+                                    patient_insurance_model patient_insurance_model= null;
+                                    patient_gov_model patient_gov_model= null;
+                                    patient_city_model patient_city_model= null;
+                                    nurse_model nurse_model = null;
+
+
+
+                                    //hospital
+                                    String  hospital__id=hospital.getString("_id");
+                                    int  hospital_id=hospital.getInt("id");
+                                    String hospital_image_url=hospital.getString("image_url");
+                                    String hospital_name=new String(hospital.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    String hospital_address="";
+                                    if (hospital.has("address")){hospital_address=hospital.getString("address");}
+                                    String hospital_phone = null;
+                                    if (hospital.has("phone")) {
+                                        hospital_phone = hospital.getString("phone");
+                                    }
+                                    String hospital_mobile=hospital.getString("mobile");
+                                    String hospital_latitude=hospital.getString("latitude");
+                                    String hospital_longitude=hospital.getString("longitude");
+                                    hospital_address = hospital.getString("address");
+                                    hospital_model=new hospital_model(hospital__id,
+                                            hospital_image_url,
+                                            hospital_name,
+                                            hospital_address,
+                                            hospital_phone,
+                                            hospital_mobile,
+                                            hospital_id,
+                                            hospital_latitude,
+                                            hospital_longitude);
+                                    //gov
+                                    JSONObject gov=hospital.getJSONObject("gov");
+                                    String gov__id="";
+                                    int gov_id=gov.getInt("id");
+                                    String gov_name= new String(gov.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    patient_gov_model=new patient_gov_model(gov__id,"",gov_name,gov_id);
+                                    //city
+
+                                    JSONObject city=hospital.getJSONObject("city");
+                                    String city__id="";
+                                    int city_id=city.getInt("id");
+                                    String city_name=new String(city.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                    patient_city_model=new patient_city_model(city__id,"",city_name,gov__id,gov_name,city_id,gov_id);
+
+
+
+
+
+                                    //insurance
+
+                                    JSONArray insurance_company_list=hospital.getJSONArray("insurance_company_list");
+                                    Log.w("sadkkdsa", String.valueOf(insurance_company_list.length()));
+                                    for (int j=0;j<insurance_company_list.length();j++){
+                                        JSONObject insurance_company_obj=insurance_company_list.getJSONObject(j);
+                                        if (insurance_company_obj.has("insurance_company")) {
+                                            JSONObject insurance_company = insurance_company_obj.getJSONObject("insurance_company");
+                                            String insurance_company__id = insurance_company.getString("_id");
+                                            int insurance_company_id = insurance_company.getInt("id");
+                                            String insurance_company_name = new String(insurance_company.getString("name").getBytes("ISO-8859-1"), "UTF-8");
+                                            patient_insurance_model = new patient_insurance_model(insurance_company__id, "", insurance_company_name, insurance_company_id);
+                                        }else {
+                                            patient_insurance_model = new patient_insurance_model("dssd", "", "none", 0);
+
+                                        }
+                                    }
+
+                                    //doctor_list
+
+                                    JSONArray doctor_list=hospital.getJSONArray("doctor_list");
+
+                                    for (int d=0;d<doctor_list.length();d++){
+                                        JSONObject doctor_obj=doctor_list.getJSONObject(d);
+                                        JSONObject doctor=doctor_obj.getJSONObject("doctor");
+                                        String doctor__id=doctor.getString("_id");
+                                        String doctor_name=new String(doctor.getString("name") .getBytes("ISO-8859-1"), "UTF-8");
+                                        int doctor_id=doctor.getInt("id");
+                                        boolean doctor_active=doctor.getBoolean("active");
+                                        boolean doctor_accept_code=doctor.getBoolean("accept_code");
+                                        String doctor_phone=doctor.getString("phone");
+                                        String doctor_info=doctor.getString("info");
+                                        String doctor_gender=doctor.getString("gender");
+                                        String doctor_code=doctor.getString("code");
+                                        double doctor_fee=doctor.getDouble("fee");
+                                        String doctor_image=doctor.getString("image_url");
+                                        JSONObject specialty=doctor.getJSONObject("specialty");
+                                        String specialty__id=specialty.getString("_id");
+                                        int specialty_id=specialty.getInt("id");
+                                        Float rate=0f;
+                                        JSONArray review_list=new JSONArray();
+                                        if (doctor.has("review_list")){
+                                            review_list=doctor.getJSONArray("review_list");
+                                            Log.w("dasadsddsa",review_list.toString());
+
+                                            for (int s=0;s<review_list.length();s++){
+                                                JSONObject rates=review_list.getJSONObject(s);
+                                                rate=rate+rates.getInt("rate");
+                                            }
+                                            rate=rate/review_list.length();
+
+                                        }
+
+
+                                        String specialty_name=new String (specialty.getString("name")
+                                                .getBytes("ISO-8859-1"), "UTF-8");
+                                        String availability=getResources().getString(R.string.not_active);
+                                        if (doctor_active){
+                                            availability=getResources().getString(R.string.active);
+                                        }
+                                        JSONArray nurse_list=hospital.getJSONArray("nurse_list");
+
+                                        for (int n=0;n<nurse_list.length();n++){
+                                            JSONObject nurse=nurse_list.getJSONObject(n);
+
+                                            String nurse__id="";
+                                            if (nurse.has("_id")){nurse__id=nurse.getString("_id");}
+                                            int nurse_id=0;
+                                            if (nurse.has("id")){nurse_id=nurse.getInt("id");}
+                                            String nurse_name="";
+                                            if (nurse.has("name")){nurse_name=new String (nurse.getString("name").getBytes("ISO-8859-1"), "UTF-8");}
+
+                                            nurse_model=new nurse_model(nurse__id,nurse_name,nurse_id);
+                                        }
+                                        doctor_model=new doctor_model(doctor_name,availability
+                                                ,""
+                                                ,doctor_image
+                                                ,doctor_accept_code,
+                                                rate
+                                                ,doctor_fee
+                                                ,doctor_id,
+                                                doctor_info,
+                                                doctor_gender,
+                                                new String(review_list.toString().getBytes("ISO-8859-1"), "UTF-8"));
+                                        patient_speciality_model=new patient_speciality_model(specialty__id,
+                                                "ss",specialty_name,specialty_id);
+                                        search_result_list_model doctor_model_res=new search_result_list_model(
+                                                hospital_model,doctor_model
+                                                ,patient_speciality_model,patient_insurance_model,
+                                                patient_gov_model,patient_city_model,nurse_model);
+
+                                        Log.w("dsakjbsdahk",doctor_model_res.doctor_model.doctor_name);
+
+
+
+                                    }
+
+                                    patient_favourite_doctor_data_fragment.this.speciality_model=patient_speciality_model;
+                                    patient_favourite_doctor_data_fragment.this.gov_model=new patient_gov_model(gov__id,""
+                                    ,gov_name,gov_id);
+                                    patient_favourite_doctor_data_fragment.this.city_model=new patient_city_model(city__id,"",
+                                            city_name,gov__id,gov_name,city_id,gov_id);
+                                    patient_favourite_doctor_data_fragment.this.hospital_model=new hospital_model(hospital__id
+                                    ,hospital_image_url,hospital_name,hospital_address,hospital_phone,hospital_mobile,hospital_id,hospital_latitude
+                                    ,hospital_longitude);
+                                    patient_favourite_doctor_data_fragment.this.doctor_model=doctor_model;
+                                    patient_favourite_doctor_data_fragment.this.insurance_model=patient_insurance_model;
+
+
+
+
+                                }
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    if (error instanceof NetworkError) {
+                    } else if (error instanceof ServerError) {
+                    } else if (error instanceof AuthFailureError) {
+                    } else if (error instanceof ParseError) {
+                    } else if (error instanceof NoConnectionError) {
+                    } else if (error instanceof TimeoutError) {
+                        Toast.makeText(getContext(),
+                                "Oops. Timeout error!",
+                                Toast.LENGTH_LONG).show();
+                    }
+                    mprogressBar.setVisibility(View.INVISIBLE);
+
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        if(doctor_model!=null) {
+                            JSONObject name_object=new JSONObject();
+                            name_object.put("doctor_list.doctor.id", doctor_model.id);
+                            object.put("where", name_object);
+                        }
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+            };
+
+
+            stringReq.setRetryPolicy(new DefaultRetryPolicy(
+                    5000,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            queue.add(stringReq);
+
+
+        } catch (Exception e) {
+
+        }
+
 
     }
 

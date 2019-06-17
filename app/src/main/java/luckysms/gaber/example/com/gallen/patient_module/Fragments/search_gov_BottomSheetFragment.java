@@ -173,6 +173,7 @@ public class search_gov_BottomSheetFragment extends BottomSheetDialogFragment im
 
 
         try {
+            final int [] counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/goves/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -224,7 +225,13 @@ public class search_gov_BottomSheetFragment extends BottomSheetDialogFragment im
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_goves_data();
+                        counter[0]++;
+                    }else {
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {

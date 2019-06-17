@@ -142,7 +142,7 @@
     <string name="appointment_period">فترة الموعد</string>
     <string name="block_patient">حجب مريض</string>
     <string name="evaluation">تقييم</string>
-    <string name="none">لايوجد</string>
+    <string name="none">بدون</string>
     <string name="active">نشط</string>
     <string name="not_active">غير نشط</string>
     <string name="please_select_doctor_first">من فضلك اختر الطبيب اولا</string>

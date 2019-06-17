@@ -165,6 +165,8 @@
     <string name="user_exists">Previous User Exists with same E-mail or Phone number</string>
     <string name="booked_up">Booked Up</string>
     <string name="not_reserved">Not Reserved</string>
+    <string name="Timeout_error">Oops. Timeout error!</string>
+    <string name="try_again_later">try again later</string>
 
 
 </resources>
