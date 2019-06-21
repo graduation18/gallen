@@ -447,4 +447,9 @@ public class patient_appointments extends Fragment implements appointment_Listen
     public void map_location(int pos) {
         open_map(pos);
     }
+
+    @Override
+    public void hospital_profile(int pos) {
+
+    }
 }

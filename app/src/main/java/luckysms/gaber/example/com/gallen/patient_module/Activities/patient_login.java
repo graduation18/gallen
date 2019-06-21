@@ -144,7 +144,7 @@ public class patient_login extends AppCompatActivity {
                             }else if (res.getString("error").equals("email or password error")){
                                 Toast.makeText(patient_login.this,getResources().getString(R.string.email_or_password_error),Toast.LENGTH_LONG).show();
 
-                            }else if (res.getString("error").contains("Login Error , You Are Loged")){
+                            }else if (res.getString("error").contains("You Are Loged")){
                                 Log.w("njhjhkjhk","jkjjhhjkhkkj");
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 logout(mobile_number_email_address_s,password_s);
@@ -240,6 +240,8 @@ public class patient_login extends AppCompatActivity {
                     Log.w("dsakjbsdahk", response);
                     try {
                         JSONObject res = new JSONObject(response);
+                        getSharedPreferences("personal_data", MODE_PRIVATE).edit()
+                        .putString("accessToken",res.getString("accessToken")).commit();
                         if (res.has("done")) {
                             if (res.getBoolean("done")) {
                                 getSharedPreferences("personal_data", MODE_PRIVATE).edit()
@@ -248,6 +250,7 @@ public class patient_login extends AppCompatActivity {
                                         .putString("email","")
                                         .putString("password"," ")
                                         .putBoolean("state",false)
+                                        .putString("accessToken",res.getString("accessToken"))
                                         .commit();
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 login(mobile_number_email_address_s,password_s);

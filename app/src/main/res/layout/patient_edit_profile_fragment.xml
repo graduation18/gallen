@@ -84,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center">
                 <com.alexzh.circleimageview.CircleImageView
-                    android:id="@+id/doctor_image"
+                    android:id="@+id/image"
                     android:layout_width="90dp"
                     android:layout_height="90dp"
                     android:layout_gravity="center"

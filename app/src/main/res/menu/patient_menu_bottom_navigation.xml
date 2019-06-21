@@ -8,6 +8,12 @@
         android:title="@string/more"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/offer"
+        android:checked="true"
+        android:icon="@drawable/offer"
+        android:title="@string/offer"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/favorites"
         android:checked="true"
         android:icon="@drawable/nav_favorits"

@@ -180,7 +180,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                 mprogressBar.setVisibility(View.VISIBLE);
 
                 update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s
-                        ,insurance_company_s,insurance_model.id,insurance_model.name,country_s);
+                        ,insurance_company_s,insurance_model.id,insurance_model.name,country_s,selected_image_url   );
             }
         });
 
@@ -221,7 +221,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                 .commit();
     }
     private void update(final String full_name_s, final String mobile_number_s, final String email_address_s
-            , final String date_of_birth_s, final String insurance_company_s,final  int insurance_company_i,final String insurance_company__i,final String country_s)
+            , final String date_of_birth_s, final String insurance_company_s,final  int insurance_company_i,final String insurance_company__i,final String country_s,final  String selected_image_url)
     {
 
 
@@ -261,7 +261,7 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                 public void onErrorResponse(VolleyError error) {
                     if (counter[0]<4) {
                         update(full_name_s,mobile_number_s,email_address_s,date_of_birth_s,insurance_company_s,insurance_company_i
-                        ,insurance_company__i,country_s);
+                        ,insurance_company__i,country_s,selected_image_url);
                         counter[0]++;
                     }else {
                         Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
@@ -286,13 +286,14 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                         object.put("name",full_name_s);
                         object.put("mobile",mobile_number_s);
                         object.put("email",email_address_s);
+                        object.put("image_url",selected_image_url);
                         object.put("birth_date_day",date_of_birth_s);
                         JSONObject insurance=new JSONObject();
                         insurance.put("name",insurance_company_s);
                         insurance.put("id",insurance_company_i);
                         insurance.put("_id",insurance_company__i);
                         object.put("insurance_company",insurance);
-                        object.put("country",country_s);
+                        object.put("country",new JSONObject().put("name",country_s));
                         object.put("user_info",user_info.getJSONObject("user_info"));
 
 
@@ -361,9 +362,10 @@ public class patient_update_data extends Fragment implements pass_insurance_data
                                 insurance_model=new patient_insurance_model("","",insurance.getString("name"),insurance.getInt("id"));
                                 country.setText(doc.getJSONObject("country").getString("name"));
                                 String url2 ="http://intmicrotec.neat-url.com:6566"+doc.getString("image_url");
+                                selected_image_url=doc.getString("image_url");
                                 Picasso.with(getActivity())
                                         .load(url2)
-                                        .placeholder(R.drawable.user)
+                                        .placeholder(R.drawable.user2)
                                         .into(image, new Callback() {
                                             @Override
                                             public void onSuccess() {}

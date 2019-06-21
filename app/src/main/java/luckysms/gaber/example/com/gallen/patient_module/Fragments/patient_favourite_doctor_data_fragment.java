@@ -67,7 +67,7 @@ import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class patient_favourite_doctor_data_fragment extends Fragment {
+public class patient_favourite_doctor_data_fragment extends Fragment   {
     private View view;
     private TextView back,number_of_notifications,notifications
             ,name,speciality,discount_code,rating_ratio,doctor_fee,doctor_info,graduated_from,text;
@@ -235,8 +235,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
             }
         });
         mprogressBar.setVisibility(View.VISIBLE);
-        get_data(doctor_model.id);
-        get_doctor_available_appintments(doctor_model.id);
+
         search();
         return view;
     }
@@ -328,7 +327,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
 
                                 name.setText(doctor_name);
                                 speciality.setText(specialty_name);
-                                graduated_from.setText(doctor_model.doctor_graduated);
+                                graduated_from.setText(new String (hospital_model.hospital_address.getBytes("ISO-8859-1"), "UTF-8"));
                                 if (doctor_accept_code){
                                     discount_code.setVisibility(View.VISIBLE);
                                 }
@@ -414,6 +413,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
     {
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/tickets/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -460,7 +460,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
                                             int to_id = to_obj.getInt("id");
                                             String to_name = to_obj.getString("en");
                                             if (object.has("selected_doctor")) {
-                                                if (object.getJSONObject("selected_doctor").getInt("id") == id) {
+                                                if (object.getJSONObject("selected_doctor").getInt("id") == doctor_model.id) {
                                                     contact_list.add(new available_appointments_list_model(day_name, from_name, to_name, day_id, from_id, to_id,ticket_id,status.getInt("id")));
                                                 }
                                             }
@@ -486,7 +486,14 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_doctor_available_appintments(doctor_model.id);
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -505,8 +512,6 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
                     JSONObject object=new JSONObject();
                     try {
                         JSONObject where=new JSONObject();
-                        where.put("doctor_list.doctor.id",id);
-                        where.put("date",new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
                         where.put("status.id",0);
                         object.put("where",where);
 
@@ -804,26 +809,111 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
     }
     private void check_for_favourite()
     {
-        String favs=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("favourite_list","");
+
+
         try {
-            JSONArray favourite_list=new JSONArray(favs);
-            for (int i=0;i<favourite_list.length();i++){
-                JSONObject object=favourite_list.getJSONObject(i);
-                if (object.getInt("id")==doctor_model.id){
-                    favorite.setImageResource( R.drawable.doctor_favourite_fill);
-                    fav_added=true;
-                }
+            final int[] counter = {0};
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    contact_list.clear();
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONObject doc=res.getJSONObject("doc");
+                                JSONArray favourite_list=doc.getJSONArray("favourite_list");
+
+                                for (int i=0;i<favourite_list.length();i++){
+                                    JSONObject object=favourite_list.getJSONObject(i);
+                                    if (object.getInt("id")==doctor_model.id){
+                                        favorite.setImageResource( R.drawable.doctor_favourite_fill);
+                                        fav_added=true;
+                                    }
+                                }
+
+                                Log.w("ksadkasdkl", String.valueOf(doctor_model.id));
+                                get_doctor_available_appintments(doctor_model.id);
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    if (counter[0]<4) {
+                        check_for_favourite();
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
+
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
         }
 
+
     }
+
     private void search()
     {
 
 
         try {
+            final  int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/hospitals/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -976,16 +1066,18 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
 
                                             nurse_model=new nurse_model(nurse__id,nurse_name,nurse_id);
                                         }
-                                        doctor_model=new doctor_model(doctor_name,availability
-                                                ,""
-                                                ,doctor_image
-                                                ,doctor_accept_code,
-                                                rate
-                                                ,doctor_fee
-                                                ,doctor_id,
-                                                doctor_info,
-                                                doctor_gender,
-                                                new String(review_list.toString().getBytes("ISO-8859-1"), "UTF-8"));
+                                        if (patient_favourite_doctor_data_fragment.this.doctor_model.id==doctor_id) {
+                                            doctor_model = new doctor_model(doctor_name, availability
+                                                    , ""
+                                                    , doctor_image
+                                                    , doctor_accept_code,
+                                                    rate
+                                                    , doctor_fee
+                                                    , doctor_id,
+                                                    doctor_info,
+                                                    doctor_gender,
+                                                    new String(review_list.toString().getBytes("ISO-8859-1"), "UTF-8"));
+                                        }
                                         patient_speciality_model=new patient_speciality_model(specialty__id,
                                                 "ss",specialty_name,specialty_id);
                                         search_result_list_model doctor_model_res=new search_result_list_model(
@@ -993,7 +1085,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
                                                 ,patient_speciality_model,patient_insurance_model,
                                                 patient_gov_model,patient_city_model,nurse_model);
 
-                                        Log.w("dsakjbsdahk",doctor_model_res.doctor_model.doctor_name);
+                                        //Log.w("dsakjbsdahk",doctor_model_res.doctor_model.doctor_name);
 
 
 
@@ -1014,6 +1106,7 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
 
 
                                 }
+                                get_data(doctor_model.id);
 
                             }
                         }
@@ -1029,17 +1122,22 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    if (error instanceof NetworkError) {
-                    } else if (error instanceof ServerError) {
-                    } else if (error instanceof AuthFailureError) {
-                    } else if (error instanceof ParseError) {
-                    } else if (error instanceof NoConnectionError) {
-                    } else if (error instanceof TimeoutError) {
-                        Toast.makeText(getContext(),
-                                "Oops. Timeout error!",
-                                Toast.LENGTH_LONG).show();
+                    if (counter[0]<4) {
+                        search();
+                        counter[0]++;
+                    }else {
+                        if (error instanceof NetworkError) {
+                        } else if (error instanceof ServerError) {
+                        } else if (error instanceof AuthFailureError) {
+                        } else if (error instanceof ParseError) {
+                        } else if (error instanceof NoConnectionError) {
+                        } else if (error instanceof TimeoutError) {
+                            Toast.makeText(getContext(),
+                                    "Oops. Timeout error!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        mprogressBar.setVisibility(View.INVISIBLE);
                     }
-                    mprogressBar.setVisibility(View.INVISIBLE);
 
                 }
             }) {
@@ -1093,8 +1191,6 @@ public class patient_favourite_doctor_data_fragment extends Fragment {
 
 
     }
-
-
 
 
 }

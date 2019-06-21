@@ -41,20 +41,26 @@ public class patient_forget_password extends AppCompatActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String mobile_number_s=mobile_number.getText().toString();
-                if (mobile_number_s.charAt(0)=='0'){
-                    mobile_number_s=mobile_number_s.substring(1);
-                }
-                Log.w("dsaldj","+"+ccp.getSelectedCountryCode()+mobile_number_s);
 
-                if (("+"+ccp.getSelectedCountryCode()+mobile_number_s).length()==13){
-                    Intent got_confirm_code=new Intent(patient_forget_password.this,patient_confirm_code.class);
-                    Log.w("dsaldj","+"+ccp.getSelectedCountryCode()+mobile_number_s);
-                    got_confirm_code.putExtra("phone_number","+"+ccp.getSelectedCountryCode()+mobile_number_s);
-                    startActivity(got_confirm_code);
-                    finish();
+                String mobile_number_s = mobile_number.getText().toString();
+                if (mobile_number_s.length() > 10) {
+                    if (mobile_number_s.charAt(0) == '0') {
+                        mobile_number_s = mobile_number_s.substring(1);
+                    }
+                    Log.w("dsaldj", "+" + ccp.getSelectedCountryCode() + mobile_number_s);
+
+                    if (("+" + ccp.getSelectedCountryCode() + mobile_number_s).length() == 13) {
+                        Intent got_confirm_code = new Intent(patient_forget_password.this, patient_confirm_code.class);
+                        Log.w("dsaldj", "+" + ccp.getSelectedCountryCode() + mobile_number_s);
+                        got_confirm_code.putExtra("phone_number", "+" + ccp.getSelectedCountryCode() + mobile_number_s);
+                        startActivity(got_confirm_code);
+                        finish();
+                    } else {
+                        Toast.makeText(patient_forget_password.this, getResources().getText(R.string.wrong_mobile_number), Toast.LENGTH_LONG).show();
+                    }
                 }else {
-                    Toast.makeText(patient_forget_password.this,getResources().getText(R.string.wrong_mobile_number),Toast.LENGTH_LONG).show();
+                    Toast.makeText(patient_forget_password.this, getResources().getText(R.string.wrong_mobile_number), Toast.LENGTH_LONG).show();
+
                 }
             }
         });

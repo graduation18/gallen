@@ -62,7 +62,7 @@
     <string name="error">خطأ</string>
     <string name="insurance_company_2">شركات تأمين</string>
     <string name="doctors">الاطباء</string>
-    <string name="doctor_data">بينات الطبيب</string>
+    <string name="doctor_data">بيانات الطبيب</string>
     <string name="available_appointments">المواعيد المتاحة</string>
     <string name="doctor_information">معلومات عن الطبيب</string>
     <string name="vistors_reviews">اراء المرضى</string>
@@ -163,7 +163,11 @@
     <string name="selected_appointment">الموعد المحدد</string>
     <string name="clear_filters">امسح التصنيفات</string>
     <string name="user_exists">يوجد مستخدم سابق مسجل بنفس البريد الاليكتروني او رقم الهاتف</string>
-
+    <string name="search_area">البحث بالمنطقة</string>
+    <string name="search_by_speciality">البحث بالتخصص</string>
+    <string name="search_by_name">البحث بالاسم</string>
+    <string name="doctor_reviews">تقييمات الطبيب</string>
+    <string name="offer">Offers</string>
 
 
 </resources>

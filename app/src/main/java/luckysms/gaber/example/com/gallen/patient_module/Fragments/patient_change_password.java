@@ -207,10 +207,21 @@ public class patient_change_password extends Fragment {
                         object.put("type",user_info.getString("type"));
                         object.put("user_info",user_info.getJSONObject("user_info"));
 
+                        Log.w("sadkjsdkjlljksda",password_s);
+                        Log.w("sadkjsdkjlljksda",user_info.getString("name"));
+                        Log.w("sadkjsdkjlljksda",user_info.getString("mobile"));
+                        Log.w("sadkjsdkjlljksda",user_info.getString("username"));
+                        Log.w("sadkjsdkjlljksda",user_info.getString("email"));
+                        Log.w("sadkjsdkjlljksda",user_info.getString("image_url"));
+                        Log.w("sadkjsdkjlljksda",user_info.getString("type"));
+                        Log.w("sadkjsdkjlljksda", String.valueOf(user_info.getJSONObject("user_info")));
+
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                     Log.w("sadkjsdkjlljksda",object.toString());
+
                     return object.toString().getBytes();
                 };
 

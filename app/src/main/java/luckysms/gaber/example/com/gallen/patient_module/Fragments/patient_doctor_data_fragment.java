@@ -66,6 +66,7 @@ import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDeco
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.available_appointments_list_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.doctor_model;
+import luckysms.gaber.example.com.gallen.patient_module.Model.favourite;
 import luckysms.gaber.example.com.gallen.patient_module.Model.hospital_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_city_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_gov_model;
@@ -297,7 +298,7 @@ public class patient_doctor_data_fragment extends Fragment {
         });
         mprogressBar.setVisibility(View.VISIBLE);
         get_data(doctor_model.id);
-        get_doctor_available_appintments(doctor_model.id);
+
         return view;
     }
 
@@ -394,7 +395,7 @@ public class patient_doctor_data_fragment extends Fragment {
 
                                 name.setText(doctor_name);
                                 speciality.setText(speciality_model.name);
-                                graduated_from.setText(doctor_model.doctor_graduated);
+                                graduated_from.setText(new String (hospital_model.hospital_address.getBytes("ISO-8859-1"), "UTF-8"));
                                 if (doctor_accept_code){
                                     discount_code.setVisibility(View.VISIBLE);
                                 }
@@ -410,7 +411,10 @@ public class patient_doctor_data_fragment extends Fragment {
                                 patient_doctor_data_fragment.this.doctor_info.setText(doctor_model.doctor_notes);
                                 if (!visitor) {
                                     check_for_favourite();
+                                }else {
+                                    get_doctor_available_appintments(doctor_model.id);
                                 }
+
 
 
                             }
@@ -425,8 +429,6 @@ public class patient_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
-
                     if (counter[0]<4) {
                         get_data(doctor_model.id);
                         counter[0]++;
@@ -482,6 +484,7 @@ public class patient_doctor_data_fragment extends Fragment {
     {
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/tickets/all";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -554,7 +557,14 @@ public class patient_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_doctor_available_appintments(doctor_model.id);
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -605,12 +615,12 @@ public class patient_doctor_data_fragment extends Fragment {
 
         }
     }
-
     private void favourite_update(final doctor_model doctor_model, final int id)
     {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/update";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -689,8 +699,15 @@ public class patient_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        favourite_update(doctor_model,id);
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
+
                 }
             }) {
                 @Override
@@ -805,6 +822,7 @@ public class patient_doctor_data_fragment extends Fragment {
 
 
         try {
+            final int []counter={0};
             String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
             if (queue == null) {
                 queue = Volley.newRequestQueue(getActivity());
@@ -853,8 +871,14 @@ public class patient_doctor_data_fragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
-                    mprogressBar.setVisibility(View.INVISIBLE);
+                    if (counter[0]<4) {
+                        get_patient_data(doctor_model,id);
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
 
                 }
             }) {
@@ -901,19 +925,103 @@ public class patient_doctor_data_fragment extends Fragment {
     }
     private void check_for_favourite()
     {
-        String favs=getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("favourite_list","");
+
+
         try {
-            JSONArray favourite_list=new JSONArray(favs);
-            for (int i=0;i<favourite_list.length();i++){
-                JSONObject object=favourite_list.getJSONObject(i);
-                if (object.getInt("id")==doctor_model.id){
-                    favorite.setImageResource( R.drawable.doctor_favourite_fill);
-                    fav_added=true;
-                }
+            final int[] counter = {0};
+            String url = "http://intmicrotec.neat-url.com:6566/api/patients/view";
+            if (queue == null) {
+                queue = Volley.newRequestQueue(getActivity());
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            // Request a string response from the provided URL.
+            final StringRequest stringReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    //do other things with the received JSONObject
+                    mprogressBar.setVisibility(View.INVISIBLE);
+                    contact_list.clear();
+                    Log.w("dsakjbsdahk", response);
+                    try {
+                        JSONObject res = new JSONObject(response);
+                        if (res.has("error")) {
+                            Toast.makeText(getActivity(),getResources().getString(R.string.error),Toast.LENGTH_LONG).show();
+
+                        } else if (res.has("done")) {
+                            if (res.getBoolean("done")) {
+                                JSONObject doc=res.getJSONObject("doc");
+                                JSONArray favourite_list=doc.getJSONArray("favourite_list");
+
+                                    for (int i=0;i<favourite_list.length();i++){
+                                        JSONObject object=favourite_list.getJSONObject(i);
+                                        if (object.getInt("id")==doctor_model.id){
+                                            favorite.setImageResource( R.drawable.doctor_favourite_fill);
+                                            fav_added=true;
+                                        }
+                                    }
+
+                                get_doctor_available_appintments(doctor_model.id);
+
+
+                            }
+                        }
+
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    if (counter[0]<4) {
+                        check_for_favourite();
+                        counter[0]++;
+                    }else {
+                        Log.w("sadkjsdkjlljksda", error.getMessage());
+                        Toast.makeText(getActivity(), "Error!", Toast.LENGTH_LONG).show();
+                        mprogressBar.setVisibility(View.INVISIBLE);
+                    }
+
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> pars = new HashMap<String, String>();
+                    pars.put("Content-Type", "application/json");
+                    pars.put("Cookie", "access_token="+ getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("accessToken",""));
+
+                    return pars;
+                }
+
+                @Override
+                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                    JSONObject object=new JSONObject();
+                    try {
+                        object.put("id",getActivity().getSharedPreferences("personal_data",Context.MODE_PRIVATE).getInt("id",0));
+
+
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("sadkjsdkjlljksda",object.toString());
+                    return object.toString().getBytes();
+
+                };
+
+                public String getBodyContentType()
+                {
+                    return "application/json; charset=utf-8";
+                }
+
+
+            };
+            queue.add(stringReq);
+
+        } catch (Exception e) {
+
         }
+
 
     }
 

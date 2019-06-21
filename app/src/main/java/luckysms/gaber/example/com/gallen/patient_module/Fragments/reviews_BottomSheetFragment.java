@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import luckysms.gaber.example.com.gallen.R;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_doctor_reviews_list_adapter;
@@ -231,13 +232,15 @@ public class reviews_BottomSheetFragment extends BottomSheetDialogFragment {
                     JSONObject object=new JSONObject();
                     try {
                         object.put("id", doc_id);
-                        JSONArray array=new JSONArray(new String(review_list.toString().getBytes("ISO-8859-1"), "UTF-8"));
+                        JSONArray array=new JSONArray(new String(review_list.toString()
+                                .getBytes("ISO-8859-1"), "UTF-8"));
                         JSONObject review=new JSONObject();
                         review.put("comment",comment);
                         review.put("rate",rate);
-                        review.put("date",new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
+                        review.put("date",new SimpleDateFormat("MM/dd/yyyy",Locale.ENGLISH).format(new Date()));
                         review.put("patient_name",
-                                getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("name",""));
+                                getActivity().getSharedPreferences("personal_data", MODE_PRIVATE)
+                                        .getString("name",""));
                         review.put("patient_image_url",
                                 getActivity().getSharedPreferences("personal_data", MODE_PRIVATE).getString("image_url",""));
                         array.put(review);

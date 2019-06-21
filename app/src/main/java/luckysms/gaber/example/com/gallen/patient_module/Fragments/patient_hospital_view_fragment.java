@@ -1,35 +1,23 @@
 package luckysms.gaber.example.com.gallen.patient_module.Fragments;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +34,8 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,14 +46,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import luckysms.gaber.example.com.gallen.R;
-import luckysms.gaber.example.com.gallen.patient_module.Adapters.insurance_SpinAdapter;
+import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_sign_up;
 import luckysms.gaber.example.com.gallen.patient_module.Adapters.patient_search_result_list_adapter;
-import luckysms.gaber.example.com.gallen.patient_module.Adapters.speciality_SpinAdapter;
-import luckysms.gaber.example.com.gallen.patient_module.Custom.MyDividerItemDecoration;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerTouchListener;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.RecyclerViewMargin;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
@@ -79,23 +66,19 @@ import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class patient_search_results_fragment extends Fragment implements pass_filter_data,appointment_Listener {
+public class patient_hospital_view_fragment extends Fragment implements appointment_Listener {
     private View view;
-    private TextView back,number_of_notifications,notifications,location,speciality,text;
+    private TextView back,text;
     private RecyclerView search_result_recycler;
     private List<search_result_list_model> contact_list = new ArrayList<>();
     private List<search_result_list_model> filtered_contact_list = new ArrayList<>();
     private patient_search_result_list_adapter data_adapter;
     private RequestQueue queue;
-    private patient_speciality_model speciality_model;
-    private patient_gov_model gov_model;
-    patient_city_model city_model;
-    private String name;
+    private int id;
     private boolean visitor;
-    private Button filter,clearfilters;
     private ProgressBar mprogressBar;
-    private pass_filter_data mListener;
     private CardView card;
+    ImageView cover,profile_pic;
 
 
 
@@ -108,17 +91,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
         super.onAttach(context);
         Bundle args = getArguments();
         if (args!=null) {
-            if ((patient_city_model) args.getSerializable("city")!=null){
-
-                city_model = (patient_city_model) args.getSerializable("city");
-            }
-            if ((patient_gov_model) args.getSerializable("governorate")!=null){
-                gov_model = (patient_gov_model) args.getSerializable("governorate");
-
-            }
-
-            speciality_model = (patient_speciality_model) args.getSerializable("speciality");
-            name=args.getString("name");
+            id=args.getInt("id");
             visitor=args.getBoolean("visitor");
 
         }
@@ -132,19 +105,15 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        view = inflater.inflate(R.layout.patient_search_by_area_and_speciality_result_fragment, container, false);
+        view = inflater.inflate(R.layout.patient_hospital_view_fragment, container, false);
 
         mprogressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
         back=(TextView)view.findViewById(R.id.back);
-        number_of_notifications=(TextView)view.findViewById(R.id.number_of_notifications);
-        notifications=(TextView)view.findViewById(R.id.notifications);
-        location=(TextView)view.findViewById(R.id.location);
-        speciality=(TextView)view.findViewById(R.id.speciality);
         text=(TextView)view.findViewById(R.id.text);
         card=(CardView)view.findViewById(R.id.card);
-        filter=(Button)view.findViewById(R.id.filters);
-        clearfilters=(Button)view.findViewById(R.id.clearfilters);
+        profile_pic=(ImageView)view.findViewById(R.id.profile_pic);
+        cover=(ImageView)view.findViewById(R.id.cover);
         search_result_recycler = view.findViewById(R.id.search_result_recycler);
         data_adapter = new patient_search_result_list_adapter(getActivity(), contact_list,this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -166,20 +135,10 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                         args.putSerializable("hospital", contact_list.get(position).hospital_model);
                         args.putSerializable("insurance_company", contact_list.get(position).patient_insurance_model);
                     }
-                    if (gov_model!=null) {
-                        args.putSerializable("governorate", gov_model);
-                    }
-                    if (speciality_model!=null) {
-                        args.putSerializable("speciality", speciality_model);
-                    }
-                    if (city_model!=null) {
-                        args.putSerializable("city", city_model);
-                    }
+
                     if (visitor){
                         args.putBoolean("visitor",true);
                     }
-
-                    args.putString("name", name);
                     Log.w("dasadsddsa",contact_list.get(position).doctor_model.review_list);
 
 
@@ -200,55 +159,18 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
             public void onClick(View v) {
                 Fragment fragment=new patient_search();
                 Bundle args=new Bundle();
-                if (visitor){
-                    args.putBoolean("visitor",true);
-                }
+
                 fragment.setArguments(args);
                 go_to(fragment);
             }
         });
-        notifications.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-        filter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Bundle s=new Bundle();
-                filters_BottomSheetFragment bottomSheetFragment = new filters_BottomSheetFragment();
-                bottomSheetFragment.setArguments(s);
-                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
-                mListener=bottomSheetFragment;
-                mListener.pass_data(contact_list,patient_search_results_fragment.this);
-
-                    }
-                });
 
 
-        clearfilters.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               getActivity().getSharedPreferences("filters",MODE_PRIVATE).edit()
-                        .putInt("fee",0)
-                        .putInt("gender",0)
-                        .putInt("insurance_company_id",0)
-                        .putString("insurance_company_name","")
-                        .putString("insurance_company_image_url","")
-                        .putString("insurance_company__id","")
-                        .commit();
-                data_adapter.filterList(contact_list);
-                data_adapter.notifyDataSetChanged();
 
 
-            }
-        });
 
 
-        view.setFocusableInTouchMode(true);
+        /*view.setFocusableInTouchMode(true);
         view.requestFocus();
         view.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -265,19 +187,8 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                 }
                 return false;
             }
-        });
+        });*/
         mprogressBar.setVisibility(View.VISIBLE);
-        if (gov_model!=null && city_model!=null) {
-            location.setText(gov_model.name + " , " + city_model.name);
-        }else if (gov_model!=null && city_model==null){
-            location.setText(gov_model.name);
-        }else if (gov_model==null && city_model!=null){
-            location.setText(city_model.name);
-        }
-        if(speciality_model!=null) {
-            speciality.setText(speciality_model.name);
-        }
-
 
         search();
 
@@ -335,6 +246,24 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                                     String  hospital__id=hospital.getString("_id");
                                     int  hospital_id=hospital.getInt("id");
                                     String hospital_image_url=hospital.getString("image_url");
+                                    Picasso.with(getActivity())
+                                            .load("http://intmicrotec.neat-url.com:6566"+hospital_image_url)
+                                            .placeholder(R.drawable.user)
+                                            .into(cover, new Callback() {
+                                                @Override
+                                                public void onSuccess() {}
+                                                @Override public void onError() {
+                                                }
+                                            });
+                                    Picasso.with(getActivity())
+                                            .load("http://intmicrotec.neat-url.com:6566"+hospital_image_url)
+                                            .placeholder(R.drawable.user)
+                                            .into(profile_pic, new Callback() {
+                                                @Override
+                                                public void onSuccess() {}
+                                                @Override public void onError() {
+                                                }
+                                            });
                                     String hospital_name=new String(hospital.getString("name").getBytes("ISO-8859-1"), "UTF-8");
                                     String hospital_address="";
                                     if (hospital.has("address")){hospital_address=hospital.getString("address");}
@@ -465,18 +394,7 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                                                 patient_gov_model,patient_city_model,nurse_model);
 
                                         Log.w("dsakjbsdahk",doctor_model_res.doctor_model.doctor_name);
-                                        if (speciality_model!=null) {
-                                            if (speciality_model.id == specialty_id) {
-                                                contact_list.add(doctor_model_res);
-
-                                            }
-                                        }else {
-
-                                            if (doctor_model.doctor_name.contains(name)) {
-                                                contact_list.add(doctor_model_res);
-
-                                            }
-                                        }
+                                        contact_list.add(doctor_model_res);
 
 
                                     }
@@ -539,35 +457,15 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
                 }
 
                 @Override
-                public byte[] getBody() throws com.android.volley.AuthFailureError {
+                public byte[] getBody() throws AuthFailureError {
                     JSONObject object=new JSONObject();
                     try {
-                        if(name != null && !name.isEmpty()) {
+
                             JSONObject name_object=new JSONObject();
-                            name_object.put("doctor_list.doctor.name", name);
+                            name_object.put("id", id);
                             object.put("where", name_object);
-                        }
 
 
-
-                        if(speciality_model!=null||city_model!=null||gov_model!=null){
-                            JSONObject where=new JSONObject();
-                            if (speciality_model!=null){
-                                where.put("doctor_list.doctor.specialty.id", speciality_model.id);
-
-                            }
-
-                            if (city_model!=null){
-                                where.put("city", city_model.id);
-
-                            }
-
-                            if (gov_model!=null){
-                                where.put("gov.id", gov_model.id);
-                            }
-                            object.put("where",where);
-
-                        }
 
 
                     } catch (JSONException e) {
@@ -599,16 +497,6 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
 
 
     }
-    @Override
-    public void pass_data(List<search_result_list_model> contact_list,pass_filter_data listner) {
-        this.mListener=listner;
-    }
-
-    @Override
-    public void notify_adapter(pass_filter_data listner,List<search_result_list_model> contact_list ) {
-        data_adapter.filterList(contact_list);
-        data_adapter.notifyDataSetChanged();
-    }
 
 
     @Override
@@ -633,17 +521,6 @@ public class patient_search_results_fragment extends Fragment implements pass_fi
 
     @Override
     public void hospital_profile(int pos) {
-
-        Bundle args = new Bundle();
-
-        args.putInt("id",contact_list.get(pos).hospital_model.hospital_id);
-        if (visitor) {
-            args.putBoolean("visitor", visitor);
-        }
-
-        Fragment doctor_profile = new patient_hospital_view_fragment();
-        doctor_profile.setArguments(args);
-        go_to(doctor_profile);
 
     }
 }

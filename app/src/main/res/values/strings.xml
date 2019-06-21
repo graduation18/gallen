@@ -167,6 +167,11 @@
     <string name="not_reserved">Not Reserved</string>
     <string name="Timeout_error">Oops. Timeout error!</string>
     <string name="try_again_later">try again later</string>
+    <string name="search_area">Search Area</string>
+    <string name="search_by_speciality">Search By Speciality</string>
+    <string name="search_by_name">Search By Name</string>
+    <string name="doctor_reviews">doctor_reviews</string>
+    <string name="offer">Offers</string>
 
 
 </resources>

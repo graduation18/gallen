@@ -84,6 +84,8 @@ public class patient_favorites extends Fragment {
             @Override
             public void onClick(View v, final int position) {
                 Bundle args = new Bundle();
+                Log.w("ksadkasdkl", String.valueOf(contact_list.get(position).doctor_model.id));
+
                 args.putSerializable("doctor", contact_list.get(position).doctor_model);
                 Fragment doctor_profile = new patient_favourite_doctor_data_fragment();
                 doctor_profile.setArguments(args);

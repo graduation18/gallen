@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_insurance_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.patient_speciality_model;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
@@ -36,10 +37,13 @@ public class speciality_SpinAdapter  extends RecyclerView.Adapter<speciality_Spi
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name;
+        public ImageView patient_image_url;
 
         public MyViewHolder(View view) {
             super(view);
             name=(TextView) view.findViewById(R.id.name);
+            patient_image_url=(ImageView)view.findViewById(R.id.patient_image_url);
+
 
         }
     }
@@ -55,7 +59,7 @@ public class speciality_SpinAdapter  extends RecyclerView.Adapter<speciality_Spi
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.dialog_list_row, parent, false);
+                .inflate(R.layout.dialog_list_row2, parent, false);
         return new MyViewHolder(itemView);
 
 
@@ -68,6 +72,8 @@ public class speciality_SpinAdapter  extends RecyclerView.Adapter<speciality_Spi
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         patient_speciality_model data = contact_list.get(position);
         holder.name.setText(data.name);
+        new AsyncTaskLoadImage(holder.patient_image_url).execute("http://intmicrotec.neat-url.com:6566"+data.image_url);
+
 
 
 

@@ -25,13 +25,16 @@ import java.net.URL;
 import java.util.List;
 
 import luckysms.gaber.example.com.gallen.R;
+import luckysms.gaber.example.com.gallen.patient_module.Activities.patient_sign_up;
 import luckysms.gaber.example.com.gallen.patient_module.Custom.AsyncTaskLoadImage;
+import luckysms.gaber.example.com.gallen.patient_module.Custom.appointment_Listener;
 import luckysms.gaber.example.com.gallen.patient_module.Model.search_result_list_model;
 
 public class patient_search_result_list_adapter extends RecyclerView.Adapter<patient_search_result_list_adapter.MyViewHolder>  {
 
     private Context context;
     private List<search_result_list_model> contact_list;
+    private appointment_Listener mListener;
 
     public void filterList(List<search_result_list_model> filteredList) {
         contact_list = filteredList;
@@ -56,15 +59,22 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
             rating=(RatingBar)view.findViewById(R.id.rating);
             image=(ImageView)view.findViewById(R.id.image);
             hospital_image=(ImageView)view.findViewById(R.id.hospital_image);
+            hospital_name.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.hospital_profile(getAdapterPosition());
+                }
+            });
 
         }
     }
 
 
 
-    public patient_search_result_list_adapter(Context context, List<search_result_list_model> contact_list) {
+    public patient_search_result_list_adapter(Context context, List<search_result_list_model> contact_list,appointment_Listener mListener) {
         this.context = context;
         this.contact_list = contact_list;
+        this.mListener=mListener;
     }
 
     @Override
@@ -96,8 +106,15 @@ public class patient_search_result_list_adapter extends RecyclerView.Adapter<pat
         holder.doctor_fee.setText(context.getResources().getText(R.string.Detection_Price)+String .valueOf(data.doctor_model.doctor_fee));
         holder.rating.setRating(data.doctor_model.doctor_rating);
         String url = "http://intmicrotec.neat-url.com:6566"+data.doctor_model.doctor_image;
-        new AsyncTaskLoadImage(holder.image).execute(url);
-        String url2 ="http://intmicrotec.neat-url.com:6566"+data.hospital_model.hospital_image_url;
+        Picasso.with(context)
+                .load(url)
+                .placeholder(R.drawable.user)
+                .into(holder.image, new Callback() {
+                    @Override
+                    public void onSuccess() {}
+                    @Override public void onError() {
+                    }
+                });        String url2 ="http://intmicrotec.neat-url.com:6566"+data.hospital_model.hospital_image_url;
         new AsyncTaskLoadImage(holder.hospital_image).execute(url2);
 
     }

@@ -163,8 +163,11 @@
     <string name="selected_appointment">Selected Appointment</string>
     <string name="clear_filters">Clear Filters</string>
     <string name="user_exists">Previous User Exists with same E-mail or Phone number</string>
-
-
+    <string name="search_area">Search Area</string>
+    <string name="search_by_speciality">Search By Speciality</string>
+    <string name="search_by_name">Search By Name</string>
+    <string name="doctor_reviews">doctor_reviews</string>
+    <string name="offer">Offers</string>
 
 
 </resources>

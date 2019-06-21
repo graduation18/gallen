@@ -8,4 +8,5 @@ public interface appointment_Listener {
     public void cancel(int pos);
     public void details(int pos);
     public void map_location(int pos);
+    public void hospital_profile(int pos);
 }
