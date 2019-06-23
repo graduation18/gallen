@@ -97,7 +97,7 @@
                     android:layoutDirection="ltr">
                     <com.rilixtech.CountryCodePicker
                         android:id="@+id/ccp"
-                        android:layout_width="20dp"
+                        android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
                         android:drawableLeft="@drawable/phone_call"

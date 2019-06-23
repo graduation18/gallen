@@ -172,6 +172,8 @@
     <string name="search_by_name">Search By Name</string>
     <string name="doctor_reviews">doctor_reviews</string>
     <string name="offer">Offers</string>
+    <string name="no_offers_yet">No Offers Yet</string>
+    <string name="myoffers">My Offers</string>
 
 
 </resources>

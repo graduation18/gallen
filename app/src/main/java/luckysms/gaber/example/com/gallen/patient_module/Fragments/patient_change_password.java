@@ -208,7 +208,7 @@ public class patient_change_password extends Fragment {
                         object.put("user_info",user_info.getJSONObject("user_info"));
 
                         Log.w("sadkjsdkjlljksda",password_s);
-                        Log.w("sadkjsdkjlljksda",user_info.getString("name"));
+                        Log.w("sadkjsdkjlljksda",new String (user_info.getString("name").getBytes("ISO-8859-1"), "UTF-8"));
                         Log.w("sadkjsdkjlljksda",user_info.getString("mobile"));
                         Log.w("sadkjsdkjlljksda",user_info.getString("username"));
                         Log.w("sadkjsdkjlljksda",user_info.getString("email"));
@@ -218,6 +218,8 @@ public class patient_change_password extends Fragment {
 
 
                     } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                     Log.w("sadkjsdkjlljksda",object.toString());

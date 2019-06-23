@@ -17,6 +17,7 @@ import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_appoin
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_favorites;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_more;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_more_visitor;
+import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_offers;
 import luckysms.gaber.example.com.gallen.patient_module.Fragments.patient_search;
 
 public class patient_main_screen extends AppCompatActivity  {
@@ -39,15 +40,19 @@ public class patient_main_screen extends AppCompatActivity  {
                             case R.id.more:
                                 viewPager.setCurrentItem(0);
                                 break;
-                            case R.id.favorites:
+                            case R.id.offer:
                                 viewPager.setCurrentItem(1);
                                 break;
-                            case R.id.myappointments:
+                            case R.id.favorites:
                                 viewPager.setCurrentItem(2);
                                 break;
-                            case R.id.search:
+                            case R.id.myappointments:
                                 viewPager.setCurrentItem(3);
                                 break;
+                            case R.id.search:
+                                viewPager.setCurrentItem(4);
+                                break;
+
 
 
                         }
@@ -106,6 +111,7 @@ public class patient_main_screen extends AppCompatActivity  {
         patient_favorites patient_favorites_fragment =new patient_favorites();
         patient_appointments patient_appointments_fragment =new patient_appointments();
         patient_search patient_search_fragment =new patient_search();
+        patient_offers patient_offers_fragment =new patient_offers();
         Bundle bundle=new Bundle();
         bundle.putBoolean("visitor",getIntent().getBooleanExtra("visitor",false));
         patient_search_fragment.setArguments(bundle);
@@ -116,11 +122,13 @@ public class patient_main_screen extends AppCompatActivity  {
             adapter.addFragment(patient_more_fragment);
 
         }
+        adapter.addFragment(patient_offers_fragment);
         adapter.addFragment(patient_favorites_fragment);
         adapter.addFragment(patient_appointments_fragment);
         adapter.addFragment(patient_search_fragment);
+
         viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(3);
+        viewPager.setCurrentItem(4);
     }
 
 

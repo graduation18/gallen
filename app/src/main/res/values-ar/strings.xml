@@ -167,7 +167,9 @@
     <string name="search_by_speciality">البحث بالتخصص</string>
     <string name="search_by_name">البحث بالاسم</string>
     <string name="doctor_reviews">تقييمات الطبيب</string>
-    <string name="offer">Offers</string>
+    <string name="offer">عروض</string>
+    <string name="no_offers_yet">لايوجد عروض الى الأن</string>
+    <string name="myoffers">عروضي</string>
 
 
 </resources>

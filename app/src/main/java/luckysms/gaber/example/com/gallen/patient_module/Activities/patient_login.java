@@ -145,7 +145,6 @@ public class patient_login extends AppCompatActivity {
                                 Toast.makeText(patient_login.this,getResources().getString(R.string.email_or_password_error),Toast.LENGTH_LONG).show();
 
                             }else if (res.getString("error").contains("You Are Loged")){
-                                Log.w("njhjhkjhk","jkjjhhjkhkkj");
                                 mprogressBar.setVisibility(View.VISIBLE);
                                 logout(mobile_number_email_address_s,password_s);
                             }
